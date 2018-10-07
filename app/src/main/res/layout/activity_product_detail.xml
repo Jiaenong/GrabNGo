@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:overScrollMode="never"
+    android:scrollbarThumbVertical="@null">
+<LinearLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ECEFF1"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
+    tools:context=".ProductDetailActivity">
+
+    <android.support.v7.widget.CardView
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+                android:padding="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+            <ImageView
+                android:id="@+id/product_image"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/rice_noodle"/>
+
+            <TextView
+                android:id="@+id/text_view_product_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="RM 18.00 "
+                android:textSize="20sp"
+                android:paddingLeft="10dp"
+                android:textColor="#FF3D00"/>
+
+            <TextView
+                android:id="@+id/text_view_product_name"
+                android:maxLines="1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:text="Cutie Compact Toilet Roll"
+                android:textSize="16sp"
+                android:paddingLeft="10dp"
+                android:textColor="@color/foreground_dark_color"/>
+
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_marginBottom="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:text="Details"
+                android:textSize="18sp"
+                android:textColor="@color/foreground_dark_color"/>
+            <TextView
+                android:id="@+id/text_view_producer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:drawableLeft="@drawable/ic_person_black_24dp"
+                android:drawablePadding="12dp"
+                android:text="Producer              : Cutie Compact"/>
+            <TextView
+                android:id="@+id/text_view_category"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:drawableLeft="@drawable/ic_baseline_category_24px"
+                android:drawablePadding="12dp"
+                android:text="Category              : Household"/>
+            <TextView
+                android:id="@+id/text_view_expired"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:drawableLeft="@drawable/ic_access_time_black_24dp"
+                android:drawablePadding="12dp"
+                android:text="Expired duration : 1 year"/>
+            <TextView
+                android:id="@+id/text_view_stock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:drawableLeft="@drawable/ic_redeem_black_24dp"
+                android:drawablePadding="12dp"
+                android:text="Stock amount      : 223"/>
+            <TextView
+                android:id="@+id/text_view_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:drawableLeft="@drawable/ic_location_on_black_24dp"
+                android:drawablePadding="12dp"
+                android:text="Shelf location      : D52-F"/>
+
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>
+</ScrollView>

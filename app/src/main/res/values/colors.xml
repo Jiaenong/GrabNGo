@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#37474F</color>
+    <color name="colorPrimaryDark">#263238</color>
+    <color name="colorAccent">#fff</color>
+    <color name="colorAccent2">#10898d</color>
+    <color name="foreground_color">#424242</color>
+    <color name="foreground_dark_color">#212121</color>
+    <color name="foreground_light_color">#90A4AE</color>
+    <color name="price_color">#FF3D00</color>
+    <color name="cancel_color">#C21807</color>
+    <color name="comfirm_color">#3ebf20</color>
+    <color name="disable_button">#E0E0E0</color>
+</resources>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ECEFF1"
+    android:orientation="vertical"
+    tools:context=".PurchaseHistoryActivity">
+
+    <android.support.v7.widget.CardView
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/history_item1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                android:text="15"
+                android:textAlignment="textEnd"
+                android:textColor="@color/foreground_dark_color"
+                android:textSize="26sp"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2018.7" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:textAlignment="center"
+                    android:background="@color/comfirm_color"
+                    android:layout_height="wrap_content"
+                    android:textColor="#fff"
+                    android:textSize="11sp"
+                    android:text="SUN" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical|end"
+                android:textSize="16sp"
+                android:textColor="@color/price_color"
+                android:text="RM 51.70"/>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/history_item2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="30dp"
+                android:textAlignment="textEnd"
+                android:layout_height="wrap_content"
+                android:text="4"
+                android:textColor="@color/foreground_dark_color"
+                android:textSize="26sp"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2018.7" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:textAlignment="center"
+                    android:background="@color/comfirm_color"
+                    android:layout_height="wrap_content"
+                    android:textColor="#fff"
+                    android:textSize="11sp"
+                    android:text="WED" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical|end"
+                android:textSize="16sp"
+                android:textColor="@color/price_color"
+                android:text="RM 84.60"/>
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="#ECEFF1"
+        tools:context=".Admin.DiscountDetailActivity">
+
+        <android.support.v7.widget.CardView
+            android:layout_margin="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:padding="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <ImageView
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginBottom="20dp"
+                    android:src="@drawable/discount_coupon"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:textColor="@color/foreground_dark_color"
+                    android:textSize="18sp"
+                    android:text="Enjoy RM 20 cash rebate !"/>
+
+                <TextView
+                    android:id="@+id/description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="Enjoy RM 20 cash rebate during the next purchase by applying the promo code given. Limited to first 100 customers only."/>
+
+                <TextView
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:drawableLeft="@drawable/ic_baseline_category_24px"
+                    android:drawablePadding="12dp"
+                    android:text="Promo Type  : Coupon"/>
+
+                <TextView
+                    android:gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:drawableLeft="@drawable/ic_date_range_black_24dp"
+                    android:drawablePadding="12dp"
+                    android:text="Duration         : 25/7/2018 - 9/8/2018"/>
+
+                <TextView
+                    android:gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:drawableLeft="@drawable/ic_person_black_24dp"
+                    android:drawablePadding="12dp"
+                    android:text="Eligibility         : First 100 customers"/>
+
+                <TextView
+                    android:gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:drawableLeft="@drawable/ic_discount_black"
+                    android:drawablePadding="12dp"
+                    android:text="Coupon code : EE123"/>
+
+                <TextView
+                    android:gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:drawableLeft="@drawable/ic_status_black_24dp"
+                    android:drawablePadding="12dp"
+                    android:text="Status             : Ongoing"/>
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal">
+            <Button
+                android:id="@+id/btn_cancel"
+                android:layout_weight="1"
+                android:layout_marginRight="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/cancel_color"
+                android:textAllCaps="false"
+                android:textColor="#fff"
+                android:text="Delete"/>
+
+            <Button
+                android:id="@+id/btn_save"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/comfirm_color"
+                android:textAllCaps="false"
+                android:textColor="#fff"
+                android:text="Edit"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

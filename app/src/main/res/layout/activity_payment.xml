@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<LinearLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    tools:context=".PaymentActivity">
+
+    <ImageView
+        android:layout_width="240dp"
+        android:layout_height="80dp"
+        android:src="@drawable/credit_card_logo"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:hint="Card number"/>
+
+    <EditText
+        android:layout_marginTop="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Name on card"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:orientation="horizontal">
+        <EditText
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="date"
+            android:hint="Expiration date"/>
+
+        <EditText
+            android:layout_marginLeft="30dp"
+            android:layout_weight="1"
+            android:maxLength="3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="CVV"/>
+
+        <ImageButton
+            android:id="@+id/btn_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@android:color/transparent"
+            app:srcCompat="@drawable/ic_info_outline_black_24dp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Card"
+            android:textSize="14sp"
+            android:paddingLeft="10dp"
+            android:textColor="@color/foreground_dark_color"/>
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Information is securely stored"
+        android:paddingLeft="10dp"
+        android:textColor="@color/foreground_light_color"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Total Amount"
+            android:textSize="18sp"
+            android:paddingLeft="10dp"
+            android:textColor="@color/foreground_dark_color"/>
+        <TextView
+            android:id="@+id/price_payment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="@color/price_color"
+            android:text="RM 18.00"/>
+    </LinearLayout>
+    <Button
+        android:id="@+id/btn_pay_now"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="30dp"
+        android:text="Pay Now"
+        android:textColor="#fff"
+        android:textAllCaps="false"
+        android:background="#3ebf20"/>
+</LinearLayout>
+</ScrollView>

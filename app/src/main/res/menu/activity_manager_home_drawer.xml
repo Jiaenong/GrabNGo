@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single"
+        android:id="@+id/group1">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_home_black_24dp"
+            android:title="Home" />
+        <item
+            android:id="@+id/nav_camera"
+            android:icon="@drawable/ic_warehouse_black"
+            android:title="Low Stock" />
+        <item
+            android:id="@+id/nav_gallery"
+            android:icon="@drawable/ic_truck_black"
+            android:title="Stock Ordering" />
+        <item
+            android:id="@+id/nav_slideshow"
+            android:icon="@drawable/ic_discount_black"
+            android:title="Promotion" />
+        <item
+            android:id="@+id/nav_report"
+            android:icon="@drawable/ic_diagram_black"
+            android:title="Report" />
+        <item
+            android:id="@+id/nav_manage"
+            android:icon="@drawable/ic_person_black_24dp"
+            android:title="Account" />
+
+    </group>
+
+    <group android:checkableBehavior="single"
+        android:id="@+id/group2">
+        <item
+            android:id="@+id/nav_share"
+            android:icon="@drawable/ic_logout_black"
+            android:title="Logout" />
+    </group>
+
+</menu>
