@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "641720307905",
+    "firebase_url": "https://grabngo-b3b33.firebaseio.com",
+    "project_id": "grabngo-b3b33",
+    "storage_bucket": "grabngo-b3b33.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:641720307905:android:68bf38ab9a51c324",
+        "android_client_info": {
+          "package_name": "com.example.user.grabngo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "641720307905-o2n0b6t71k9mkvqp1plevtftalqf1o77.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsqB-W9Adj33ZEYrXN7JEvapXglVrxhQQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
