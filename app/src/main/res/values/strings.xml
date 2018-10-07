@@ -53,4 +53,16 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_manager_home">ManagerHomeActivity</string>
+    <string name="emailaddress">Email Address</string>
+    <string name="sign_up_password">Password</string>
+    <string name="retype_password">Retype Password</string>
+    <string name="sign_up_name">Name</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
+    <string name="sign_up_address">Address</string>
+    <string name="button_signup">Sign Up</string>
+    <string name="sign_in_email">Email address</string>
+    <string name="sign_in_password">Password</string>
+    <string name="sign_in_login">Log In</string>
+    <string name="sign_in_signup">Sign Up</string>
 </resources>

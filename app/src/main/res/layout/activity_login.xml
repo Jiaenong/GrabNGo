@@ -49,17 +49,17 @@
                 android:id="@+id/editText_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
-                android:ems="10"
-                android:textSize="14sp"
-                android:background="@android:color/transparent"
-                android:drawablePadding="12dp"
-                android:padding="8dp"
-                android:hint="Email address"
-                android:textColorHint="#fff"
-                android:maxLines="1"
                 android:layout_marginTop="30dp"
-                android:drawableLeft="@drawable/ic_email_white_24dp" />
+                android:background="@android:color/transparent"
+                android:drawableLeft="@drawable/ic_email_white_24dp"
+                android:drawablePadding="12dp"
+                android:ems="10"
+                android:hint="@string/sign_in_email"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
+                android:padding="8dp"
+                android:textColorHint="#fff"
+                android:textSize="14sp" />
 
             <View
                 android:layout_width="match_parent"
@@ -70,18 +70,17 @@
                 android:id="@+id/editText_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:ems="10"
-                android:background="@android:color/transparent"
-                android:drawablePadding="12dp"
-                android:padding="8dp"
-                android:textSize="14sp"
-                android:hint="Password"
-                android:textColorHint="#fff"
-                android:maxLines="1"
                 android:layout_marginTop="5dp"
+                android:background="@android:color/transparent"
                 android:drawableLeft="@drawable/ic_lock_white_24dp"
-                />
+                android:drawablePadding="12dp"
+                android:ems="10"
+                android:hint="@string/sign_in_password"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:padding="8dp"
+                android:textColorHint="#fff"
+                android:textSize="14sp" />
 
             <View
                 android:layout_width="match_parent"
@@ -90,31 +89,31 @@
 
             <Button
                 android:id="@+id/btn_login"
+                style="@style/Base.TextAppearance.AppCompat.Body1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="50dp"
                 android:background="@drawable/background_login"
-                android:text="Log In"
+                android:clickable="true"
+                android:padding="16dp"
+                android:text="@string/sign_in_login"
                 android:textAllCaps="false"
                 android:textColor="#424242"
-                android:padding="16dp"
-                android:clickable="true"
-                style="@style/Base.TextAppearance.AppCompat.Body1"
-                android:layout_marginTop="50dp"
-                android:textSize="14sp"/>
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/btn_signup"
+                style="@style/Base.TextAppearance.AppCompat.Body1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
                 android:background="@drawable/background_signup"
-                android:text="Sign Up"
+                android:clickable="true"
+                android:padding="16dp"
+                android:text="@string/sign_in_signup"
                 android:textAllCaps="false"
                 android:textColor="#fff"
-                android:padding="16dp"
-                android:clickable="true"
-                style="@style/Base.TextAppearance.AppCompat.Body1"
-                android:layout_marginTop="15dp"
-                android:textSize="14sp"/>
+                android:textSize="14sp" />
 
             <TextView
                 android:layout_width="match_parent"
