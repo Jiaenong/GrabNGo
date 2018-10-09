@@ -1,11 +1,17 @@
 package com.example.user.grabngo;
 
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,13 +21,30 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
+
+import com.example.user.grabngo.Class.Product;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProductsFragment extends Fragment {
 
     private Spinner spinnerCategory;
-    private LinearLayout productLayout,productLayout2,productLayout3,productLayout4,productLayout5,productLayout6,productLayout7,productLayout8;
+    private RecyclerView recyclerView;
+    private ProductAdapter productAdapter;
+    private List<Product> productList;
+    private ProgressBar progressBar;
+
+    private FirebaseFirestore mFirebaseFirestore;
+    private CollectionReference mCollectionReference;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,40 +59,136 @@ public class ProductsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_products, container, false);
 
         setHasOptionsMenu(true);
-        productLayout = (LinearLayout)v.findViewById(R.id.layout_product);
-        productLayout2 = (LinearLayout)v.findViewById(R.id.layout_product2);
-        productLayout3 = (LinearLayout)v.findViewById(R.id.layout_product3);
-        productLayout4 = (LinearLayout)v.findViewById(R.id.layout_product4);
-        productLayout5 = (LinearLayout)v.findViewById(R.id.layout_product5);
-        productLayout6 = (LinearLayout)v.findViewById(R.id.layout_product6);
-        productLayout7 = (LinearLayout)v.findViewById(R.id.layout_product7);
-        productLayout8 = (LinearLayout)v.findViewById(R.id.layout_product8);
         spinnerCategory = (Spinner)v.findViewById(R.id.spinner_category);
+        recyclerView = (RecyclerView)v.findViewById(R.id.recycleViewProduct);
+        progressBar = (ProgressBar)v.findViewById(R.id.progressBar);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this.getActivity() ,R.array.category, R.layout.support_simple_spinner_dropdown_item);
+        productList = new ArrayList<>();
+
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
+        mCollectionReference = mFirebaseFirestore.collection("Product");
+
+        final ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this.getActivity() ,R.array.category, R.layout.support_simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         spinnerCategory.setAdapter(adapter);
+        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), recyclerView, new RecyclerTouchListener.ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                Product product = productList.get(position);
+                Intent intent = new Intent(getContext(),ProductDetailActivity.class);
+                intent.putExtra("productName",product.getProductName());
+                startActivity(intent);
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        }));
 
         spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
+                progressBar.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.GONE);
                 String selectedItem = adapterView.getItemAtPosition(i).toString();
                 FragmentManager fm = getFragmentManager();
                 switch (selectedItem){
                     case "All":
+                        productList.clear();
+                        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                                {
+                                    Product product = documentSnapshot.toObject(Product.class);
+                                    String image = product.getImageUrl();
+                                    String name = product.getProductName();
+                                    String price = product.getPrice();
+                                    Product mProduct = new Product(image, name, price);
+                                    productList.add(mProduct);
+                                }
+                                productAdapter = new ProductAdapter(getActivity(),productList);
+                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2);
+                                recyclerView.setLayoutManager(mLayoutManager);
+                                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                                recyclerView.setAdapter(productAdapter);
+                                progressBar.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
+                        });
                         break;
                     case "Personal Care":
-                        Fragment personalCareFragment = new PersonalCareFragment();
-                        fm.beginTransaction().replace(R.id.fragment_container,personalCareFragment).commit();
+                        productList.clear();
+                        mCollectionReference.whereEqualTo("category","Personal Care").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                                {
+                                    Product product = documentSnapshot.toObject(Product.class);
+                                    String image = product.getImageUrl();
+                                    String name = product.getProductName();
+                                    String price = product.getPrice();
+                                    Product mProduct = new Product(image, name, price);
+                                    productList.add(mProduct);
+                                }
+                                productAdapter = new ProductAdapter(getActivity(),productList);
+                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(),2);
+                                recyclerView.setLayoutManager(mLayoutManager);
+                                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                                recyclerView.setAdapter(productAdapter);
+                                progressBar.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
+                        });
                         break;
                     case "Household":
-                        Fragment householdFragment = new HouseholdFragment();
-                        fm.beginTransaction().replace(R.id.fragment_container,householdFragment).commit();
+                        productList.clear();
+                        mCollectionReference.whereEqualTo("category","Household").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                                {
+                                    Product product = documentSnapshot.toObject(Product.class);
+                                    String image = product.getImageUrl();
+                                    String name = product.getProductName();
+                                    String price = product.getPrice();
+                                    Product mProduct = new Product(image, name, price);
+                                    productList.add(mProduct);
+                                }
+                                productAdapter = new ProductAdapter(getActivity(),productList);
+                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(),2);
+                                recyclerView.setLayoutManager(mLayoutManager);
+                                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                                recyclerView.setAdapter(productAdapter);
+                                progressBar.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
+                        });
                         break;
                     case "Food and Beverages":
-                        Fragment foodFragment = new FoodFragment();
-                        fm.beginTransaction().replace(R.id.fragment_container,foodFragment).commit();
+                        productList.clear();
+                        mCollectionReference.whereEqualTo("category","Food and Beverages").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                                {
+                                    Product product = documentSnapshot.toObject(Product.class);
+                                    String image = product.getImageUrl();
+                                    String name = product.getProductName();
+                                    String price = product.getPrice();
+                                    Product mProduct = new Product(image, name, price);
+                                    productList.add(mProduct);
+                                }
+                                productAdapter = new ProductAdapter(getActivity(),productList);
+                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(),2);
+                                recyclerView.setLayoutManager(mLayoutManager);
+                                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                                recyclerView.setAdapter(productAdapter);
+                                progressBar.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
+                        });
                         break;
                 }
             }
@@ -79,87 +198,6 @@ public class ProductsFragment extends Fragment {
 
             }
         });
-
-        productLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String productName = "Cutie Compact Toilet Roll";
-                Intent intent = new Intent(getActivity(), ProductDetailActivity.class);
-                intent.putExtra("pName",productName);
-                startActivity(intent);
-            }
-        });
-
-        productLayout2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String productName = "Magnum Ice Cream";
-                Intent intent = new Intent(getActivity(), ProductDetailActivity.class);
-                intent.putExtra("pName",productName);
-                startActivity(intent);
-            }
-        });
-
-        productLayout3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String productName = "Oat Krunch";
-                Intent intent = new Intent(getActivity(), ProductDetailActivity.class);
-                intent.putExtra("pName",productName);
-                startActivity(intent);
-            }
-        });
-
-        productLayout4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String productName = "Jongga Spicy Rice Noodle";
-                Intent intent = new Intent(getActivity(), ProductDetailActivity.class);
-                intent.putExtra("pName",productName);
-                startActivity(intent);
-            }
-        });
-
-        productLayout5.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String productName = "Listerine Cool Mint";
-                Intent intent = new Intent(getActivity(), ProductDetailActivity.class);
-                intent.putExtra("pName",productName);
-                startActivity(intent);
-            }
-        });
-
-        productLayout6.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String productName = "Colgate Max Fresh toothpaste";
-                Intent intent = new Intent(getActivity(), ProductDetailActivity.class);
-                intent.putExtra("pName",productName);
-                startActivity(intent);
-            }
-        });
-
-        productLayout7.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String productName = "Sunsilk Hair Shampoo";
-                Intent intent = new Intent(getActivity(), ProductDetailActivity.class);
-                intent.putExtra("pName",productName);
-                startActivity(intent);
-            }
-        });
-
-        productLayout8.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String productName = "Gain Ultra Dish Liquid";
-                Intent intent = new Intent(getActivity(), ProductDetailActivity.class);
-                intent.putExtra("pName",productName);
-                startActivity(intent);
-            }
-        });
-
 
 
         return v;
