@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.user.grabngo.Admin.ManagerHomeActivity;
 import com.example.user.grabngo.Admin.StaffHomeActivity;
@@ -25,10 +27,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private Button btnSignUp, btnLogin;
     private EditText editTextEmail, editTextPassword;
-    private ProgressDialog pDialog;
+    private ProgressBar progressBarLogIn;
+    private View view1, view2;
+    private TextView textViewForgetPassword;
 
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
+
+    private int check = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +46,15 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = (Button)findViewById(R.id.btn_login);
         editTextEmail = (EditText)findViewById(R.id.editText_email);
         editTextPassword = (EditText)findViewById(R.id.editText_password);
-        pDialog = new ProgressDialog(this);
+        progressBarLogIn = (ProgressBar)findViewById(R.id.progressBarLogIn);
+        textViewForgetPassword = (TextView)findViewById(R.id.forgetPassword);
+        view1 = (View)findViewById(R.id.view1);
+        view2 = (View)findViewById(R.id.view2);
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Customer");
+
+        progressBarLogIn.setVisibility(View.GONE);
 
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,9 +71,14 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!pDialog.isShowing())
-                    pDialog.setMessage("Signing in...");
-                pDialog.show();
+                progressBarLogIn.setVisibility(View.VISIBLE);
+                editTextEmail.setVisibility(View.GONE);
+                editTextPassword.setVisibility(View.GONE);
+                btnLogin.setVisibility(View.GONE);
+                btnSignUp.setVisibility(View.GONE);
+                textViewForgetPassword.setVisibility(View.GONE);
+                view1.setVisibility(View.GONE);
+                view2.setVisibility(View.GONE);
                 mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -73,12 +89,33 @@ public class LoginActivity extends AppCompatActivity {
                             String password = editTextPassword.getText().toString();
                             if(email.equals(customer.getEmail()) && password.equals(customer.getPassword()))
                             {
+                                check++;
                                 Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                                 startActivity(intent);
                                 finish();
-                                if(pDialog.isShowing())
-                                    pDialog.dismiss();
                             }
+                        }
+                        if(check == 0)
+                        {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(LoginActivity.this, R.style.AlertDialogCustom));
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    progressBarLogIn.setVisibility(View.GONE);
+                                    editTextEmail.setVisibility(View.VISIBLE);
+                                    editTextPassword.setVisibility(View.VISIBLE);
+                                    btnLogin.setVisibility(View.VISIBLE);
+                                    btnSignUp.setVisibility(View.VISIBLE);
+                                    textViewForgetPassword.setVisibility(View.VISIBLE);
+                                    view1.setVisibility(View.VISIBLE);
+                                    view2.setVisibility(View.VISIBLE);
+                                    return;
+                                }
+                            });
+                            builder.setTitle("Error");
+                            builder.setMessage("Incorrect email and password !");
+                            AlertDialog alert = builder.create();
+                            alert.show();
                         }
                     }
                 });
@@ -88,6 +125,14 @@ public class LoginActivity extends AppCompatActivity {
                     builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
+                            progressBarLogIn.setVisibility(View.GONE);
+                            editTextEmail.setVisibility(View.VISIBLE);
+                            editTextPassword.setVisibility(View.VISIBLE);
+                            btnLogin.setVisibility(View.VISIBLE);
+                            btnSignUp.setVisibility(View.VISIBLE);
+                            textViewForgetPassword.setVisibility(View.VISIBLE);
+                            view1.setVisibility(View.VISIBLE);
+                            view2.setVisibility(View.VISIBLE);
                             return;
                         }
                     });

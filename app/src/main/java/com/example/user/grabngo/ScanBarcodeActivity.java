@@ -21,6 +21,12 @@ import android.widget.Toast;
 
 import com.example.user.grabngo.Class.ProductDetail;
 import com.example.user.grabngo.Class.ProductList;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.zxing.Result;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
@@ -32,6 +38,11 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ZXingScann
     private static final int REQUEST_CAMERA = 1;
     private ZXingScannerView scannerView;
 
+    private FirebaseFirestore mFirebaseFirestore;
+    private CollectionReference mCollectionReference;
+
+    private int check = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +50,8 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ZXingScann
         scannerView = new ZXingScannerView(this);
         scannerView.setAspectTolerance(0.5f);
         setContentView(scannerView);
+
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
 
         if(checkPermission()){
             Toast.makeText(ScanBarcodeActivity.this,"Permission is already granted",Toast.LENGTH_SHORT).show();
@@ -114,21 +127,31 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ZXingScann
 
 
     @Override
-    public void handleResult(Result result) {
+    public void handleResult(final Result result) {
         final String scanResult = result.getText();
-        ProductList productList = ProductList.get(ScanBarcodeActivity.this);
-        ProductDetail productDetail = productList.getProductBarcode(scanResult);
-
-        if(productDetail!=null){
-            Intent intent = new Intent(ScanBarcodeActivity.this,AddToCartActivity.class);
-            intent.putExtra("pName",productDetail.getProductName());
-            startActivity(intent);
-            finish();
-        }else{
-            Toast.makeText(ScanBarcodeActivity.this,"Invalid Barcode",Toast.LENGTH_SHORT).show();
-            scannerView.resumeCameraPreview(ScanBarcodeActivity.this);
-        }
-
+        mCollectionReference = mFirebaseFirestore.collection("Product");
+        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                {
+                    check++;
+                    String key = documentSnapshot.getId();
+                    if(key.equals(scanResult))
+                    {
+                        Intent intent = new Intent(ScanBarcodeActivity.this,AddToCartActivity.class);
+                        intent.putExtra("productID",scanResult);
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+                if(check == 0)
+                {
+                    Toast.makeText(ScanBarcodeActivity.this,"Invalid Barcode",Toast.LENGTH_SHORT).show();
+                    scannerView.resumeCameraPreview(ScanBarcodeActivity.this);
+                }
+            }
+        });
     }
 
     public void displayAlertMessage(String message, DialogInterface.OnClickListener listener){
