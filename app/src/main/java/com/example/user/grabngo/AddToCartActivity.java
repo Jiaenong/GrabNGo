@@ -23,9 +23,12 @@ import com.example.user.grabngo.Class.Product;
 import com.example.user.grabngo.Class.ProductDetail;
 import com.example.user.grabngo.Class.ProductList;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
 
@@ -41,6 +44,7 @@ public class AddToCartActivity extends AppCompatActivity {
 
     private FirebaseFirestore mFirebaseFirestore;
     private DocumentReference mDocumentReference;
+    private CollectionReference mCollectionReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +52,10 @@ public class AddToCartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_to_cart);
 
         Intent intent = getIntent();
-        String productKey = intent.getStringExtra("productID");
+        final String barcode = intent.getStringExtra("barcode");
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
-        mDocumentReference = mFirebaseFirestore.document("Product/"+productKey);
+        mCollectionReference = mFirebaseFirestore.collection("Product");
 
         textViewPrice = (TextView)findViewById(R.id.text_view_price);
         textViewProduct = (TextView)findViewById(R.id.text_view_product_name);
@@ -91,21 +95,23 @@ public class AddToCartActivity extends AppCompatActivity {
             }
         });
 
-        mDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        mCollectionReference.whereEqualTo("barcode",barcode).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Product product = documentSnapshot.toObject(Product.class);
-                Glide.with(AddToCartActivity.this).load(product.getImageUrl()).into(imageView);
-                textViewProduct.setText(product.getProductName());
-                textViewPrice.setText("RM " + product.getPrice());
-                textViewProducer.setText("Producer               : " + product.getProducer());
-                textViewCategory.setText("Category               : " + product.getCategory());
-                textViewExpired.setText("Expired Date        : " + product.getExpired());
-                textViewStock.setText("Stock Amount     : " + product.getStockAmount());
-                textViewLocation.setText("Shelf location      : " + product.getShelfLocation());
-                progressBar.setVisibility(View.GONE);
-                scrollView.setVisibility(View.VISIBLE);
-
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                {
+                    Product product = documentSnapshot.toObject(Product.class);
+                    Glide.with(AddToCartActivity.this).load(product.getImageUrl()).into(imageView);
+                    textViewProduct.setText(product.getProductName());
+                    textViewPrice.setText("RM " + product.getPrice());
+                    textViewProducer.setText("Producer               : " + product.getProducer());
+                    textViewCategory.setText("Category               : " + product.getCategory());
+                    textViewExpired.setText("Expired Date        : " + product.getExpired());
+                    textViewStock.setText("Stock Amount     : " + product.getStockAmount());
+                    textViewLocation.setText("Shelf location      : " + product.getShelfLocation());
+                    progressBar.setVisibility(View.GONE);
+                    scrollView.setVisibility(View.VISIBLE);
+                }
             }
         });
 
@@ -113,8 +119,8 @@ public class AddToCartActivity extends AppCompatActivity {
         btnAddToCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                CartList cartList = CartList.get(AddToCartActivity.this);
-
+                mCollectionReference = mFirebaseFirestore.collection("Customer").document().collection("Cart");
+                //CartList cartList = CartList.get(AddToCartActivity.this);
                 int i = Integer.parseInt(quantity.getText().toString());
                 //cartList.addCartItem(product,i);
 

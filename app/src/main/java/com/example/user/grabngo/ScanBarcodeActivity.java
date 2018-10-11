@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.user.grabngo.Class.Product;
 import com.example.user.grabngo.Class.ProductDetail;
 import com.example.user.grabngo.Class.ProductList;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -136,11 +137,12 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ZXingScann
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                 {
                     check++;
-                    String key = documentSnapshot.getId();
-                    if(key.equals(scanResult))
+                    Product product = documentSnapshot.toObject(Product.class);
+                    String barcode = product.getBarcode();
+                    if(barcode.equals(scanResult))
                     {
                         Intent intent = new Intent(ScanBarcodeActivity.this,AddToCartActivity.class);
-                        intent.putExtra("productID",scanResult);
+                        intent.putExtra("barcode",scanResult);
                         startActivity(intent);
                         finish();
                     }

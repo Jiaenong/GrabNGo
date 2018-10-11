@@ -9,13 +9,14 @@ public class Product {
     private String shelfLocation;
     private String stockAmount;
     private String imageUrl;
+    private String barcode;
 
     public Product()
     {
 
     }
 
-    public Product(String productName, String producer, String price, String category, String expired, String shelfLocation, String stockAmount, String imageUrl)
+    public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, String stockAmount, String imageUrl)
     {
         this.productName = productName;
         this.producer = producer;
@@ -25,6 +26,7 @@ public class Product {
         this.shelfLocation = shelfLocation;
         this.stockAmount = stockAmount;
         this.imageUrl = imageUrl;
+        this.barcode = barcode;
     }
 
     public Product(String imageUrl, String productName, String price)
@@ -96,5 +98,13 @@ public class Product {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getBarcode() {
+        return barcode;
+    }
+
+    public void setBarcode(String barcode) {
+        this.barcode = barcode;
     }
 }
