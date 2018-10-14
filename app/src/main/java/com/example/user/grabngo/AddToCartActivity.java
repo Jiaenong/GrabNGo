@@ -119,17 +119,35 @@ public class AddToCartActivity extends AppCompatActivity {
         btnAddToCart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mCollectionReference = mFirebaseFirestore.collection("Customer").document().collection("Cart");
-                //CartList cartList = CartList.get(AddToCartActivity.this);
-                int i = Integer.parseInt(quantity.getText().toString());
-                //cartList.addCartItem(product,i);
-
+                mCollectionReference.whereEqualTo("barcode",barcode).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                        {
+                            Product product = documentSnapshot.toObject(Product.class);
+                            String name = product.getProductName();
+                            String imageSrc = product.getImageUrl();
+                            String price = product.getPrice();
+                            AddCart(name, imageSrc, price);
+                        }
+                    }
+                });
                 finish();
                 Toast.makeText(AddToCartActivity.this, "Item successfully added to cart",Toast.LENGTH_SHORT).show();
             }
         });
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void AddCart(String name, String imageSrc, String price)
+    {
+        String id = SaveSharedPreference.getID(AddToCartActivity.this);
+        int qty = Integer.parseInt(quantity.getText().toString());
+        Double itemprice = Double.parseDouble(price);
+        mCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
+        CartItem cartItem = new CartItem(name,imageSrc, qty, itemprice);
+        mCollectionReference.add(cartItem);
     }
 
     @Override

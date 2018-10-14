@@ -132,6 +132,8 @@ public class LoginActivity extends AppCompatActivity {
                                 String password = editTextPassword.getText().toString();
                                 if (email.equals(customer.getEmail()) && password.equals(customer.getPassword())) {
                                     check++;
+                                    String id = documentSnapshot.getId();
+                                    SaveSharedPreference.setID(LoginActivity.this,id);
                                     Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                                     startActivity(intent);
                                     finish();
