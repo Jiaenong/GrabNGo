@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,14 +45,19 @@ public class CartActivity extends AppCompatActivity {
     private TextView pricePayment;
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
+    private ProgressBar progressBarCart;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
         btnPayment = (Button)findViewById(R.id.btn_payment);
         pricePayment = (TextView)findViewById(R.id.price_payment);
+        progressBarCart = (ProgressBar)findViewById(R.id.progressBarCart);
+        mRecyclerView = (RecyclerView)findViewById(R.id.cart_recycle_view);
         cartList = new ArrayList<>();
         String id = SaveSharedPreference.getID(CartActivity.this);
+        progressBarCart.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.GONE);
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
 
@@ -70,13 +76,14 @@ public class CartActivity extends AppCompatActivity {
                     cartList.add(cartitem);
                     totalprice += price*qty;
                 }
-                mRecyclerView = (RecyclerView)findViewById(R.id.cart_recycle_view);
                 mAdapter = new CartAdapter(cartList);
                 RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
                 mRecyclerView.setLayoutManager(mLayoutManager);
                 mRecyclerView.setItemAnimator(new DefaultItemAnimator());
                 mRecyclerView.setAdapter(mAdapter);
                 pricePayment.setText("RM " + String.format("%.2f",totalprice));
+                progressBarCart.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.VISIBLE);
             }
         });
 
