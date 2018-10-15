@@ -10,10 +10,33 @@ public class Product {
     private String stockAmount;
     private String imageUrl;
     private String barcode;
+    private String modifiedStaffName;
+    private String modifiedDate;
+    private String modifiedTime;
+    private String supplierKey;
+    private String staffKey;
 
     public Product()
     {
 
+    }
+
+    public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, String stockAmount, String imageUrl, String modifiedStaffName, String modifiedDate, String modifiedTime, String supplierKey, String staffKey)
+    {
+        this.productName = productName;
+        this.producer = producer;
+        this.price = price;
+        this.category = category;
+        this.expired = expired;
+        this.shelfLocation = shelfLocation;
+        this.stockAmount = stockAmount;
+        this.imageUrl = imageUrl;
+        this.barcode = barcode;
+        this.modifiedStaffName = modifiedStaffName;
+        this.modifiedDate = modifiedDate;
+        this.modifiedTime = modifiedTime;
+        this.supplierKey = supplierKey;
+        this.staffKey = staffKey;
     }
 
     public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, String stockAmount, String imageUrl)
@@ -106,5 +129,45 @@ public class Product {
 
     public void setBarcode(String barcode) {
         this.barcode = barcode;
+    }
+
+    public String getModifiedStaffName() {
+        return modifiedStaffName;
+    }
+
+    public void setModifiedStaffName(String modifiedStaffName) {
+        this.modifiedStaffName = modifiedStaffName;
+    }
+
+    public String getModifiedDate() {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(String modifiedDate) {
+        this.modifiedDate = modifiedDate;
+    }
+
+    public String getModifiedTime() {
+        return modifiedTime;
+    }
+
+    public void setModifiedTime(String modifiedTime) {
+        this.modifiedTime = modifiedTime;
+    }
+
+    public String getSupplierKey() {
+        return supplierKey;
+    }
+
+    public void setSupplierKey(String supplierKey) {
+        this.supplierKey = supplierKey;
+    }
+
+    public String getStaffKey() {
+        return staffKey;
+    }
+
+    public void setStaffKey(String staffKey) {
+        this.staffKey = staffKey;
     }
 }

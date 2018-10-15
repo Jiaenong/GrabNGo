@@ -58,6 +58,7 @@ public class SignUpActivity extends AppCompatActivity {
                         int num = Integer.parseInt(key.substring(3));
                         num++;
                         autoID = "C000"+num;
+                        break;
                     }
                 }
             }

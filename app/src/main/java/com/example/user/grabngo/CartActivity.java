@@ -84,24 +84,25 @@ public class CartActivity extends AppCompatActivity {
                 pricePayment.setText("RM " + String.format("%.2f",totalprice));
                 progressBarCart.setVisibility(View.GONE);
                 mRecyclerView.setVisibility(View.VISIBLE);
+
+                if(cartList.isEmpty()){
+                    btnPayment.setBackgroundColor(getResources().getColor(R.color.foreground_light_color));
+
+                }else {
+                    btnPayment.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            Intent intent = new Intent(CartActivity.this, PaymentActivity.class);
+                            intent.putExtra("totalPrice",pricePayment.getText().toString());
+                            startActivity(intent);
+                        }
+                    });
+                }
             }
         });
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        if(cartList.isEmpty()){
-            btnPayment.setBackgroundColor(getResources().getColor(R.color.foreground_light_color));
-
-        }else {
-            btnPayment.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    Intent intent = new Intent(CartActivity.this, PaymentActivity.class);
-                    startActivity(intent);
-                }
-            });
-        }
     }
 
 
@@ -188,12 +189,13 @@ public class CartActivity extends AppCompatActivity {
                             totalPrice = Double.parseDouble(text.substring(2));
                             totalPrice -= price;
                             pricePayment.setText("RM " + totalPrice);
+
+                            if(cartList.isEmpty()){
+                                btnPayment.setBackgroundColor(getResources().getColor(R.color.foreground_light_color));
+                                btnPayment.setOnClickListener(null);
+                            }
                         }
                     });
-                    if(cartList.isEmpty()){
-                        btnPayment.setBackgroundColor(getResources().getColor(R.color.foreground_light_color));
-                        btnPayment.setOnClickListener(null);
-                    }
 
                     cart.remove(position);
                     Toast.makeText(CartActivity.this, "Item removed from cart",Toast.LENGTH_SHORT).show();

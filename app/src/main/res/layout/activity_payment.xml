@@ -20,37 +20,42 @@
         android:src="@drawable/credit_card_logo"/>
 
     <EditText
+        android:id="@+id/editTextCardNumber"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="number"
-        android:hint="Card number"/>
+        android:hint="Card number"
+        android:inputType="number" />
 
     <EditText
-        android:layout_marginTop="30dp"
+        android:id="@+id/editTextCardName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Name on card"/>
+        android:layout_marginTop="30dp"
+        android:hint="Name on card" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:orientation="horizontal">
-        <EditText
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:inputType="date"
-            android:hint="Expiration date"/>
 
         <EditText
-            android:layout_marginLeft="30dp"
-            android:layout_weight="1"
-            android:maxLength="3"
+            android:id="@+id/editTextExpDate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Expiration date"
+            android:inputType="date" />
+
+        <EditText
+            android:id="@+id/editTextCVV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_weight="1"
+            android:hint="CVV"
             android:inputType="number"
-            android:hint="CVV"/>
+            android:maxLength="3" />
 
         <ImageButton
             android:id="@+id/btn_hint"
@@ -75,10 +80,11 @@
             android:textSize="14sp"
             android:paddingLeft="10dp"
             android:textColor="@color/foreground_dark_color"/>
+
         <Switch
+            android:id="@+id/switchSave"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
+            android:layout_height="wrap_content" />
     </LinearLayout>
     <TextView
         android:layout_width="match_parent"
