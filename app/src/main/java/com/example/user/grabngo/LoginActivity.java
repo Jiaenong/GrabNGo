@@ -3,6 +3,8 @@ package com.example.user.grabngo;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -55,6 +57,7 @@ public class LoginActivity extends AppCompatActivity {
         textViewForgetPassword = (TextView)findViewById(R.id.forgetPassword);
         view1 = (View)findViewById(R.id.view1);
         view2 = (View)findViewById(R.id.view2);
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Customer");
@@ -148,6 +151,9 @@ public class LoginActivity extends AppCompatActivity {
                                             Staff staff = documentSnapshot.toObject(Staff.class);
                                             if (email.equals(staff.getEmail()) && password.equals(staff.getPassword())) {
                                                 check++;
+                                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                                editor.putString("username",staff.getName());
+                                                editor.apply();
                                                 Intent intent = new Intent(LoginActivity.this, StaffHomeActivity.class);
                                                 startActivity(intent);
                                                 finish();

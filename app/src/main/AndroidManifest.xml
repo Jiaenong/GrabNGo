@@ -59,7 +59,8 @@
             android:label="@string/title_activity_manager_home"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".Admin.SupplierDetailActivity" />
-        <activity android:name=".Admin.DiscountDetailActivity"></activity>
+        <activity android:name=".Admin.DiscountDetailActivity" />
+        <activity android:name=".Admin.AddProductActivity"></activity>
     </application>
 
 </manifest>

@@ -2,26 +2,48 @@ package com.example.user.grabngo.Admin;
 
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.user.grabngo.CartActivity;
+import com.example.user.grabngo.Class.Product;
 import com.example.user.grabngo.HomeActivity;
+import com.example.user.grabngo.ProductAdapter;
 import com.example.user.grabngo.ProductDetailActivity;
 import com.example.user.grabngo.R;
+import com.example.user.grabngo.RecyclerTouchListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,7 +52,13 @@ public class InventoryFragment extends Fragment {
 
     private Spinner spinnerCategory, spinnerSortby;
     private NavigationView navigationView;
-    private LinearLayout productLayout4;
+    private RecyclerView recyclerView;
+    private AdminProductAdapter adminProductAdapter;
+    private List<Product> productList;
+    private ProgressBar progressBar;
+    private FirebaseFirestore mFirebaseFirestore;
+    private CollectionReference mCollectionReference;
+    private FloatingActionButton fab;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -39,8 +67,14 @@ public class InventoryFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_inventory, container, false);
 
         setHasOptionsMenu(true);
-        productLayout4 = (LinearLayout)v.findViewById(R.id.layout_product);
+        recyclerView = (RecyclerView)v.findViewById(R.id.recycleViewProduct);
         navigationView = (NavigationView)getActivity().findViewById(R.id.nav_view);
+        progressBar = (ProgressBar)v.findViewById(R.id.progressBar);
+        productList = new ArrayList<>();
+
+        mFirebaseFirestore = FirebaseFirestore.getInstance();
+        mCollectionReference = mFirebaseFirestore.collection("Product");
+        Task<QuerySnapshot> sp = mCollectionReference.orderBy("productName",Query.Direction.DESCENDING).get();
 
         getActivity().setTitle("Inventory");
         navigationView.getMenu().getItem(1).setChecked(true);
@@ -56,24 +90,170 @@ public class InventoryFragment extends Fragment {
         adapter2.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         spinnerSortby.setAdapter(adapter2);
 
-        FloatingActionButton fab = (FloatingActionButton) v.findViewById(R.id.fab);
+        fab = (FloatingActionButton) v.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        productLayout4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String productName = "Jongga Spicy Rice Noodle";
-                Intent intent = new Intent(getActivity(), StaffProductDetailActivity.class);
-                intent.putExtra("pName",productName);
+                Intent intent = new Intent(getContext(),AddProductActivity.class);
                 startActivity(intent);
             }
         });
+
+        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), recyclerView, new RecyclerTouchListener.ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                Product product = productList.get(position);
+                Intent intent = new Intent(getContext(),ProductDetailActivity.class);
+                intent.putExtra("productName",product.getProductName());
+                startActivity(intent);
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        }));
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0 && fab.getVisibility() == View.VISIBLE) {
+                    fab.hide();
+                } else if (dy < 0 && fab.getVisibility() != View.VISIBLE) {
+                    fab.show();
+                }
+            }
+        });
+
+        spinnerSortby.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                progressBar.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                progressBar.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.GONE);
+                spinnerSortby.setSelection(0);
+                String selectedItem = adapterView.getItemAtPosition(i).toString();
+                FragmentManager fm = getFragmentManager();
+                switch (selectedItem){
+                    case "All":
+                        productList.clear();
+                        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                                {
+                                    Product product = documentSnapshot.toObject(Product.class);
+                                    String image = product.getImageUrl();
+                                    String name = product.getProductName();
+                                    String stockAmount = product.getStockAmount();
+                                    Product mProduct = new Product(image, name, stockAmount);
+                                    productList.add(mProduct);
+                                }
+                                adminProductAdapter = new AdminProductAdapter(getActivity(),productList);
+                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2);
+                                recyclerView.setLayoutManager(mLayoutManager);
+                                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                                recyclerView.setAdapter(adminProductAdapter);
+                                progressBar.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
+                        });
+                        break;
+                    case "Personal Care":
+                        productList.clear();
+                        mCollectionReference.whereEqualTo("category","Personal Care").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                                {
+                                    Product product = documentSnapshot.toObject(Product.class);
+                                    String image = product.getImageUrl();
+                                    String name = product.getProductName();
+                                    String stockAmount = product.getStockAmount();
+                                    Product mProduct = new Product(image, name, stockAmount);
+                                    productList.add(mProduct);
+                                }
+                                adminProductAdapter = new AdminProductAdapter(getActivity(),productList);
+                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2);
+                                recyclerView.setLayoutManager(mLayoutManager);
+                                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                                recyclerView.setAdapter(adminProductAdapter);
+                                progressBar.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
+                        });
+                        break;
+                    case "Household":
+                        productList.clear();
+                        mCollectionReference.whereEqualTo("category","Household").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                                {
+                                    Product product = documentSnapshot.toObject(Product.class);
+                                    String image = product.getImageUrl();
+                                    String name = product.getProductName();
+                                    String stockAmount = product.getStockAmount();
+                                    Product mProduct = new Product(image, name, stockAmount);
+                                    productList.add(mProduct);
+                                }
+                                adminProductAdapter = new AdminProductAdapter(getActivity(),productList);
+                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2);
+                                recyclerView.setLayoutManager(mLayoutManager);
+                                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                                recyclerView.setAdapter(adminProductAdapter);
+                                progressBar.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
+                        });
+                        break;
+                    case "Food and Beverages":
+                        productList.clear();
+                        mCollectionReference.whereEqualTo("category","Food and Beverages").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                                {
+                                    Product product = documentSnapshot.toObject(Product.class);
+                                    String image = product.getImageUrl();
+                                    String name = product.getProductName();
+                                    String stockAmount = product.getStockAmount();
+                                    Product mProduct = new Product(image, name, stockAmount);
+                                    productList.add(mProduct);
+                                }
+                                adminProductAdapter = new AdminProductAdapter(getActivity(),productList);
+                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2);
+                                recyclerView.setLayoutManager(mLayoutManager);
+                                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                                recyclerView.setAdapter(adminProductAdapter);
+                                progressBar.setVisibility(View.GONE);
+                                recyclerView.setVisibility(View.VISIBLE);
+                            }
+                        });
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+
 
         return v;
     }
