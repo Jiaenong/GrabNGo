@@ -75,6 +75,7 @@ public class InventoryFragment extends Fragment {
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Product");
         Task<QuerySnapshot> sp = mCollectionReference.orderBy("productName",Query.Direction.DESCENDING).get();
+        Query query = mCollectionReference.orderBy("productName");
 
         getActivity().setTitle("Inventory");
         navigationView.getMenu().getItem(1).setChecked(true);
@@ -82,7 +83,7 @@ public class InventoryFragment extends Fragment {
         spinnerCategory = (Spinner)v.findViewById(R.id.spinner_category);
         spinnerSortby = (Spinner)v.findViewById(R.id.spinner_sortby);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this.getActivity() ,R.array.category, R.layout.support_simple_spinner_dropdown_item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this.getActivity() ,R.array.product_category, R.layout.support_simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         spinnerCategory.setAdapter(adapter);
 
@@ -131,6 +132,7 @@ public class InventoryFragment extends Fragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 progressBar.setVisibility(View.VISIBLE);
                 recyclerView.setVisibility(View.GONE);
+                filterProduct();
             }
 
             @Override
@@ -144,107 +146,8 @@ public class InventoryFragment extends Fragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 progressBar.setVisibility(View.VISIBLE);
                 recyclerView.setVisibility(View.GONE);
-                spinnerSortby.setSelection(0);
-                String selectedItem = adapterView.getItemAtPosition(i).toString();
-                FragmentManager fm = getFragmentManager();
-                switch (selectedItem){
-                    case "All":
-                        productList.clear();
-                        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                            @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                                {
-                                    Product product = documentSnapshot.toObject(Product.class);
-                                    String image = product.getImageUrl();
-                                    String name = product.getProductName();
-                                    String stockAmount = product.getStockAmount();
-                                    Product mProduct = new Product(image, name, stockAmount);
-                                    productList.add(mProduct);
-                                }
-                                adminProductAdapter = new AdminProductAdapter(getActivity(),productList);
-                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2);
-                                recyclerView.setLayoutManager(mLayoutManager);
-                                recyclerView.setItemAnimator(new DefaultItemAnimator());
-                                recyclerView.setAdapter(adminProductAdapter);
-                                progressBar.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                            }
-                        });
-                        break;
-                    case "Personal Care":
-                        productList.clear();
-                        mCollectionReference.whereEqualTo("category","Personal Care").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                            @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                                {
-                                    Product product = documentSnapshot.toObject(Product.class);
-                                    String image = product.getImageUrl();
-                                    String name = product.getProductName();
-                                    String stockAmount = product.getStockAmount();
-                                    Product mProduct = new Product(image, name, stockAmount);
-                                    productList.add(mProduct);
-                                }
-                                adminProductAdapter = new AdminProductAdapter(getActivity(),productList);
-                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2);
-                                recyclerView.setLayoutManager(mLayoutManager);
-                                recyclerView.setItemAnimator(new DefaultItemAnimator());
-                                recyclerView.setAdapter(adminProductAdapter);
-                                progressBar.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                            }
-                        });
-                        break;
-                    case "Household":
-                        productList.clear();
-                        mCollectionReference.whereEqualTo("category","Household").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                            @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                                {
-                                    Product product = documentSnapshot.toObject(Product.class);
-                                    String image = product.getImageUrl();
-                                    String name = product.getProductName();
-                                    String stockAmount = product.getStockAmount();
-                                    Product mProduct = new Product(image, name, stockAmount);
-                                    productList.add(mProduct);
-                                }
-                                adminProductAdapter = new AdminProductAdapter(getActivity(),productList);
-                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2);
-                                recyclerView.setLayoutManager(mLayoutManager);
-                                recyclerView.setItemAnimator(new DefaultItemAnimator());
-                                recyclerView.setAdapter(adminProductAdapter);
-                                progressBar.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                            }
-                        });
-                        break;
-                    case "Food and Beverages":
-                        productList.clear();
-                        mCollectionReference.whereEqualTo("category","Food and Beverages").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                            @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                                {
-                                    Product product = documentSnapshot.toObject(Product.class);
-                                    String image = product.getImageUrl();
-                                    String name = product.getProductName();
-                                    String stockAmount = product.getStockAmount();
-                                    Product mProduct = new Product(image, name, stockAmount);
-                                    productList.add(mProduct);
-                                }
-                                adminProductAdapter = new AdminProductAdapter(getActivity(),productList);
-                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2);
-                                recyclerView.setLayoutManager(mLayoutManager);
-                                recyclerView.setItemAnimator(new DefaultItemAnimator());
-                                recyclerView.setAdapter(adminProductAdapter);
-                                progressBar.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                            }
-                        });
-                        break;
-                }
+                filterProduct();
+
             }
 
             @Override
@@ -256,6 +159,57 @@ public class InventoryFragment extends Fragment {
 
 
         return v;
+    }
+
+    public void filterProduct(){
+        productList.clear();
+        int sortBy = spinnerSortby.getSelectedItemPosition();
+        Query query;
+
+        if(spinnerCategory.getSelectedItemPosition() == 0){
+            if(sortBy == 0)
+                query = mCollectionReference.orderBy("modifiedDate",Query.Direction.ASCENDING);
+            else if(sortBy == 1)
+                query = mCollectionReference.orderBy("modifiedDate",Query.Direction.DESCENDING);
+            else if(sortBy == 2)
+                query = mCollectionReference.orderBy("productName",Query.Direction.ASCENDING);
+            else
+                query = mCollectionReference.orderBy("stockAmount",Query.Direction.ASCENDING);
+
+        }else{
+            if(sortBy == 0)
+                query = mCollectionReference.whereEqualTo("category",spinnerCategory.getSelectedItem().toString()).orderBy("modifiedDate",Query.Direction.ASCENDING);
+            else if(sortBy == 1)
+                query = mCollectionReference.whereEqualTo("category",spinnerCategory.getSelectedItem().toString()).orderBy("modifiedDate",Query.Direction.DESCENDING);
+            else if(sortBy == 2)
+                query = mCollectionReference.whereEqualTo("category",spinnerCategory.getSelectedItem().toString()).orderBy("productName",Query.Direction.ASCENDING);
+            else
+                query = mCollectionReference.whereEqualTo("category",spinnerCategory.getSelectedItem().toString()).orderBy("stockAmount",Query.Direction.ASCENDING);
+
+        }
+
+
+        query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                {
+                    Product product = documentSnapshot.toObject(Product.class);
+                    String image = product.getImageUrl();
+                    String name = product.getProductName();
+                    String stockAmount = ""+product.getStockAmount();
+                    Product mProduct = new Product(image, name, stockAmount);
+                    productList.add(mProduct);
+                }
+                adminProductAdapter = new AdminProductAdapter(getActivity(),productList);
+                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2);
+                recyclerView.setLayoutManager(mLayoutManager);
+                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                recyclerView.setAdapter(adminProductAdapter);
+                progressBar.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     @Override

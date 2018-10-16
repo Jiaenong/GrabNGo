@@ -1,5 +1,9 @@
 package com.example.user.grabngo.Class;
 
+import com.google.firebase.firestore.ServerTimestamp;
+
+import java.util.Date;
+
 public class Product {
     private String productName;
     private String producer;
@@ -7,21 +11,21 @@ public class Product {
     private String category;
     private String expired;
     private String shelfLocation;
-    private String stockAmount;
+    private int stockAmount;
     private String imageUrl;
     private String barcode;
     private String modifiedStaffName;
-    private String modifiedDate;
-    private String modifiedTime;
+    private @ServerTimestamp Date modifiedDate;
     private String supplierKey;
     private String staffKey;
+    ;
 
     public Product()
     {
 
     }
 
-    public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, String stockAmount, String imageUrl, String modifiedStaffName, String modifiedDate, String modifiedTime, String supplierKey, String staffKey)
+    public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, int stockAmount, String imageUrl, String modifiedStaffName, Date modifiedDate, String supplierKey, String staffKey)
     {
         this.productName = productName;
         this.producer = producer;
@@ -34,12 +38,11 @@ public class Product {
         this.barcode = barcode;
         this.modifiedStaffName = modifiedStaffName;
         this.modifiedDate = modifiedDate;
-        this.modifiedTime = modifiedTime;
         this.supplierKey = supplierKey;
         this.staffKey = staffKey;
     }
 
-    public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, String stockAmount, String imageUrl)
+    public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, int stockAmount, String imageUrl, Date modifiedDate)
     {
         this.productName = productName;
         this.producer = producer;
@@ -49,6 +52,7 @@ public class Product {
         this.shelfLocation = shelfLocation;
         this.stockAmount = stockAmount;
         this.imageUrl = imageUrl;
+        this.modifiedDate = modifiedDate;
         this.barcode = barcode;
     }
 
@@ -107,11 +111,11 @@ public class Product {
         this.shelfLocation = shelfLocation;
     }
 
-    public String getStockAmount() {
+    public int getStockAmount() {
         return stockAmount;
     }
 
-    public void setStockAmount(String stockAmount) {
+    public void setStockAmount(int stockAmount) {
         this.stockAmount = stockAmount;
     }
 
@@ -139,20 +143,12 @@ public class Product {
         this.modifiedStaffName = modifiedStaffName;
     }
 
-    public String getModifiedDate() {
+    public Date getModifiedDate() {
         return modifiedDate;
     }
 
-    public void setModifiedDate(String modifiedDate) {
+    public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
-    }
-
-    public String getModifiedTime() {
-        return modifiedTime;
-    }
-
-    public void setModifiedTime(String modifiedTime) {
-        this.modifiedTime = modifiedTime;
     }
 
     public String getSupplierKey() {

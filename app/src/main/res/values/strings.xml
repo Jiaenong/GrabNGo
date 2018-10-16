@@ -23,6 +23,12 @@
         <item>Food and Beverages</item>
     </string-array>
 
+    <string-array name="product_category">
+        <item>Personal Care</item>
+        <item>Household</item>
+        <item>Food and Beverages</item>
+    </string-array>
+
     <string-array name="report">
         <item>Monthly Sales Report</item>
         <item>Best Selling Report</item>
