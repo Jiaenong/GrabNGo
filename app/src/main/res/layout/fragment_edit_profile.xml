@@ -139,13 +139,18 @@
                         android:textColor="@color/foreground_color"
                         android:textSize="16sp"/>
 
-                    <EditText
-                        android:id="@+id/editTextName"
+                    <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Name"
-                        android:padding="10dp"
-                        android:textSize="14sp" />
+                        android:layout_marginTop="10dp">
+                        <EditText
+                            android:id="@+id/editTextName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Name"
+                            android:padding="10dp"
+                            android:textSize="14sp" />
+                    </android.support.design.widget.TextInputLayout>
 
 
                     <LinearLayout
@@ -177,21 +182,31 @@
                             android:textSize="14sp" />
                     </LinearLayout>
 
-                    <EditText
-                        android:id="@+id/editTextEmail"
+                    <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Email"
-                        android:padding="10dp"
-                        android:textSize="14sp" />
+                        android:layout_marginTop="10dp">
+                        <EditText
+                            android:id="@+id/editTextEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Email"
+                            android:padding="10dp"
+                            android:textSize="14sp" />
+                    </android.support.design.widget.TextInputLayout>
 
-                    <EditText
-                        android:id="@+id/editTextAddress"
+                    <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Address"
-                        android:padding="10dp"
-                        android:textSize="14sp" />
+                        android:layout_marginTop="10dp">
+                        <EditText
+                            android:id="@+id/editTextAddress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Address"
+                            android:padding="10dp"
+                            android:textSize="14sp" />
+                    </android.support.design.widget.TextInputLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
