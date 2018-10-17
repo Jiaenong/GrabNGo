@@ -7,18 +7,20 @@ public class Payment {
     private String payTime;
     private List<String> item;
     private double totalPayment;
+    private String customerKey;
 
     public Payment()
     {
 
     }
 
-    public Payment(String payDate, String payTime, List<String> item, double totalPayment)
+    public Payment(String payDate, String payTime, List<String> item, double totalPayment, String customerKey)
     {
         this.payDate = payDate;
         this.payTime = payTime;
         this.item = item;
         this.totalPayment = totalPayment;
+        this.customerKey = customerKey;
     }
 
     public String getPayDate() {
@@ -51,5 +53,13 @@ public class Payment {
 
     public void setTotalPayment(double totalPayment) {
         this.totalPayment = totalPayment;
+    }
+
+    public String getCustomerKey() {
+        return customerKey;
+    }
+
+    public void setCustomerKey(String customerKey) {
+        this.customerKey = customerKey;
     }
 }

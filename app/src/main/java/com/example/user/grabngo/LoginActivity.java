@@ -59,6 +59,12 @@ public class LoginActivity extends AppCompatActivity {
         view2 = (View)findViewById(R.id.view2);
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
+        if(SaveSharedPreference.getCheckLogin(LoginActivity.this))
+        {
+            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+            startActivity(intent);
+        }
+
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Customer");
         mStaffCollectionReference = mFirebaseFirestore.collection("Staff");
@@ -137,6 +143,7 @@ public class LoginActivity extends AppCompatActivity {
                                     check++;
                                     String id = documentSnapshot.getId();
                                     SaveSharedPreference.setID(LoginActivity.this,id);
+                                    SaveSharedPreference.setCheckLogin(LoginActivity.this,true);
                                     Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                                     startActivity(intent);
                                     finish();

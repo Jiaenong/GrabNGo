@@ -1,5 +1,6 @@
 package com.example.user.grabngo;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -20,9 +21,11 @@ import android.widget.TextView;
 import com.example.user.grabngo.Class.CartItem;
 import com.example.user.grabngo.Class.CartList;
 import com.example.user.grabngo.Class.Payment;
+import com.example.user.grabngo.Class.Product;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -44,13 +47,15 @@ public class PaymentActivity extends AppCompatActivity {
     private Button btnPayment;
     private EditText editTextCardNumber, editTextCardName, editTextExpDate, editTextCVV;
     private Switch switchSave;
+    private ProgressDialog progressDialog;
 
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference, nCollectionReference;
-    private DocumentReference mDocumentReference;
+    private DocumentReference mDocumentReference, nDocumentReference;
 
     private List<String> items;
     private String paymentID;
+    private int qty;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -82,7 +87,7 @@ public class PaymentActivity extends AppCompatActivity {
         String text = intent.getStringExtra("totalPrice");
 
         items = new ArrayList<>();
-
+        progressDialog = new ProgressDialog(this);
         editTextCardNumber = (EditText)findViewById(R.id.editTextCardNumber);
         editTextCardName = (EditText)findViewById(R.id.editTextCardName);
         editTextExpDate = (EditText)findViewById(R.id.editTextExpDate);
@@ -129,6 +134,9 @@ public class PaymentActivity extends AppCompatActivity {
         btnPayment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(progressDialog.isShowing())
+                    progressDialog.setMessage("Processing...");
+                progressDialog.show();
                 items.clear();
                 if(switchSave.isChecked())
                 {
@@ -146,7 +154,7 @@ public class PaymentActivity extends AppCompatActivity {
                 }else{
                     SaveSharedPreference.clearData(PaymentActivity.this);
                 }
-                String id = SaveSharedPreference.getID(PaymentActivity.this);
+                final String id = SaveSharedPreference.getID(PaymentActivity.this);
                 Calendar calendar = Calendar.getInstance();
                 SimpleDateFormat sdDate = new SimpleDateFormat("yyyy / MM / dd");
                 SimpleDateFormat sdTime = new SimpleDateFormat("HH:mm:ss");
@@ -157,19 +165,34 @@ public class PaymentActivity extends AppCompatActivity {
                 mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        String key = "";
                         for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                         {
                             CartItem cartItem = documentSnapshot.toObject(CartItem.class);
                             String item = cartItem.getProductname();
+                            key = cartItem.getProductKey();
+                            qty = cartItem.getQuantity();
                             items.add(item);
                         }
                         String text = paymentPrice.getText().toString();
                         double price = Double.parseDouble(text.substring(2));
-                        Payment payment = new Payment(currentDate, currentTime, items, price);
+                        Payment payment = new Payment(currentDate, currentTime, items, price, id);
                         mDocumentReference = mFirebaseFirestore.document("Payment/"+paymentID);
+                        nDocumentReference = mFirebaseFirestore.document("Product/"+key);
+                        nDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                Product product = documentSnapshot.toObject(Product.class);
+                                int quantity = product.getStockAmount();
+                                quantity -= qty;
+                                nDocumentReference.update("stockAmount",quantity);
+                            }
+                        });
                         mDocumentReference.set(payment).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
+                                if(progressDialog.isShowing())
+                                    progressDialog.dismiss();
                                 AlertDialog.Builder builder = new AlertDialog.Builder(PaymentActivity.this);
                                 builder.setTitle("Payment Success");
                                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {

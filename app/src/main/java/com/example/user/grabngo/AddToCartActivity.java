@@ -128,7 +128,8 @@ public class AddToCartActivity extends AppCompatActivity {
                             String name = product.getProductName();
                             String imageSrc = product.getImageUrl();
                             String price = product.getPrice();
-                            AddCart(name, imageSrc, price);
+                            String key = documentSnapshot.getId();
+                            AddCart(name, imageSrc, price, key);
                         }
                     }
                 });
@@ -140,13 +141,13 @@ public class AddToCartActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void AddCart(String name, String imageSrc, String price)
+    private void AddCart(String name, String imageSrc, String price, String key)
     {
         String id = SaveSharedPreference.getID(AddToCartActivity.this);
         int qty = Integer.parseInt(quantity.getText().toString());
         Double itemprice = Double.parseDouble(price);
         mCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
-        CartItem cartItem = new CartItem(name,imageSrc, qty, itemprice);
+        CartItem cartItem = new CartItem(name,imageSrc, qty, itemprice, key);
         mCollectionReference.add(cartItem);
     }
 

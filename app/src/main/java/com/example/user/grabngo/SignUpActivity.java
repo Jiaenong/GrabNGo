@@ -116,7 +116,7 @@ public class SignUpActivity extends AppCompatActivity {
             gender = radioButtonMale.getText().toString();
         }else
             gender = radioButtonFemale.getText().toString();
-        Customer customer = new Customer(email, password, name, address, gender);
+        Customer customer = new Customer(email, password, name, gender, address);
         mDocumentReference.set(customer).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {

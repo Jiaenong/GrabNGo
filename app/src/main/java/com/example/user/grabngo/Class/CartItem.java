@@ -6,16 +6,26 @@ public class CartItem {
     private String imageSrc;
     private int quantity;
     private double price;
+    private String productKey;
 
-    public CartItem(String productname, String imageSrc, int quantity, double price) {
+    public CartItem(String productname, String imageSrc, int quantity, double price, String productKey) {
         this.productname = productname;
         this.imageSrc = imageSrc;
         this.quantity = quantity;
         this.price = price;
+        this.productKey = productKey;
     }
 
     public CartItem(){
 
+    }
+
+    public CartItem(String productname, String imageSrc, int quantity, double price)
+    {
+        this.productname = productname;
+        this.imageSrc = imageSrc;
+        this.quantity = quantity;
+        this.price = price;
     }
 
     public String getProductname() {
@@ -48,5 +58,13 @@ public class CartItem {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public String getProductKey() {
+        return productKey;
+    }
+
+    public void setProductKey(String productKey) {
+        this.productKey = productKey;
     }
 }

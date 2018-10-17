@@ -175,19 +175,21 @@ public class CartActivity extends AppCompatActivity {
                         public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                             double price = 0, totalPrice = 0;
                             String key = "";
+                            int quantity = 0;
                             String id = SaveSharedPreference.getID(CartActivity.this);
                             for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                             {
                                 CartItem cart = documentSnapshot.toObject(CartItem.class);
                                 key = documentSnapshot.getId();
                                 price = cart.getPrice();
+                                quantity = cart.getQuantity();
 
                             }
                             mDocumentReference = mFirebaseFirestore.document("Customer/"+id+"/Cart/"+key);
                             mDocumentReference.delete();
                             String text = pricePayment.getText().toString();
                             totalPrice = Double.parseDouble(text.substring(2));
-                            totalPrice -= price;
+                            totalPrice -= price*quantity;
                             pricePayment.setText("RM " + totalPrice);
 
                             if(cartList.isEmpty()){
