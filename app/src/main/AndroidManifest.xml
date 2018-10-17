@@ -6,6 +6,7 @@
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
+
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
@@ -62,7 +63,8 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".Admin.SupplierDetailActivity" />
         <activity android:name=".Admin.DiscountDetailActivity" />
-        <activity android:name=".Admin.AddProductActivity"></activity>
+        <activity android:name=".Admin.AddProductActivity" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.example.user.grabngo"
@@ -70,9 +72,10 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_list"></meta-data>
+                android:resource="@xml/file_list" />
         </provider>
 
+        <activity android:name=".Admin.EditProductActivity"></activity>
     </application>
 
 </manifest>

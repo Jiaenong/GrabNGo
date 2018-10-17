@@ -1,6 +1,7 @@
 package com.example.user.grabngo;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -130,30 +131,37 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ZXingScann
     @Override
     public void handleResult(final Result result) {
         final String scanResult = result.getText();
-        mCollectionReference = mFirebaseFirestore.collection("Product");
-        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                {
-                    check++;
-                    Product product = documentSnapshot.toObject(Product.class);
-                    String barcode = product.getBarcode();
-                    if(barcode.equals(scanResult))
-                    {
-                        Intent intent = new Intent(ScanBarcodeActivity.this,AddToCartActivity.class);
-                        intent.putExtra("barcode",scanResult);
-                        startActivity(intent);
-                        finish();
+        int callingActivity = getIntent().getIntExtra("callingActivity",0);
+
+        if(callingActivity==101){
+            Intent intent = new Intent();
+            intent.putExtra("result",scanResult);
+            setResult(Activity.RESULT_OK,intent);
+            finish();
+        }else {
+
+            mCollectionReference = mFirebaseFirestore.collection("Product");
+            mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                        check++;
+                        Product product = documentSnapshot.toObject(Product.class);
+                        String barcode = product.getBarcode();
+                        if (barcode.equals(scanResult)) {
+                            Intent intent = new Intent(ScanBarcodeActivity.this, AddToCartActivity.class);
+                            intent.putExtra("barcode", scanResult);
+                            startActivity(intent);
+                            finish();
+                        }
+                    }
+                    if (check == 0) {
+                        Toast.makeText(ScanBarcodeActivity.this, "Invalid Barcode", Toast.LENGTH_SHORT).show();
+                        scannerView.resumeCameraPreview(ScanBarcodeActivity.this);
                     }
                 }
-                if(check == 0)
-                {
-                    Toast.makeText(ScanBarcodeActivity.this,"Invalid Barcode",Toast.LENGTH_SHORT).show();
-                    scannerView.resumeCameraPreview(ScanBarcodeActivity.this);
-                }
-            }
-        });
+            });
+        }
     }
 
     public void displayAlertMessage(String message, DialogInterface.OnClickListener listener){

@@ -29,7 +29,7 @@ public class AdminProductAdapter extends RecyclerView.Adapter<AdminProductAdapte
     public void onBindViewHolder(AdminProductAdapter.MyViewHolder holder, int position) {
         Product product = productList.get(position);
         holder.name.setText(product.getProductName());
-        holder.stockAmount.setText("Stock Amount: " + product.getPrice());
+        holder.stockAmount.setText("Stock Amount: " + product.getStockAmount());
         Glide.with(mContext).load(product.getImageUrl()).into(holder.imageViewProduct);
     }
 

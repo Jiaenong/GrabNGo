@@ -2,6 +2,8 @@ package com.example.user.grabngo.Class;
 
 import com.google.firebase.firestore.ServerTimestamp;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Product {
@@ -18,14 +20,14 @@ public class Product {
     private @ServerTimestamp Date modifiedDate;
     private String supplierKey;
     private String staffKey;
-    ;
+    private String documentID;
 
     public Product()
     {
 
     }
 
-    public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, int stockAmount, String imageUrl, String modifiedStaffName, Date modifiedDate, String supplierKey, String staffKey)
+    public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, int stockAmount, String imageUrl, String modifiedStaffName, Date modifiedDate)
     {
         this.productName = productName;
         this.producer = producer;
@@ -63,6 +65,22 @@ public class Product {
         this.price = price;
     }
 
+    public Product(String imageUrl, String productName, int stockAmount, String documentID)
+    {
+        this.imageUrl = imageUrl;
+        this.productName = productName;
+        this.stockAmount = stockAmount;
+        this.documentID = documentID;
+    }
+
+    public String getDocumentID() {
+        return documentID;
+    }
+
+    public void setDocumentID(String documentID) {
+        this.documentID = documentID;
+    }
+
     public String getProductName() {
         return productName;
     }
@@ -80,7 +98,8 @@ public class Product {
     }
 
     public String getPrice() {
-        return price;
+        double temp = Double.parseDouble(price);
+        return String.format("%.2f",temp);
     }
 
     public void setPrice(String price) {
@@ -166,4 +185,5 @@ public class Product {
     public void setStaffKey(String staffKey) {
         this.staffKey = staffKey;
     }
+
 }

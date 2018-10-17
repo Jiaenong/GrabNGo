@@ -83,7 +83,7 @@ public class InventoryFragment extends Fragment {
         spinnerCategory = (Spinner)v.findViewById(R.id.spinner_category);
         spinnerSortby = (Spinner)v.findViewById(R.id.spinner_sortby);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this.getActivity() ,R.array.product_category, R.layout.support_simple_spinner_dropdown_item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this.getActivity() ,R.array.category, R.layout.support_simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         spinnerCategory.setAdapter(adapter);
 
@@ -104,8 +104,8 @@ public class InventoryFragment extends Fragment {
             @Override
             public void onClick(View view, int position) {
                 Product product = productList.get(position);
-                Intent intent = new Intent(getContext(),ProductDetailActivity.class);
-                intent.putExtra("productName",product.getProductName());
+                Intent intent = new Intent(getContext(),StaffProductDetailActivity.class);
+                intent.putExtra("productID",product.getDocumentID());
                 startActivity(intent);
             }
 
@@ -127,6 +127,7 @@ public class InventoryFragment extends Fragment {
             }
         });
 
+        spinnerSortby.setSelection(spinnerSortby.getSelectedItemPosition(),false);
         spinnerSortby.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -141,6 +142,7 @@ public class InventoryFragment extends Fragment {
             }
         });
 
+        spinnerCategory.setSelection(spinnerCategory.getSelectedItemPosition(),false);
         spinnerCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -156,7 +158,7 @@ public class InventoryFragment extends Fragment {
             }
         });
 
-
+        adminProductAdapter = new AdminProductAdapter(getActivity(),productList);
 
         return v;
     }
@@ -168,9 +170,9 @@ public class InventoryFragment extends Fragment {
 
         if(spinnerCategory.getSelectedItemPosition() == 0){
             if(sortBy == 0)
-                query = mCollectionReference.orderBy("modifiedDate",Query.Direction.ASCENDING);
-            else if(sortBy == 1)
                 query = mCollectionReference.orderBy("modifiedDate",Query.Direction.DESCENDING);
+            else if(sortBy == 1)
+                query = mCollectionReference.orderBy("modifiedDate",Query.Direction.ASCENDING);
             else if(sortBy == 2)
                 query = mCollectionReference.orderBy("productName",Query.Direction.ASCENDING);
             else
@@ -178,16 +180,15 @@ public class InventoryFragment extends Fragment {
 
         }else{
             if(sortBy == 0)
-                query = mCollectionReference.whereEqualTo("category",spinnerCategory.getSelectedItem().toString()).orderBy("modifiedDate",Query.Direction.ASCENDING);
-            else if(sortBy == 1)
                 query = mCollectionReference.whereEqualTo("category",spinnerCategory.getSelectedItem().toString()).orderBy("modifiedDate",Query.Direction.DESCENDING);
+            else if(sortBy == 1)
+                query = mCollectionReference.whereEqualTo("category",spinnerCategory.getSelectedItem().toString()).orderBy("modifiedDate",Query.Direction.ASCENDING);
             else if(sortBy == 2)
                 query = mCollectionReference.whereEqualTo("category",spinnerCategory.getSelectedItem().toString()).orderBy("productName",Query.Direction.ASCENDING);
             else
                 query = mCollectionReference.whereEqualTo("category",spinnerCategory.getSelectedItem().toString()).orderBy("stockAmount",Query.Direction.ASCENDING);
 
         }
-
 
         query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
@@ -197,8 +198,8 @@ public class InventoryFragment extends Fragment {
                     Product product = documentSnapshot.toObject(Product.class);
                     String image = product.getImageUrl();
                     String name = product.getProductName();
-                    String stockAmount = ""+product.getStockAmount();
-                    Product mProduct = new Product(image, name, stockAmount);
+                    int stockAmount = product.getStockAmount();
+                    Product mProduct = new Product(image, name, stockAmount, documentSnapshot.getId());
                     productList.add(mProduct);
                 }
                 adminProductAdapter = new AdminProductAdapter(getActivity(),productList);
@@ -224,9 +225,20 @@ public class InventoryFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        progressBar.setVisibility(View.VISIBLE);
+        productList.clear();
+        adminProductAdapter.notifyDataSetChanged();
+        filterProduct();
+    }
+
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.inventory_menu,menu);
         return;
     }
+
 
 }
