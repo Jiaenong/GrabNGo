@@ -1,46 +1,34 @@
 package com.example.user.grabngo.Admin;
 
-import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
-import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.example.user.grabngo.Class.Product;
+import com.example.user.grabngo.Class.Refund;
 import com.example.user.grabngo.Class.Staff;
 import com.example.user.grabngo.LoginActivity;
 import com.example.user.grabngo.R;
 import com.example.user.grabngo.SaveSharedPreference;
-import com.example.user.grabngo.ScanBarcodeActivity;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -58,67 +46,48 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
-public class AddProductActivity extends AppCompatActivity {
+public class AddRefundActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int CAPTURE_BARCODE = 2;
     private final int PICK_IMAGE_REQUEST = 71;
-    private static final String DIALOG_DATE = "DialogDate";
-    private static final int REQUEST_DATE = 0;
-    public static final int ADDPRODUCTACTIVITY = 101;
 
-    private ImageButton imageButtonBarcode;
-    private ProgressDialog pDialog;
+    private EditText editTextProduct, editTextCustomer, editTextReason;
     private ImageView imageViewProduct;
-    private Button btnSubmit, btnCamera, btnGallery;
+    private Button btnGallery, btnCamera, btnSave;
     private Uri filePath;
     private String pictureFilePath;
-    private EditText editTextName, editTextPrice, editTextProducer, editTextExpiredDate, editTextAmount, editTextLocation, editTextBarcode;
-    private Spinner spinnerCategory;
-    private Staff staff;
-
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mStorageReference;
+    private ProgressDialog pDialog;
+    private Staff staff;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_product);
+        setContentView(R.layout.activity_add_refund);
+        AddRefundActivity.this.setTitle("Add New Refund");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        editTextProduct = (EditText)findViewById(R.id.editTextProductName);
+        editTextCustomer = (EditText)findViewById(R.id.editTextCustomerName);
+        editTextReason = (EditText)findViewById(R.id.editTextReason);
         imageViewProduct = (ImageView)findViewById(R.id.product_image);
-        btnSubmit = (Button)findViewById(R.id.buttonSubmit);
-        btnCamera = (Button) findViewById(R.id.btn_camera);
-        btnGallery = (Button) findViewById(R.id.btn_gallery);
-        spinnerCategory = (Spinner)findViewById(R.id.spinner_category);
-        editTextName = (EditText)findViewById(R.id.editTextProductName);
-        editTextPrice = (EditText)findViewById(R.id.editTextPrice);
-        editTextAmount = (EditText)findViewById(R.id.editTextAmount);
-        editTextExpiredDate = (EditText)findViewById(R.id.editTextExpiry);
-        editTextLocation = (EditText)findViewById(R.id.editTextLocation);
-        editTextProducer = (EditText)findViewById(R.id.editTextProducer);
-        editTextBarcode = (EditText)findViewById(R.id.editTextBarcode);
-        imageButtonBarcode = (ImageButton)findViewById(R.id.imageButtonBarcode);
-
-        AddProductActivity.this.setTitle("Add new product");
+        btnGallery = (Button)findViewById(R.id.btn_gallery);
+        btnCamera = (Button)findViewById(R.id.btn_camera);
+        btnSave = (Button)findViewById(R.id.buttonSave);
 
         mFirebaseStorage = FirebaseStorage.getInstance();
         mStorageReference = mFirebaseStorage.getReference();
         mFirebaseFirestore = FirebaseFirestore.getInstance();
-        mCollectionReference = mFirebaseFirestore.collection("Product");
+        mCollectionReference = mFirebaseFirestore.collection("Refund");
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(AddProductActivity.this ,R.array.product_category, R.layout.support_simple_spinner_dropdown_item);
-        adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(adapter);
-
-        String id = SaveSharedPreference.getID(AddProductActivity.this);
+        String id = SaveSharedPreference.getID(AddRefundActivity.this);
         FirebaseFirestore.getInstance().collection("Staff").document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -127,22 +96,10 @@ public class AddProductActivity extends AppCompatActivity {
             }
         });
 
-        editTextExpiredDate.setOnClickListener(new View.OnClickListener() {
+        btnGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FragmentManager manager = getSupportFragmentManager();
-                DatePickerFragment dialog = DatePickerFragment.newInstance(new Date());
-
-                dialog.show(manager,DIALOG_DATE);
-            }
-        });
-
-        imageButtonBarcode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(AddProductActivity.this, ScanBarcodeActivity.class);
-                intent.putExtra("callingActivity",ADDPRODUCTACTIVITY);
-                startActivityForResult(intent,CAPTURE_BARCODE);
+                chooseImage();
             }
         });
 
@@ -157,11 +114,11 @@ public class AddProductActivity extends AppCompatActivity {
                     try {
                         pictureFile = getPictureFile();
                     } catch (IOException ex) {
-                        Toast.makeText(AddProductActivity.this, "Photo file can't be created, please try again", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddRefundActivity.this, "Photo file can't be created, please try again", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     if (pictureFile != null) {
-                        Uri photoURI = FileProvider.getUriForFile(AddProductActivity.this,
+                        Uri photoURI = FileProvider.getUriForFile(AddRefundActivity.this,
                                 "com.example.user.grabngo",
                                 pictureFile);
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
@@ -171,23 +128,15 @@ public class AddProductActivity extends AppCompatActivity {
             }
         });
 
-        btnGallery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                chooseImage();
-            }
-        });
-
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
+        btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 uploadImage();
             }
         });
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
     }
+
 
     private File getPictureFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
@@ -212,7 +161,7 @@ public class AddProductActivity extends AppCompatActivity {
             filePath = data.getData();
             Bitmap bitmap = null;
             try {
-                bitmap = MediaStore.Images.Media.getBitmap(AddProductActivity.this.getContentResolver(), filePath);
+                bitmap = MediaStore.Images.Media.getBitmap(AddRefundActivity.this.getContentResolver(), filePath);
                 imageViewProduct.setImageBitmap(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -225,16 +174,12 @@ public class AddProductActivity extends AppCompatActivity {
                 filePath = Uri.fromFile(imgFile);
                 imageViewProduct.setImageURI(Uri.fromFile(imgFile));
             }
-        }else if(requestCode == CAPTURE_BARCODE && resultCode == RESULT_OK){
-
-            String barcode = data.getStringExtra("result");
-            Toast.makeText(AddProductActivity.this, barcode, Toast.LENGTH_SHORT).show();
-            editTextBarcode.setText(barcode);
-
         }
     }
 
     private void uploadImage() {
+
+        validation();
 
         InputMethodManager inputManager = (InputMethodManager)
                 getSystemService(INPUT_METHOD_SERVICE);
@@ -244,12 +189,12 @@ public class AddProductActivity extends AppCompatActivity {
 
         if(filePath != null)
         {
-            pDialog = new ProgressDialog(AddProductActivity.this);
+            pDialog = new ProgressDialog(AddRefundActivity.this);
             pDialog.setMessage("Saving...");
             pDialog.setCancelable(false);
             pDialog.show();
 
-            final StorageReference ref = mStorageReference.child("product_photo/"+ UUID.randomUUID().toString());
+            final StorageReference ref = mStorageReference.child("refund_photo/"+ UUID.randomUUID().toString());
 
             Bitmap bmp = null;
             try {
@@ -264,11 +209,11 @@ public class AddProductActivity extends AppCompatActivity {
             //uploading the image
             UploadTask uploadTask2 = ref.putBytes(data);
             uploadTask2.addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(AddProductActivity.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(AddRefundActivity.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
 
             Task<Uri> urlTask = uploadTask2.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
@@ -287,40 +232,69 @@ public class AddProductActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         Uri downloadUri = task.getResult();
 
-                        final Product product = new Product(editTextBarcode.getText().toString(),
-                                editTextName.getText().toString(),
-                                editTextProducer.getText().toString(),
-                                editTextPrice.getText().toString(),
-                                spinnerCategory.getSelectedItem().toString(),
-                                editTextExpiredDate.getText().toString(),
-                                editTextLocation.getText().toString(),
-                                Integer.parseInt(editTextAmount.getText().toString()),
+                        Refund refund = new Refund(editTextCustomer.getText().toString(),
                                 downloadUri.toString(),
+                                null,
                                 staff.getName(),
+                                editTextProduct.getText().toString(),
+                                editTextReason.getText().toString(),
                                 null);
 
-                        mCollectionReference.add(product).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        mCollectionReference.add(refund).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override
                             public void onSuccess(DocumentReference documentReference) {
-                                Toast.makeText(AddProductActivity.this, "Product successfully added", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(AddRefundActivity.this, "Refund successfully added", Toast.LENGTH_SHORT).show();
                                 pDialog.dismiss();
                                 finish();
                             }
                         })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(AddProductActivity.this, "Unable to upload to firestore", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(AddRefundActivity.this, "Unable to upload to firestore", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
 
                     } else {
                         // Handle failures
-                        Toast.makeText(AddProductActivity.this, "GetDownloadURL fail", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddRefundActivity.this, "GetDownloadURL fail", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
 
+        }
+    }
+
+    public void validation(){
+        if(editTextProduct.getText().toString().equals("") || editTextCustomer.getText().toString().equals("") || editTextReason.getText().toString().equals("")){
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(AddRefundActivity.this, R.style.AlertDialogCustom));
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    return;
+                }
+            });
+            builder.setTitle("Field cannot be empty");
+            builder.setMessage("Please fill in all the textbox provided to proceed");
+            AlertDialog alert = builder.create();
+            alert.show();
+            return;
+
+        }else if(filePath==null){
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(AddRefundActivity.this, R.style.AlertDialogCustom));
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    return;
+                }
+            });
+            builder.setTitle("Image cannot be empty");
+            builder.setMessage("Please submit a photo of the refund product");
+            AlertDialog alert = builder.create();
+            alert.show();
+            return;
         }
     }
 
@@ -339,5 +313,4 @@ public class AddProductActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         return true;
     }
-
 }

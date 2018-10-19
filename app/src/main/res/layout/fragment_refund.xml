@@ -3,224 +3,49 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#ECEFF1"
+    android:padding="10dp"
     tools:context=".Admin.RefundFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#ECEFF1"
         android:orientation="vertical">
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/refund_one"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycleViewRefund"
             android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:scrollbars="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
+
+        </android.support.v7.widget.RecyclerView>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="30dp"
-                android:layout_height="wrap_content"
-                android:text="15"
-                android:textAlignment="textEnd"
-                android:textColor="@color/foreground_dark_color"
-                android:textSize="26sp"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:orientation="vertical">
-                <TextView
-                    android:gravity="center_horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="2018.7" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:textAlignment="center"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:background="#1E88E5"
-                    android:layout_height="wrap_content"
-                    android:textColor="#fff"
-                    android:textSize="11sp"
-                    android:text="14:23 PM" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center|left"
-                    android:textSize="16sp"
-                    android:textColor="@color/foreground_dark_color"
-                    android:text="Heinz Tomato Soup"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center|left"
-                    android:textSize="12sp"
-                    android:textColor="@color/foreground_light_color"
-                    android:text="Raymond Tan Hui Jian"/>
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </android.support.v7.widget.CardView>
-
-    <android.support.v7.widget.CardView
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
-            android:id="@+id/history_item2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="30dp"
-                android:textAlignment="textEnd"
-                android:layout_height="wrap_content"
-                android:text="4"
-                android:textColor="@color/foreground_dark_color"
-                android:textSize="26sp"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:orientation="vertical">
-                <TextView
-                    android:gravity="center_horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="2018.7" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:textAlignment="center"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:background="#1E88E5"
-                    android:layout_height="wrap_content"
-                    android:textColor="#fff"
-                    android:textSize="11sp"
-                    android:text="01:58 PM" />
-            </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center|left"
-                android:textSize="16sp"
-                android:textColor="@color/foreground_dark_color"
-                android:text="Oat Krunch"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center|left"
-                android:textSize="12sp"
-                android:textColor="@color/foreground_light_color"
-                android:text="Kim Jae Hyung"/>
-        </LinearLayout>
-
-        </LinearLayout>
-
-    </android.support.v7.widget.CardView>
-
-    <android.support.v7.widget.CardView
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
-            android:id="@+id/history_item3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="30dp"
-                android:textAlignment="textEnd"
-                android:layout_height="wrap_content"
-                android:text="4"
-                android:textColor="@color/foreground_dark_color"
-                android:textSize="26sp"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:orientation="vertical">
-                <TextView
-                    android:gravity="center_horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="2018.7" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:textAlignment="center"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:background="#1E88E5"
-                    android:layout_height="wrap_content"
-                    android:textColor="#fff"
-                    android:textSize="11sp"
-                    android:text="09:31 AM" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center|left"
-                    android:textSize="16sp"
-                    android:textColor="@color/foreground_dark_color"
-                    android:text="Oat Krunch"/>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center|left"
-                    android:textSize="12sp"
-                    android:textColor="@color/foreground_light_color"
-                    android:text="Ong Jing Ying"/>
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </android.support.v7.widget.CardView>
-
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.446" />
+    </android.support.constraint.ConstraintLayout>
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton

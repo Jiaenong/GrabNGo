@@ -1,51 +1,45 @@
 package com.example.user.grabngo.Admin;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.example.user.grabngo.Class.Product;
+import com.example.user.grabngo.Class.Refund;
 import com.example.user.grabngo.Class.Staff;
 import com.example.user.grabngo.R;
 import com.example.user.grabngo.SaveSharedPreference;
-import com.example.user.grabngo.ScanBarcodeActivity;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.ServerTimestamp;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -53,76 +47,57 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-public class EditProductActivity extends AppCompatActivity {
+public class EditRefundActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int CAPTURE_BARCODE = 2;
     private final int PICK_IMAGE_REQUEST = 71;
-    private static final String DIALOG_DATE = "DialogDate";
-    private static final int REQUEST_DATE = 0;
-    public static final int ADDPRODUCTACTIVITY = 101;
 
-    private ImageButton imageButtonBarcode;
-    private ProgressDialog pDialog;
+    private EditText editTextProduct, editTextCustomer, editTextReason;
     private ImageView imageViewProduct;
-    private Button btnSubmit, btnCamera, btnGallery;
+    private Button btnGallery, btnCamera, btnSave;
     private Uri filePath;
-    private String pictureFilePath, oldImgUrl, selectedProduct;
-    private EditText editTextName, editTextPrice, editTextProducer, editTextExpiredDate, editTextAmount, editTextLocation, editTextBarcode;
-    private Spinner spinnerCategory;
-    private ProgressBar progressBar;
-    private LinearLayout linearLayout;
-    private Staff staff;
-
+    private String pictureFilePath, documentID, oldImageUrl;
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mStorageReference;
-    private DocumentReference mDocumentReference;
+    private ProgressDialog pDialog;
+    private ProgressBar progressBar;
+    private LinearLayout linearLayout;
+    private Staff staff;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_product);
-        EditProductActivity.this.setTitle("Edit Product");
+        setContentView(R.layout.activity_add_refund);
+        EditRefundActivity.this.setTitle("Edit Refund");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        editTextProduct = (EditText)findViewById(R.id.editTextProductName);
+        editTextCustomer = (EditText)findViewById(R.id.editTextCustomerName);
+        editTextReason = (EditText)findViewById(R.id.editTextReason);
         imageViewProduct = (ImageView)findViewById(R.id.product_image);
-        btnSubmit = (Button)findViewById(R.id.buttonSubmit);
-        btnCamera = (Button) findViewById(R.id.btn_camera);
-        btnGallery = (Button) findViewById(R.id.btn_gallery);
-        spinnerCategory = (Spinner)findViewById(R.id.spinner_category);
-        editTextName = (EditText)findViewById(R.id.editTextProductName);
-        editTextPrice = (EditText)findViewById(R.id.editTextPrice);
-        editTextAmount = (EditText)findViewById(R.id.editTextAmount);
-        editTextExpiredDate = (EditText)findViewById(R.id.editTextExpiry);
-        editTextLocation = (EditText)findViewById(R.id.editTextLocation);
-        editTextProducer = (EditText)findViewById(R.id.editTextProducer);
-        editTextBarcode = (EditText)findViewById(R.id.editTextBarcode);
-        imageButtonBarcode = (ImageButton)findViewById(R.id.imageButtonBarcode);
+        btnGallery = (Button)findViewById(R.id.btn_gallery);
+        btnCamera = (Button)findViewById(R.id.btn_camera);
+        btnSave = (Button)findViewById(R.id.buttonSave);
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
         linearLayout = (LinearLayout)findViewById(R.id.linearLayout);
 
         mFirebaseStorage = FirebaseStorage.getInstance();
         mStorageReference = mFirebaseStorage.getReference();
         mFirebaseFirestore = FirebaseFirestore.getInstance();
-        mCollectionReference = mFirebaseFirestore.collection("Product");
+        mCollectionReference = mFirebaseFirestore.collection("Refund");
 
         progressBar.setVisibility(View.VISIBLE);
         linearLayout.setVisibility(View.GONE);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(EditProductActivity.this ,R.array.product_category, R.layout.support_simple_spinner_dropdown_item);
-        adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
-        spinnerCategory.setAdapter(adapter);
-
-        Intent intent = getIntent();
-        selectedProduct = intent.getStringExtra("productID");
-
-        String id = SaveSharedPreference.getID(EditProductActivity.this);
+        String id = SaveSharedPreference.getID(EditRefundActivity.this);
         FirebaseFirestore.getInstance().collection("Staff").document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -131,47 +106,38 @@ public class EditProductActivity extends AppCompatActivity {
             }
         });
 
-        mCollectionReference.document(selectedProduct).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                            progressBar.setVisibility(View.GONE);
-                            linearLayout.setVisibility(View.VISIBLE);
-                            Product product = documentSnapshot.toObject(Product.class);
+        Intent intent = getIntent();
+        documentID = intent.getStringExtra("refundID");
 
-                            oldImgUrl = product.getImageUrl();
-                            editTextBarcode.setText(product.getBarcode());
-                            editTextName.setText(product.getProductName());
-                            editTextPrice.setText(product.getPrice());
-                            for(int i =0; i<spinnerCategory.getAdapter().getCount(); i++){
-                                if(spinnerCategory.getItemAtPosition(i).equals(product.getCategory()))
-                                    spinnerCategory.setSelection(i);
-                            }
-                            editTextProducer.setText(product.getProducer());
-                            editTextExpiredDate.setText(product.getExpired());
-                            editTextAmount.setText(""+product.getStockAmount());
-                            editTextLocation.setText(product.getShelfLocation());
-                            Glide.with(EditProductActivity.this).load(product.getImageUrl()).into(imageViewProduct);
-
-                        }
-                    });
-
-
-        editTextExpiredDate.setOnClickListener(new View.OnClickListener() {
+        mCollectionReference.document(documentID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
-            public void onClick(View view) {
-                FragmentManager manager = getSupportFragmentManager();
-                DatePickerFragment dialog = DatePickerFragment.newInstance(new Date());
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                progressBar.setVisibility(View.GONE);
+                linearLayout.setVisibility(View.VISIBLE);
+                Refund refund = documentSnapshot.toObject(Refund.class);
+                oldImageUrl = refund.getImgUrl();
 
-                dialog.show(manager,DIALOG_DATE);
+                Glide.with(EditRefundActivity.this).load(refund.getImgUrl()).into(imageViewProduct);
+                editTextProduct.setText(refund.getProductName());
+                editTextCustomer.setText(refund.getCustomerName());
+                editTextReason.setText(refund.getReason());
+                DateFormat df = new SimpleDateFormat("dd/mm/yyyy HH:mm");
+                try {
+                    Date s = df.parse("12/10/2018 12:34");
+                    Timestamp ts = new Timestamp(s);
+                    Toast.makeText(EditRefundActivity.this,ts.toString(),Toast.LENGTH_SHORT).show();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+
             }
         });
 
-        imageButtonBarcode.setOnClickListener(new View.OnClickListener() {
+        btnGallery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(EditProductActivity.this, ScanBarcodeActivity.class);
-                intent.putExtra("callingActivity",ADDPRODUCTACTIVITY);
-                startActivityForResult(intent,CAPTURE_BARCODE);
+                chooseImage();
             }
         });
 
@@ -186,11 +152,11 @@ public class EditProductActivity extends AppCompatActivity {
                     try {
                         pictureFile = getPictureFile();
                     } catch (IOException ex) {
-                        Toast.makeText(EditProductActivity.this, "Photo file can't be created, please try again", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditRefundActivity.this, "Photo file can't be created, please try again", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     if (pictureFile != null) {
-                        Uri photoURI = FileProvider.getUriForFile(EditProductActivity.this,
+                        Uri photoURI = FileProvider.getUriForFile(EditRefundActivity.this,
                                 "com.example.user.grabngo",
                                 pictureFile);
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
@@ -200,14 +166,7 @@ public class EditProductActivity extends AppCompatActivity {
             }
         });
 
-        btnGallery.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                chooseImage();
-            }
-        });
-
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
+        btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 uploadImage();
@@ -239,7 +198,7 @@ public class EditProductActivity extends AppCompatActivity {
             filePath = data.getData();
             Bitmap bitmap = null;
             try {
-                bitmap = MediaStore.Images.Media.getBitmap(EditProductActivity.this.getContentResolver(), filePath);
+                bitmap = MediaStore.Images.Media.getBitmap(EditRefundActivity.this.getContentResolver(), filePath);
                 imageViewProduct.setImageBitmap(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -252,16 +211,12 @@ public class EditProductActivity extends AppCompatActivity {
                 filePath = Uri.fromFile(imgFile);
                 imageViewProduct.setImageURI(Uri.fromFile(imgFile));
             }
-        }else if(requestCode == CAPTURE_BARCODE && resultCode == RESULT_OK){
-
-            String barcode = data.getStringExtra("result");
-            Toast.makeText(EditProductActivity.this, barcode, Toast.LENGTH_SHORT).show();
-            editTextBarcode.setText(barcode);
-
         }
     }
 
     private void uploadImage() {
+
+        validation();
 
         InputMethodManager inputManager = (InputMethodManager)
                 getSystemService(INPUT_METHOD_SERVICE);
@@ -269,13 +224,14 @@ public class EditProductActivity extends AppCompatActivity {
         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS);
 
-        pDialog = new ProgressDialog(EditProductActivity.this);
-        pDialog.setMessage("Saving...");
-        pDialog.setCancelable(false);
-        pDialog.show();
+        if(filePath != null)
+        {
+            pDialog = new ProgressDialog(EditRefundActivity.this);
+            pDialog.setMessage("Saving...");
+            pDialog.setCancelable(false);
+            pDialog.show();
 
-        if (filePath != null) {
-            final StorageReference ref = mStorageReference.child("product_photo/" + UUID.randomUUID().toString());
+            final StorageReference ref = mStorageReference.child("refund_photo/"+ UUID.randomUUID().toString());
 
             Bitmap bmp = null;
             try {
@@ -292,7 +248,7 @@ public class EditProductActivity extends AppCompatActivity {
             uploadTask2.addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(EditProductActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EditRefundActivity.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -312,25 +268,46 @@ public class EditProductActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<Uri> task) {
                     if (task.isSuccessful()) {
                         Uri downloadUri = task.getResult();
-                        saveChanges(downloadUri.toString());
+
+                        Refund refund = new Refund(editTextCustomer.getText().toString(),
+                                downloadUri.toString(),
+                                null,
+                                staff.getName(),
+                                editTextProduct.getText().toString(),
+                                editTextReason.getText().toString(),
+                                null);
+
+                        mCollectionReference.add(refund).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Toast.makeText(EditRefundActivity.this, "Refund successfully added", Toast.LENGTH_SHORT).show();
+                                pDialog.dismiss();
+                                finish();
+                            }
+                        })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(EditRefundActivity.this, "Unable to upload to firestore", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
                     } else {
                         // Handle failures
-                        Toast.makeText(EditProductActivity.this, "GetDownloadURL fail", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditRefundActivity.this, "GetDownloadURL fail", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
 
-        }else{
-            saveChanges(oldImgUrl);
         }
     }
 
     public void saveChanges(String picURL){
 
-        mCollectionReference.document(selectedProduct).update("productName", editTextName.getText().toString(),
-                "price", editTextPrice.getText().toString(),
-                "barcode", editTextBarcode.getText().toString(),
-                "category", spinnerCategory.getSelectedItem().toString(),
+        /*mCollectionReference.document(documentID).update("productName", editTextProduct.getText().toString(),
+                "customerName", editTextCustomer.getText().toString(),
+                "reason", editTextReason.getText().toString(),
+                "modifiedDate", spinnerCategory.getSelectedItem().toString(),
                 "producer", editTextProducer.getText().toString(),
                 "expired", editTextExpiredDate.getText().toString(),
                 "imageUrl", picURL,
@@ -341,13 +318,47 @@ public class EditProductActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(EditProductActivity.this, "Changes has been saved", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditRefundActivity.this, "Changes has been saved", Toast.LENGTH_SHORT).show();
                         pDialog.dismiss();
                         finish();
                     }
                 });
-
+*/
     }
+
+    public void validation(){
+        if(editTextProduct.getText().toString().equals("") || editTextCustomer.getText().toString().equals("") || editTextReason.getText().toString().equals("")){
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(EditRefundActivity.this, R.style.AlertDialogCustom));
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    return;
+                }
+            });
+            builder.setTitle("Field cannot be empty");
+            builder.setMessage("Please fill in all the textbox provided to proceed");
+            AlertDialog alert = builder.create();
+            alert.show();
+            return;
+
+        }else if(filePath==null){
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(EditRefundActivity.this, R.style.AlertDialogCustom));
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    return;
+                }
+            });
+            builder.setTitle("Image cannot be empty");
+            builder.setMessage("Please submit a photo of the refund product");
+            AlertDialog alert = builder.create();
+            alert.show();
+            return;
+        }
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -364,3 +375,5 @@ public class EditProductActivity extends AppCompatActivity {
         return true;
     }
 }
+
+

@@ -12,16 +12,22 @@ public class SaveSharedPreference {
     static final String PREF_EXP_DATE = "expDate";
     static final String PREF_CVV = "cvv";
     static final String PREF_CHECK_SAVE = "saved";
+    static final String USER_TYPE = "user";
 
     static SharedPreferences getSharedPreference(Context context)
     {
         return PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public static void setID(Context context, String id)
+    public static String getUserType(Context context){
+        return getSharedPreference(context).getString(USER_TYPE,"");
+    }
+
+    public static void setID(Context context, String id, String user)
     {
         SharedPreferences.Editor editor = getSharedPreference(context).edit();
         editor.putString(PREF_USER_ID,id);
+        editor.putString(USER_TYPE,user);
         editor.commit();
     }
 

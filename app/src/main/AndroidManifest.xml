@@ -75,7 +75,9 @@
                 android:resource="@xml/file_list" />
         </provider>
 
-        <activity android:name=".Admin.EditProductActivity"></activity>
+        <activity android:name=".Admin.EditProductActivity" />
+        <activity android:name=".Admin.AddRefundActivity" />
+        <activity android:name=".Admin.EditRefundActivity"></activity>
     </application>
 
 </manifest>

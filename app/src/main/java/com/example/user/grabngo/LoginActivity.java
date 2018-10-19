@@ -57,12 +57,19 @@ public class LoginActivity extends AppCompatActivity {
         textViewForgetPassword = (TextView)findViewById(R.id.forgetPassword);
         view1 = (View)findViewById(R.id.view1);
         view2 = (View)findViewById(R.id.view2);
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         if(SaveSharedPreference.getCheckLogin(LoginActivity.this))
         {
-            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-            startActivity(intent);
+            if(SaveSharedPreference.getUserType(LoginActivity.this).equals("customer")) {
+                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                startActivity(intent);
+            }else if(SaveSharedPreference.getUserType(LoginActivity.this).equals("staff")){
+                Intent intent = new Intent(LoginActivity.this, StaffHomeActivity.class);
+                startActivity(intent);
+            }else if(SaveSharedPreference.getUserType(LoginActivity.this).equals("manager")){
+                Intent intent = new Intent(LoginActivity.this, ManagerHomeActivity.class);
+                startActivity(intent);
+            }
         }
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
@@ -142,7 +149,7 @@ public class LoginActivity extends AppCompatActivity {
                                 if (email.equals(customer.getEmail()) && password.equals(customer.getPassword())) {
                                     check++;
                                     String id = documentSnapshot.getId();
-                                    SaveSharedPreference.setID(LoginActivity.this,id);
+                                    SaveSharedPreference.setID(LoginActivity.this,id,"customer");
                                     SaveSharedPreference.setCheckLogin(LoginActivity.this,true);
                                     Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                                     startActivity(intent);
@@ -158,9 +165,9 @@ public class LoginActivity extends AppCompatActivity {
                                             Staff staff = documentSnapshot.toObject(Staff.class);
                                             if (email.equals(staff.getEmail()) && password.equals(staff.getPassword())) {
                                                 check++;
-                                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                                editor.putString("username",staff.getName());
-                                                editor.apply();
+                                                String id = documentSnapshot.getId();
+                                                SaveSharedPreference.setID(LoginActivity.this,id,"staff");
+                                                SaveSharedPreference.setCheckLogin(LoginActivity.this,true);
                                                 Intent intent = new Intent(LoginActivity.this, StaffHomeActivity.class);
                                                 startActivity(intent);
                                                 finish();
@@ -176,6 +183,9 @@ public class LoginActivity extends AppCompatActivity {
                                                         Staff manager = documentSnapshot.toObject(Staff.class);
                                                         if (email.equals(manager.getEmail()) && password.equals(manager.getPassword())) {
                                                             check++;
+                                                            String id = documentSnapshot.getId();
+                                                            SaveSharedPreference.setID(LoginActivity.this,id,"manager");
+                                                            SaveSharedPreference.setCheckLogin(LoginActivity.this,true);
                                                             Intent intent = new Intent(LoginActivity.this, ManagerHomeActivity.class);
                                                             startActivity(intent);
                                                             finish();
