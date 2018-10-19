@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.user.grabngo.Class.Refund;
+import com.example.user.grabngo.Class.RefundTemp;
 import com.example.user.grabngo.R;
 
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
 
 public class RefundAdapter extends RecyclerView.Adapter<RefundAdapter.MyViewHolder> {
     private Context mContext;
-    private List<Refund> refundList;
+    private List<RefundTemp> refundList;
 
     @Override
     public RefundAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -27,7 +28,7 @@ public class RefundAdapter extends RecyclerView.Adapter<RefundAdapter.MyViewHold
 
     @Override
     public void onBindViewHolder(RefundAdapter.MyViewHolder holder, int position) {
-        Refund refund = refundList.get(position);
+        RefundTemp refund = refundList.get(position);
         holder.productName.setText(refund.getProductName());
         holder.customerName.setText(refund.getCustomerName());
         holder.day.setText(refund.getDay());
@@ -55,7 +56,7 @@ public class RefundAdapter extends RecyclerView.Adapter<RefundAdapter.MyViewHold
         }
     }
 
-    public RefundAdapter(Context mContext, List<Refund> refundList)
+    public RefundAdapter(Context mContext, List<RefundTemp> refundList)
     {
         this.mContext = mContext;
         this.refundList = refundList;

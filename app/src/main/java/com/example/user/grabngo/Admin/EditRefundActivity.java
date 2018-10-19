@@ -1,6 +1,7 @@
 package com.example.user.grabngo.Admin;
 
 import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -8,6 +9,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -50,6 +53,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
@@ -57,8 +61,9 @@ public class EditRefundActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private final int PICK_IMAGE_REQUEST = 71;
+    private static final String DIALOG_DATE = "DialogDate";
 
-    private EditText editTextProduct, editTextCustomer, editTextReason;
+    private EditText editTextProduct, editTextCustomer, editTextReason, editTextDate, editTextTime;
     private ImageView imageViewProduct;
     private Button btnGallery, btnCamera, btnSave;
     private Uri filePath;
@@ -82,6 +87,8 @@ public class EditRefundActivity extends AppCompatActivity {
         editTextProduct = (EditText)findViewById(R.id.editTextProductName);
         editTextCustomer = (EditText)findViewById(R.id.editTextCustomerName);
         editTextReason = (EditText)findViewById(R.id.editTextReason);
+        editTextDate = (EditText)findViewById(R.id.editTextExpiry);
+        editTextTime = (EditText)findViewById(R.id.editTextRefundTime);
         imageViewProduct = (ImageView)findViewById(R.id.product_image);
         btnGallery = (Button)findViewById(R.id.btn_gallery);
         btnCamera = (Button)findViewById(R.id.btn_camera);
@@ -121,18 +128,63 @@ public class EditRefundActivity extends AppCompatActivity {
                 editTextProduct.setText(refund.getProductName());
                 editTextCustomer.setText(refund.getCustomerName());
                 editTextReason.setText(refund.getReason());
-                DateFormat df = new SimpleDateFormat("dd/mm/yyyy HH:mm");
-                try {
-                    Date s = df.parse("12/10/2018 12:34");
-                    Timestamp ts = new Timestamp(s);
-                    Toast.makeText(EditRefundActivity.this,ts.toString(),Toast.LENGTH_SHORT).show();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
 
+                DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+                DateFormat df1 = new SimpleDateFormat("hh:mm a");
+                editTextDate.setText(df.format(refund.getRefundDate()));
+                editTextTime.setText(df1.format(refund.getRefundDate()));
 
             }
         });
+
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        editTextDate.setText(df.format(new Date()));
+        editTextDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentManager manager = getSupportFragmentManager();
+                DatePickerFragment dialog = DatePickerFragment.newInstance(new Date());
+
+                dialog.show(manager,DIALOG_DATE);
+            }
+        });
+
+        final DateFormat df1 = new SimpleDateFormat("hh:mm a");
+        editTextTime.setText(df1.format(new Date()));
+        editTextTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Date date1 = null;
+                try {
+                    date1 = df1.parse(editTextTime.getText().toString());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                Calendar mcurrentTime = Calendar.getInstance();
+                mcurrentTime.setTime(date1);
+                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                int minute = mcurrentTime.get(Calendar.MINUTE);
+                TimePickerDialog mTimePicker;
+                mTimePicker = new TimePickerDialog(EditRefundActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                        String s = "" + selectedHour + ":" + selectedMinute;
+                        DateFormat df2 = new SimpleDateFormat("HH:mm");
+                        Date date = null;
+                        try {
+                            date = df2.parse(s);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        editTextTime.setText(df1.format(date));
+                    }
+                }, hour, minute, false);//Yes 24 hour time
+                mTimePicker.setTitle("Select Time");
+                mTimePicker.show();
+
+            }
+        });
+
 
         btnGallery.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -218,19 +270,13 @@ public class EditRefundActivity extends AppCompatActivity {
 
         validation();
 
-        InputMethodManager inputManager = (InputMethodManager)
-                getSystemService(INPUT_METHOD_SERVICE);
-
-        inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
-                InputMethodManager.HIDE_NOT_ALWAYS);
+        pDialog = new ProgressDialog(EditRefundActivity.this);
+        pDialog.setMessage("Saving...");
+        pDialog.setCancelable(false);
+        pDialog.show();
 
         if(filePath != null)
         {
-            pDialog = new ProgressDialog(EditRefundActivity.this);
-            pDialog.setMessage("Saving...");
-            pDialog.setCancelable(false);
-            pDialog.show();
-
             final StorageReference ref = mStorageReference.child("refund_photo/"+ UUID.randomUUID().toString());
 
             Bitmap bmp = null;
@@ -268,29 +314,7 @@ public class EditRefundActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<Uri> task) {
                     if (task.isSuccessful()) {
                         Uri downloadUri = task.getResult();
-
-                        Refund refund = new Refund(editTextCustomer.getText().toString(),
-                                downloadUri.toString(),
-                                null,
-                                staff.getName(),
-                                editTextProduct.getText().toString(),
-                                editTextReason.getText().toString(),
-                                null);
-
-                        mCollectionReference.add(refund).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                            @Override
-                            public void onSuccess(DocumentReference documentReference) {
-                                Toast.makeText(EditRefundActivity.this, "Refund successfully added", Toast.LENGTH_SHORT).show();
-                                pDialog.dismiss();
-                                finish();
-                            }
-                        })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(EditRefundActivity.this, "Unable to upload to firestore", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+                        saveChanges(downloadUri.toString());
 
                     } else {
                         // Handle failures
@@ -299,31 +323,37 @@ public class EditRefundActivity extends AppCompatActivity {
                 }
             });
 
+        }else{
+            saveChanges(oldImageUrl);
         }
     }
 
     public void saveChanges(String picURL){
 
-        /*mCollectionReference.document(documentID).update("productName", editTextProduct.getText().toString(),
-                "customerName", editTextCustomer.getText().toString(),
-                "reason", editTextReason.getText().toString(),
-                "modifiedDate", spinnerCategory.getSelectedItem().toString(),
-                "producer", editTextProducer.getText().toString(),
-                "expired", editTextExpiredDate.getText().toString(),
-                "imageUrl", picURL,
-                "shelfLocation", editTextLocation.getText().toString(),
-                "stockAmount", Integer.parseInt(editTextAmount.getText().toString()),
-                "modifiedStaffName", staff.getName(),
-                "modifiedDate", FieldValue.serverTimestamp())
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(EditRefundActivity.this, "Changes has been saved", Toast.LENGTH_SHORT).show();
-                        pDialog.dismiss();
-                        finish();
-                    }
-                });
-*/
+        String dateString = editTextDate.getText().toString() + " " + editTextTime.getText().toString();
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+        Calendar calendar = Calendar.getInstance();
+        try {
+            Date date = dateFormat.parse(dateString);
+            calendar.setTime(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        mCollectionReference.document(documentID).update("productName",editTextProduct.getText().toString(),
+                "customerName",editTextCustomer.getText().toString(),
+                "reason",editTextReason.getText().toString(),
+                "imgUrl",picURL,
+                "modifiedStaff",staff.getName(),
+                "modifiedDate",FieldValue.serverTimestamp(),
+                "refundDate",calendar.getTime()).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Toast.makeText(EditRefundActivity.this, "Changes has been saved", Toast.LENGTH_SHORT).show();
+                pDialog.dismiss();
+                finish();
+            }
+        });
     }
 
     public void validation(){
@@ -342,20 +372,6 @@ public class EditRefundActivity extends AppCompatActivity {
             alert.show();
             return;
 
-        }else if(filePath==null){
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(EditRefundActivity.this, R.style.AlertDialogCustom));
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    return;
-                }
-            });
-            builder.setTitle("Image cannot be empty");
-            builder.setMessage("Please submit a photo of the refund product");
-            AlertDialog alert = builder.create();
-            alert.show();
-            return;
         }
     }
 

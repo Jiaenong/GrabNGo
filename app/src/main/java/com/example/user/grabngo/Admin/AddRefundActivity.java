@@ -1,6 +1,7 @@
 package com.example.user.grabngo.Admin;
 
 import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -10,6 +11,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +24,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.user.grabngo.Class.Refund;
@@ -37,6 +40,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -45,17 +49,20 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
 public class AddRefundActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private static final int CAPTURE_BARCODE = 2;
+    private static final String DIALOG_DATE = "DialogDate";
     private final int PICK_IMAGE_REQUEST = 71;
 
-    private EditText editTextProduct, editTextCustomer, editTextReason;
+    private EditText editTextProduct, editTextCustomer, editTextReason, editTextDate, editTextTime;
     private ImageView imageViewProduct;
     private Button btnGallery, btnCamera, btnSave;
     private Uri filePath;
@@ -77,6 +84,8 @@ public class AddRefundActivity extends AppCompatActivity {
         editTextProduct = (EditText)findViewById(R.id.editTextProductName);
         editTextCustomer = (EditText)findViewById(R.id.editTextCustomerName);
         editTextReason = (EditText)findViewById(R.id.editTextReason);
+        editTextDate = (EditText)findViewById(R.id.editTextExpiry);
+        editTextTime = (EditText)findViewById(R.id.editTextRefundTime);
         imageViewProduct = (ImageView)findViewById(R.id.product_image);
         btnGallery = (Button)findViewById(R.id.btn_gallery);
         btnCamera = (Button)findViewById(R.id.btn_camera);
@@ -92,6 +101,54 @@ public class AddRefundActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 staff = documentSnapshot.toObject(Staff.class);
+
+            }
+        });
+
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+        editTextDate.setText(df.format(new Date()));
+        editTextDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentManager manager = getSupportFragmentManager();
+                DatePickerFragment dialog = DatePickerFragment.newInstance(new Date());
+
+                dialog.show(manager,DIALOG_DATE);
+            }
+        });
+
+        final DateFormat df1 = new SimpleDateFormat("hh:mm a");
+        editTextTime.setText(df1.format(new Date()));
+        editTextTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Date date1 = null;
+                try {
+                    date1 = df1.parse(editTextTime.getText().toString());
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                Calendar mcurrentTime = Calendar.getInstance();
+                mcurrentTime.setTime(date1);
+                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                int minute = mcurrentTime.get(Calendar.MINUTE);
+                TimePickerDialog mTimePicker;
+                mTimePicker = new TimePickerDialog(AddRefundActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                        String s = "" + selectedHour + ":" + selectedMinute;
+                        DateFormat df2 = new SimpleDateFormat("HH:mm");
+                        Date date = null;
+                        try {
+                            date = df2.parse(s);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        editTextTime.setText(df1.format(date));
+                    }
+                }, hour, minute, false);//Yes 24 hour time
+                mTimePicker.setTitle("Select Time");
+                mTimePicker.show();
 
             }
         });
@@ -231,6 +288,16 @@ public class AddRefundActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<Uri> task) {
                     if (task.isSuccessful()) {
                         Uri downloadUri = task.getResult();
+                        String dateString = editTextDate.getText().toString() + " " + editTextTime.getText().toString();
+                        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+                        Calendar calendar = Calendar.getInstance();
+                        try {
+                            Date date = dateFormat.parse(dateString);
+                            calendar.setTime(date);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
 
                         Refund refund = new Refund(editTextCustomer.getText().toString(),
                                 downloadUri.toString(),
@@ -238,7 +305,7 @@ public class AddRefundActivity extends AppCompatActivity {
                                 staff.getName(),
                                 editTextProduct.getText().toString(),
                                 editTextReason.getText().toString(),
-                                null);
+                                calendar.getTime());
 
                         mCollectionReference.add(refund).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override

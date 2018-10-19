@@ -127,6 +127,44 @@
                                 android:textSize="14sp"/>
                         </android.support.design.widget.TextInputLayout>
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <android.support.design.widget.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginTop="10dp">
+                            <EditText
+                                android:id="@+id/editTextExpiry"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:focusable="false"
+                                android:clickable="true"
+                                android:hint="Refund Date"
+                                android:singleLine="true"
+                                android:ems="10"
+                                android:textSize="14sp"/>
+                        </android.support.design.widget.TextInputLayout>
+                        <android.support.design.widget.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginTop="10dp">
+                            <EditText
+                                android:id="@+id/editTextRefundTime"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:focusable="false"
+                                android:clickable="true"
+                                android:hint="Refund Time"
+                                android:singleLine="true"
+                                android:ems="10"
+                                android:textSize="14sp"/>
+                        </android.support.design.widget.TextInputLayout>
+                    </LinearLayout>
+
                     <android.support.design.widget.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

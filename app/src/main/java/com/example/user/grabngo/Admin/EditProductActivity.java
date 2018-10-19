@@ -263,12 +263,6 @@ public class EditProductActivity extends AppCompatActivity {
 
     private void uploadImage() {
 
-        InputMethodManager inputManager = (InputMethodManager)
-                getSystemService(INPUT_METHOD_SERVICE);
-
-        inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
-                InputMethodManager.HIDE_NOT_ALWAYS);
-
         pDialog = new ProgressDialog(EditProductActivity.this);
         pDialog.setMessage("Saving...");
         pDialog.setCancelable(false);

@@ -131,8 +131,6 @@ public class RefundDetailActivity extends AppCompatActivity {
             }
         });
 
-        show();
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Refund Detail");
 
@@ -159,6 +157,19 @@ public class RefundDetailActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        cardView1.setVisibility(View.GONE);
+        cardView2.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+        btnDelete.setVisibility(View.GONE);
+        btnEdit.setVisibility(View.GONE);
+
+        show();
     }
 
     @Override
