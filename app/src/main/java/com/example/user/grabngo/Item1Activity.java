@@ -28,6 +28,7 @@ import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class Item1Activity extends AppCompatActivity {
@@ -54,7 +55,7 @@ public class Item1Activity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Intent intent = getIntent();
-        String key = intent.getStringExtra("customerKey");
+        final String date = intent.getStringExtra("payDate");
 
         textViewTotalPayment = (TextView)findViewById(R.id.textViewTotalPayment);
         recyclerViewPaymentDetail = (RecyclerView)findViewById(R.id.recycleViewPaymentDetail);
@@ -69,16 +70,23 @@ public class Item1Activity extends AppCompatActivity {
         layout2.setVisibility(View.GONE);
         layout3.setVisibility(View.GONE);
 
+        Log.i("Testing ",date);
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         nCollectionReference = mFirebaseFirestore.collection("Payment");
-        nCollectionReference.whereEqualTo("customerKey",key).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        nCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                 {
                     Payment payment = documentSnapshot.toObject(Payment.class);
-                    id = documentSnapshot.getId();
-                    totalPayment = payment.getTotalPayment();
+                    SimpleDateFormat formatDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                    String daTe = formatDate.format(payment.getPayDate());
+                    if(daTe.equals(date))
+                    {
+                        Log.i("testing ", daTe);
+                        id = documentSnapshot.getId();
+                        totalPayment = payment.getTotalPayment();
+                    }
                 }
                 mCollectionReference = mFirebaseFirestore.collection("Payment").document(id).collection("PaymentDetail");
                 mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {

@@ -62,9 +62,10 @@ public class PurchaseHistoryActivity extends AppCompatActivity {
             @Override
             public void onClick(View view, int position) {
                 Payment payment = paymentList.get(position);
-                Log.i("Testing :", payment.getCustomerKey());
                 Intent intent = new Intent(PurchaseHistoryActivity.this, Item1Activity.class);
-                intent.putExtra("customerKey",payment.getCustomerKey());
+                SimpleDateFormat formatDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                String date = formatDate.format(payment.getPayDate());
+                intent.putExtra("payDate",date);
                 startActivity(intent);
             }
 
@@ -73,8 +74,8 @@ public class PurchaseHistoryActivity extends AppCompatActivity {
 
             }
         }));
-
-        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        String id = SaveSharedPreference.getID(PurchaseHistoryActivity.this);
+        mCollectionReference.whereEqualTo("customerKey",id).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
@@ -137,7 +138,7 @@ public class PurchaseHistoryActivity extends AppCompatActivity {
             holder.textViewDay.setText(day);
             holder.textViewDate.setText(realDate);
             holder.textViewWeek.setText(realNameDay);
-            holder.textViewPrice.setText(payment.getTotalPayment()+"");
+            holder.textViewPrice.setText("RM " + String.format("%.2f",payment.getTotalPayment()));
         }
 
         @Override
