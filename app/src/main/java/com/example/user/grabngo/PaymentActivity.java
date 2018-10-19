@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.example.user.grabngo.Class.CartItem;
 import com.example.user.grabngo.Class.CartList;
 import com.example.user.grabngo.Class.Payment;
+import com.example.user.grabngo.Class.PaymentDetail;
 import com.example.user.grabngo.Class.Product;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -50,10 +51,11 @@ public class PaymentActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
 
     private FirebaseFirestore mFirebaseFirestore;
-    private CollectionReference mCollectionReference, nCollectionReference;
+    private CollectionReference mCollectionReference, nCollectionReference, pCollectionReference;
     private DocumentReference mDocumentReference, nDocumentReference;
 
     private List<String> items;
+    private List<Integer> amounts;
     private String paymentID;
     private int qty;
 
@@ -64,7 +66,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         nCollectionReference = mFirebaseFirestore.collection("Payment");
-        nCollectionReference.orderBy("payTime", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        nCollectionReference.orderBy("payDate", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 if(queryDocumentSnapshots.isEmpty())
@@ -87,6 +89,7 @@ public class PaymentActivity extends AppCompatActivity {
         String text = intent.getStringExtra("totalPrice");
 
         items = new ArrayList<>();
+        amounts = new ArrayList<>();
         progressDialog = new ProgressDialog(this);
         editTextCardNumber = (EditText)findViewById(R.id.editTextCardNumber);
         editTextCardName = (EditText)findViewById(R.id.editTextCardName);
@@ -156,61 +159,69 @@ public class PaymentActivity extends AppCompatActivity {
                 }
                 final String id = SaveSharedPreference.getID(PaymentActivity.this);
                 Calendar calendar = Calendar.getInstance();
-                SimpleDateFormat sdDate = new SimpleDateFormat("yyyy / MM / dd");
-                SimpleDateFormat sdTime = new SimpleDateFormat("HH:mm:ss");
-                final String currentDate = sdDate.format(calendar.getTime());
-                final String currentTime = sdTime.format(calendar.getTime());
+                final java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(calendar.getTime().getTime());
 
-                mCollectionReference = mFirebaseFirestore.collection("Customer/"+id+"/Cart");
-                mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                String text = paymentPrice.getText().toString();
+                double price = Double.parseDouble(text.substring(2));
+                Payment payment = new Payment(currentTimestamp, price, id);
+                mDocumentReference = mFirebaseFirestore.document("Payment/"+paymentID);
+                mDocumentReference.set(payment).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        String key = "";
-                        for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                        {
-                            CartItem cartItem = documentSnapshot.toObject(CartItem.class);
-                            String item = cartItem.getProductname();
-                            key = cartItem.getProductKey();
-                            qty = cartItem.getQuantity();
-                            items.add(item);
-                        }
-                        String text = paymentPrice.getText().toString();
-                        double price = Double.parseDouble(text.substring(2));
-                        Payment payment = new Payment(currentDate, currentTime, items, price, id);
-                        mDocumentReference = mFirebaseFirestore.document("Payment/"+paymentID);
-                        nDocumentReference = mFirebaseFirestore.document("Product/"+key);
-                        nDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                            @Override
-                            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                Product product = documentSnapshot.toObject(Product.class);
-                                int quantity = product.getStockAmount();
-                                quantity -= qty;
-                                nDocumentReference.update("stockAmount",quantity);
-                            }
-                        });
-                        mDocumentReference.set(payment).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                if(progressDialog.isShowing())
-                                    progressDialog.dismiss();
-                                AlertDialog.Builder builder = new AlertDialog.Builder(PaymentActivity.this);
-                                builder.setTitle("Payment Success");
-                                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        int batchSize = 3;
-                                        deleteCollection(batchSize);
+                    public void onSuccess(Void aVoid) {
 
-                                        Intent intent = new Intent(PaymentActivity.this, HomeActivity.class);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                        startActivity(intent);
+                        pCollectionReference = mFirebaseFirestore.collection("Payment").document(paymentID).collection("PaymentDetail");
+                        mCollectionReference = mFirebaseFirestore.collection("Customer/"+id+"/Cart");
+                        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                String key = "";
+                                int quantity = 0;
+                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                                {
+                                    CartItem cartItem = documentSnapshot.toObject(CartItem.class);
+                                    String item = cartItem.getProductname();
+                                    key = cartItem.getProductKey();
+                                    qty = cartItem.getQuantity();
+                                    quantity = cartItem.getQuantity();
+                                    double price = cartItem.getPrice();
+                                    PaymentDetail paymentDetail = new PaymentDetail(item, quantity, price);
+                                    pCollectionReference.add(paymentDetail).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                        @Override
+                                        public void onSuccess(DocumentReference documentReference) {
+                                            return;
+                                        }
+                                    });
+                                }
+                                nDocumentReference = mFirebaseFirestore.document("Product/"+key);
+                                nDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                        Product product = documentSnapshot.toObject(Product.class);
+                                        int quantity = product.getStockAmount();
+                                        quantity -= qty;
+                                        nDocumentReference.update("stockAmount",quantity);
                                     }
                                 });
-                                builder.setMessage("Please check your email for the receipt.");
-                                AlertDialog alert = builder.create();
-                                alert.show();
                             }
                         });
+                        if(progressDialog.isShowing())
+                            progressDialog.dismiss();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(PaymentActivity.this);
+                        builder.setTitle("Payment Success");
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                int batchSize = 3;
+                                deleteCollection(batchSize);
+
+                                Intent intent = new Intent(PaymentActivity.this, HomeActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                            }
+                        });
+                        builder.setMessage("Please check your email for the receipt.");
+                        AlertDialog alert = builder.create();
+                        alert.show();
                     }
                 });
 
