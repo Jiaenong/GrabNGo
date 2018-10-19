@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,7 +8,17 @@
     android:background="#ECEFF1"
     tools:context=".Item1Activity">
 
+    <ProgressBar
+        android:id="@+id/progressBarDetail"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
+
     <LinearLayout
+        android:id="@+id/layout1"
         android:layout_width="match_parent"
         android:layout_height="130dp"
         android:layout_margin="10dp"
@@ -22,21 +32,25 @@
             android:gravity="center_vertical|center_horizontal"
             android:textColor="#fff"
             android:textSize="26sp"/>
+
         <TextView
+            android:id="@+id/textViewTotalPayment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="RM 84.60"
             android:gravity="center_vertical|center_horizontal"
+            android:text="RM 84.60"
             android:textColor="#fff"
-            android:textSize="30sp"/>
+            android:textSize="30sp" />
     </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/layout2"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/layout1"
             android:orientation="horizontal">
             <TextView
                 android:layout_weight="4"
@@ -61,136 +75,16 @@
                 android:text="Subtotal (RM)"/>
         </LinearLayout>
 
-    <android.support.v7.widget.CardView
-        android:layout_marginTop="5dp"
+    <LinearLayout
+        android:id="@+id/layout3"
         android:layout_width="match_parent"
-        android:layout_height="50dp">
-        <LinearLayout
-            android:gravity="center_vertical"
-            android:padding="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-        <TextView
-            android:layout_weight="4"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Cutie Compact Toilet Roll"/>
-        <TextView
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:text="2"/>
-        <TextView
-            android:layout_weight="2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textAlignment="textEnd"
-            android:paddingRight="10dp"
-            android:text="31.00"/>
-        </LinearLayout>
-    </android.support.v7.widget.CardView>
+        android:layout_height="match_parent"
+        android:layout_below="@id/layout2">
 
-    <android.support.v7.widget.CardView
-        android:layout_marginTop="5dp"
-        android:layout_width="match_parent"
-        android:layout_height="50dp">
-        <LinearLayout
-            android:gravity="center_vertical"
-            android:padding="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycleViewPaymentDetail"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_weight="4"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Magnum Ice Cream"/>
-            <TextView
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="1"/>
-            <TextView
-                android:layout_weight="2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
-                android:paddingRight="10dp"
-                android:text="5.00"/>
-        </LinearLayout>
-    </android.support.v7.widget.CardView>
+            android:layout_height="match_parent" />
+    </LinearLayout>
 
-    <android.support.v7.widget.CardView
-        android:layout_marginTop="5dp"
-        android:layout_width="match_parent"
-        android:layout_height="50dp">
-        <LinearLayout
-            android:gravity="center_vertical"
-            android:padding="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_weight="4"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="OatKrunch"/>
-            <TextView
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="1"/>
-            <TextView
-                android:layout_weight="2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
-                android:paddingRight="10dp"
-                android:text="10.80"/>
-        </LinearLayout>
-    </android.support.v7.widget.CardView>
-
-    <android.support.v7.widget.CardView
-        android:layout_marginTop="5dp"
-        android:layout_width="match_parent"
-        android:layout_height="50dp">
-        <LinearLayout
-            android:gravity="center_vertical"
-            android:padding="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_weight="4"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="Jongga Spicy Rice Noodle"/>
-            <TextView
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="1"/>
-            <TextView
-                android:layout_weight="2"
-                android:paddingRight="10dp"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
-                android:text="37.80"/>
-        </LinearLayout>
-    </android.support.v7.widget.CardView>
-
-</LinearLayout>
+</RelativeLayout>
