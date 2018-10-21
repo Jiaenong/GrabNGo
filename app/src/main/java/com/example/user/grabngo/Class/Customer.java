@@ -6,17 +6,19 @@ public class Customer {
     private String name;
     private String gender;
     private String address;
+    private String profilePic;
 
     public Customer(){
 
     }
 
-    public Customer(String email, String password, String name, String gender, String address){
+    public Customer(String email, String password, String name, String gender, String address, String profilePic){
         this.email = email;
         this.password = password;
         this.name = name;
         this.gender = gender;
         this.address = address;
+        this.profilePic = profilePic;
     }
 
     public String getEmail() {
@@ -57,5 +59,13 @@ public class Customer {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getProfilePic() {
+        return profilePic;
+    }
+
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
     }
 }

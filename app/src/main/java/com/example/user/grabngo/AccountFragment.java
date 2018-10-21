@@ -3,10 +3,17 @@ package com.example.user.grabngo;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,16 +22,30 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.user.grabngo.Class.Customer;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageException;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import javax.xml.transform.Result;
+
+import static android.app.Activity.RESULT_OK;
 
 
 /**
@@ -33,17 +54,63 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class AccountFragment extends Fragment {
 
     private ImageButton btnPurchaseHistory, btnEditProfile, btnForgetPassword, btnLogout;
-    private TextView textViewName, textViewGender, textViewEmail, textViewAddress;
+    private TextView textViewName, textViewGender, textViewEmail, textViewAddress, textViewUploadPic;
+    private ImageView imageViewProfilePic;
     private ProgressBar progressBarAccount;
     private LinearLayout linearLayoutAccount;
 
     private FirebaseFirestore mFirebaseFirestore;
+    private FirebaseStorage mFirebaseStorage;
     private DocumentReference mDocumentReference;
+    private StorageReference mStorageReference;
+
+    private static final int RC_PHOTO_PICKER = 2;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         getActivity().setTitle(R.string.title_account);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK)
+        {
+            Uri seletedImageUri = data.getData();
+            final StorageReference photoref = mStorageReference.child(seletedImageUri.getLastPathSegment());
+            Toast.makeText(getContext(),"Uploading", Toast.LENGTH_LONG).show();
+            photoref.putFile(seletedImageUri).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if(!task.isSuccessful())
+                    {
+                        throw task.getException();
+                    }
+                    return photoref.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if(task.isSuccessful())
+                    {
+                        Uri downloadUri = task.getResult();
+                        mDocumentReference.update("profilePic",downloadUri.toString());
+                        mDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                Customer customer = documentSnapshot.toObject(Customer.class);
+                                Glide.with(getActivity()).load(customer.getProfilePic()).into(imageViewProfilePic);
+                                textViewUploadPic.setText("Choose other Picture");
+                            }
+                        });
+                    }
+                    else{
+                        Toast.makeText(getActivity(),"Upload Failed: "+task.getException().getMessage(),Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -55,11 +122,16 @@ public class AccountFragment extends Fragment {
         setHasOptionsMenu(true);
         String id = SaveSharedPreference.getID(getContext());
         mFirebaseFirestore = FirebaseFirestore.getInstance();
+        mFirebaseStorage = FirebaseStorage.getInstance();
         mDocumentReference = mFirebaseFirestore.document("Customer/"+id);
+        mStorageReference = mFirebaseStorage.getReference().child("profile_photo");
+
         textViewName = (TextView)v.findViewById(R.id.textViewName);
         textViewGender = (TextView)v.findViewById(R.id.textViewGender);
         textViewEmail = (TextView)v.findViewById(R.id.textViewEmail);
         textViewAddress = (TextView)v.findViewById(R.id.textViewAddress);
+        textViewUploadPic = (TextView)v.findViewById(R.id.textViewUploadPic);
+        imageViewProfilePic = (ImageView)v.findViewById(R.id.imageViewProfilePic);
         btnPurchaseHistory = (ImageButton)v.findViewById(R.id.btn_purchase_history);
         btnEditProfile = (ImageButton)v.findViewById(R.id.btn_edit_profile);
         btnForgetPassword = (ImageButton)v.findViewById(R.id.btn_forget_password);
@@ -77,11 +149,28 @@ public class AccountFragment extends Fragment {
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 Customer customer = documentSnapshot.toObject(Customer.class);
                 textViewName.setText("Name: "+customer.getName());
-                textViewGender.setText("Gender: "+customer.getAddress());
+                textViewGender.setText("Gender: "+customer.getGender());
                 textViewEmail.setText("Email: "+customer.getEmail());
                 textViewAddress.setText("Address: "+customer.getAddress());
+                if(customer.getProfilePic().equals(""))
+                {
+                    imageViewProfilePic.setImageResource(R.drawable.user);
+                }else{
+                    Glide.with(getActivity()).load(customer.getProfilePic()).into(imageViewProfilePic);
+                    textViewUploadPic.setText("Choose other Picture");
+                }
                 progressBarAccount.setVisibility(View.GONE);
                 linearLayoutAccount.setVisibility(View.VISIBLE);
+            }
+        });
+
+        imageViewProfilePic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/jpeg");
+                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                startActivityForResult(Intent.createChooser(intent,"Complete the action using"), RC_PHOTO_PICKER);
             }
         });
 

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
@@ -107,7 +108,8 @@ public class SignUpActivity extends AppCompatActivity {
     private void SaveCustomer()
     {
         mDocumentReference = mFirebaseFirestore.document("Customer/"+autoID);
-        String email = editTextEmailAddress.getText().toString();
+        String pic = "";
+        final String email = editTextEmailAddress.getText().toString();
         String password = editTextPassword.getText().toString();
         String name = editTextCustomerName.getText().toString();
         String address = editTextAddress.getText().toString();
@@ -116,7 +118,16 @@ public class SignUpActivity extends AppCompatActivity {
             gender = radioButtonMale.getText().toString();
         }else
             gender = radioButtonFemale.getText().toString();
-        Customer customer = new Customer(email, password, name, gender, address);
+        Customer customer = new Customer(email, password, name, gender, address, pic);
+        try {
+            Log.i("Testing ",email);
+            GMailSender sender = new GMailSender("jiaen.ong.jo@gmail.com","Ahen199765");
+            sender.sendMail("Sign Up Successfully!!",
+                    "Thanks for register to the GrabNGo, you can now enjoy the service provided by the system",
+                    "jiaen.ong.jo@gmail.com","ongje-pa15@student.tarc.edu.my");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         mDocumentReference.set(customer).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {

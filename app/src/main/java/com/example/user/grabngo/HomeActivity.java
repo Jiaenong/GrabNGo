@@ -49,7 +49,7 @@ public class HomeActivity extends AppCompatActivity {
                         startActivity(intent);
                         return true;
                     case R.id.navigation_qna:
-                        Fragment fragment4 = new ForumFragment();
+                        Fragment fragment4 = new CustomerForumFragment();
                         fm.beginTransaction().replace(R.id.fragment_container,fragment4).commit();
                         return true;
                     case R.id.navigation_account:

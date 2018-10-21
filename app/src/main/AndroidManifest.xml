@@ -3,6 +3,8 @@
     package="com.example.user.grabngo">
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -77,7 +79,10 @@
 
         <activity android:name=".Admin.EditProductActivity" />
         <activity android:name=".Admin.AddRefundActivity" />
-        <activity android:name=".Admin.EditRefundActivity"></activity>
+        <activity android:name=".Admin.EditRefundActivity" />
+        <activity android:name=".PostActivity"
+            android:label="Upload Post"
+            android:parentActivityName=".HomeActivity"></activity>
     </application>
 
 </manifest>
