@@ -80,12 +80,15 @@
         <activity android:name=".Admin.EditProductActivity" />
         <activity android:name=".Admin.AddRefundActivity" />
         <activity android:name=".Admin.EditRefundActivity" />
-        <activity android:name=".PostActivity"
+        <activity
+            android:name=".PostActivity"
             android:label="Upload Post"
-            android:parentActivityName=".HomeActivity"/>
+            android:parentActivityName=".HomeActivity" />
+
         <receiver android:name=".Class.LowStockNotification" />
 
-        <activity android:name=".Admin.IgnoreLowStockActivity"></activity>
+        <activity android:name=".Admin.IgnoreLowStockActivity" />
+        <activity android:name=".Admin.AddSupplierActivity"></activity>
     </application>
 
 </manifest>

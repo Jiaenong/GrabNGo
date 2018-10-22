@@ -3,189 +3,52 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#ECEFF1"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Admin.StockOrderFragment">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="60dp"
-        android:background="#ECEFF1"
-        android:orientation="vertical">
 
-        <android.support.v7.widget.CardView
-            android:id="@+id/supplier_one"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+        <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:layout_above="@+id/linearLayout">
 
-            <LinearLayout
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycleViewSupplier"
                 android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:scrollbars="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0">
+
+            </android.support.v7.widget.RecyclerView>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:orientation="horizontal">
-
-
-                <ImageView
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/munchys"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center|left"
-                        android:textSize="16sp"
-                        android:textColor="@color/foreground_dark_color"
-                        android:text="Munchy's"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center|left"
-                        android:textSize="13sp"
-                        android:textColor="@color/foreground_light_color"
-                        android:text="Email : munchys@gmail.com"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center|left"
-                        android:textSize="13sp"
-                        android:textColor="@color/foreground_light_color"
-                        android:text="H/P    : 012-2213131"/>
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </android.support.v7.widget.CardView>
-
-        <android.support.v7.widget.CardView
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:orientation="horizontal">
-
-
-                <ImageView
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/nestle_logo"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center|left"
-                        android:textSize="16sp"
-                        android:textColor="@color/foreground_dark_color"
-                        android:text="Nestle"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center|left"
-                        android:textSize="13sp"
-                        android:textColor="@color/foreground_light_color"
-                        android:text="Email : nestleMY@gmail.com"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center|left"
-                        android:textSize="13sp"
-                        android:textColor="@color/foreground_light_color"
-                        android:text="H/P    : 021-2221031"/>
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </android.support.v7.widget.CardView>
-
-        <android.support.v7.widget.CardView
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:orientation="horizontal">
-
-
-                <ImageView
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/darlie_logo"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center|left"
-                        android:textSize="16sp"
-                        android:textColor="@color/foreground_dark_color"
-                        android:text="Darlie"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center|left"
-                        android:textSize="13sp"
-                        android:textColor="@color/foreground_light_color"
-                        android:text="Email : darlie@gmail.com"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center|left"
-                        android:textSize="13sp"
-                        android:textColor="@color/foreground_light_color"
-                        android:text="H/P    : 011-8291771"/>
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </android.support.v7.widget.CardView>
-
-    </LinearLayout>
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.446" />
+        </android.support.constraint.ConstraintLayout>
 
     <LinearLayout
-        android:id="@+id/btn_order"
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:padding="5dp"
@@ -193,6 +56,7 @@
         android:layout_alignParentBottom="true"
         >
         <Button
+            android:id="@+id/btn_order"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/comfirm_color"
@@ -207,7 +71,7 @@
             android:layout_height="wrap_content"
             android:scaleType="center"
             android:layout_gravity="bottom|end"
-            android:layout_above="@+id/btn_order"
+            android:layout_above="@+id/linearLayout"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="100dp"
             android:layout_margin="@dimen/fab_margin"

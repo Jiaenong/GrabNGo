@@ -124,9 +124,12 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.cart,menu);
-        MenuItem item = menu.findItem(R.id.action_search);
-        item.setVisible(false);
+        Boolean checkedActivity = getIntent().getBooleanExtra("Activity",false);
+        if(!checkedActivity) {
+            getMenuInflater().inflate(R.menu.cart, menu);
+            MenuItem item = menu.findItem(R.id.action_search);
+            item.setVisible(false);
+        }
         return true;
     }
 }
