@@ -1,12 +1,14 @@
 package com.example.user.grabngo;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -38,6 +40,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static com.example.user.grabngo.CustomerForumFragment.PostAdapter.*;
 
 
 /**
@@ -116,6 +120,18 @@ public class CustomerForumFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+        recyclerViewPost.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0 && btnAddPost.getVisibility() == View.VISIBLE) {
+                    btnAddPost.hide();
+                } else if (dy < 0 && btnAddPost.getVisibility() != View.VISIBLE) {
+                    btnAddPost.show();
+                }
+            }
+        });
         return view;
     }
 
@@ -138,6 +154,7 @@ public class CustomerForumFragment extends Fragment {
 
     public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder>{
         private List<Post> postList;
+        private int pos;
         private FirebaseFirestore mFirebaseFirestore;
         private DocumentReference mDocumentReference;
 
@@ -148,7 +165,7 @@ public class CustomerForumFragment extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(final MyViewHolder holder, int position) {
+        public void onBindViewHolder(final MyViewHolder holder, final int position) {
             mFirebaseFirestore = FirebaseFirestore.getInstance();
             final Post post = postList.get(position);
             if(!(post.getPostImage()==null))
@@ -183,11 +200,14 @@ public class CustomerForumFragment extends Fragment {
             holder.imageViewMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    pos = holder.getAdapterPosition();
                     PopupMenu popup = new PopupMenu(getContext(), v);
                     MenuInflater inflater = popup.getMenuInflater();
                     inflater.inflate(R.menu.menu_post, popup.getMenu());
                     popup.setOnMenuItemClickListener(new MyMenuItemClickListener());
                     popup.show();
+
+                    Log.i("Position ", holder.getAdapterPosition()+"");
                 }
             });
         }
@@ -201,15 +221,15 @@ public class CustomerForumFragment extends Fragment {
             private TextView textViewCustomerName, textViewTime, textViewPostContent;
             private ImageView imageViewPicture, imgView_postPic, imageViewMenu;
 
-            public MyViewHolder(View view)
-            {
+            public MyViewHolder(View view) {
                 super(view);
-                textViewCustomerName = (TextView)view.findViewById(R.id.textViewCustomerName);
-                textViewTime = (TextView)view.findViewById(R.id.textViewTime);
-                textViewPostContent = (TextView)view.findViewById(R.id.textViewPostContent);
-                imageViewPicture = (ImageView)view.findViewById(R.id.imageViewPicture);
-                imgView_postPic = (ImageView)view.findViewById(R.id.imgView_postPic);
-                imageViewMenu = (ImageView)view.findViewById(R.id.imageViewMenu);
+                textViewCustomerName = (TextView) view.findViewById(R.id.textViewCustomerName);
+                textViewTime = (TextView) view.findViewById(R.id.textViewTime);
+                textViewPostContent = (TextView) view.findViewById(R.id.textViewPostContent);
+                imageViewPicture = (ImageView) view.findViewById(R.id.imageViewPicture);
+                imgView_postPic = (ImageView) view.findViewById(R.id.imgView_postPic);
+                imageViewMenu = (ImageView) view.findViewById(R.id.imageViewMenu);
+
             }
         }
 
@@ -218,9 +238,7 @@ public class CustomerForumFragment extends Fragment {
             postList = post;
         }
 
-        class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener{
-            private FirebaseFirestore pFirebaseFirestore;
-            private CollectionReference nCollectionReference;
+        private class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
             public MyMenuItemClickListener()
             {
 
@@ -228,13 +246,38 @@ public class CustomerForumFragment extends Fragment {
 
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch(item.getItemId())
-                {
+                CollectionReference qCollectionReference;
+                switch(item.getItemId()){
                     case R.id.edit:
-                        Toast.makeText(getContext(),"Edit", Toast.LENGTH_LONG).show();
+                        Post post2 = postList.get(pos);
+                        Date time2 = post2.getPostDate();
+                        Intent intent = new Intent(getContext(), PostActivity.class);
+                        intent.putExtra("time",time2+"");
+                        startActivity(intent);
                         return true;
                     case R.id.delete:
-                        Toast.makeText(getContext(),"Delete",Toast.LENGTH_LONG).show();
+                        Post post = postList.get(pos);
+                        Date time = post.getPostDate();
+                        Log.i("Time ", time+"");
+                        qCollectionReference = mFirebaseFirestore.collection("Post");
+                        qCollectionReference.whereEqualTo("postDate",time).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                DocumentReference qDocumentReference;
+                                String id = "";
+                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                                {
+                                    id =documentSnapshot.getId();
+                                    Log.i("Testing ",id);
+                                }
+                                qDocumentReference = mFirebaseFirestore.document("Post/"+id);
+                                qDocumentReference.delete();
+                                Toast.makeText(getContext(),"Delete Success",Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        postList.remove(pos);
+                        notifyItemRemoved(pos);
+                        notifyItemRangeChanged(pos,postList.size());
                         return true;
                     default:
                 }
@@ -242,4 +285,5 @@ public class CustomerForumFragment extends Fragment {
             }
         }
     }
+
 }
