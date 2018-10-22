@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -52,10 +53,11 @@ import static com.example.user.grabngo.CustomerForumFragment.PostAdapter.*;
  * Use the {@link CustomerForumFragment#} factory method to
  * create an instance of this fragment.
  */
-public class CustomerForumFragment extends Fragment {
+public class CustomerForumFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private RecyclerView recyclerViewPost;
     private FloatingActionButton btnAddPost;
     private ProgressBar progressBarForum;
+    private SwipeRefreshLayout swipe_container;
 
     private FirebaseFirestore nFirebaseFirestore;
     private CollectionReference mCollectionReference;
@@ -85,7 +87,9 @@ public class CustomerForumFragment extends Fragment {
         recyclerViewPost = (RecyclerView)view.findViewById(R.id.recycleViewPost);
         btnAddPost = (FloatingActionButton)view.findViewById(R.id.btnAddPost);
         progressBarForum = (ProgressBar)view.findViewById(R.id.progressBarForum);
+        swipe_container = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         pList = new ArrayList<>();
+        swipe_container.setOnRefreshListener(this);
 
         progressBarForum.setVisibility(View.VISIBLE);
         recyclerViewPost.setVisibility(View.GONE);
@@ -93,6 +97,7 @@ public class CustomerForumFragment extends Fragment {
         mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                pList.clear();
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                 {
                     Post post = documentSnapshot.toObject(Post.class);
@@ -150,6 +155,36 @@ public class CustomerForumFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.cart,menu);
         return;
+    }
+
+    @Override
+    public void onRefresh() {
+        swipe_container.setRefreshing(true);
+        pList.clear();
+        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                {
+                    Post post = documentSnapshot.toObject(Post.class);
+                    String customerKey = post.getCustomerKey();
+                    String content = post.getContent();
+                    String image = post.getPostImage();
+                    Date time = post.getPostDate();
+                    Post post1 = new Post(customerKey, image, content, time);
+                    pList.add(post1);
+                }
+                adapter = new PostAdapter(pList);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
+                recyclerViewPost.setLayoutManager(mLayoutManager);
+                recyclerViewPost.setItemAnimator(new DefaultItemAnimator());
+                recyclerViewPost.setAdapter(adapter);
+                progressBarForum.setVisibility(View.GONE);
+                recyclerViewPost.setVisibility(View.VISIBLE);
+                swipe_container.setRefreshing(false);
+            }
+        });
+
     }
 
     public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder>{
