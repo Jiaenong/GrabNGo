@@ -46,6 +46,8 @@ public class ManagerHomeFragment extends Fragment {
 
         final FragmentManager fm = getFragmentManager();
 
+
+
         cardViewLowStock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

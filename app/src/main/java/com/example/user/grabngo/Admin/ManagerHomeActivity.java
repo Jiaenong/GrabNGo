@@ -1,21 +1,27 @@
 package com.example.user.grabngo.Admin;
 
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.user.grabngo.Class.LowStockNotification;
 import com.example.user.grabngo.R;
+import com.example.user.grabngo.SaveSharedPreference;
+import com.example.user.grabngo.ViewDialog;
+
+import java.util.Calendar;
 
 public class ManagerHomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -26,6 +32,28 @@ public class ManagerHomeActivity extends AppCompatActivity
         setContentView(R.layout.activity_manager_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        /*AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(ManagerHomeActivity.this, LowStockNotification.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(ManagerHomeActivity.this,0,intent,0);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 1000*60, pendingIntent);*/
+
+        if(SaveSharedPreference.getCheckAlert(ManagerHomeActivity.this)==false){
+            SaveSharedPreference.setCheckAlert(ManagerHomeActivity.this,true);
+            scheduleNotification();
+        }
+
+        Intent intent = getIntent();
+        boolean lowStockAlert = intent.getBooleanExtra("lowStockAlert",false);
+        if(lowStockAlert){
+            ViewDialog alert = new ViewDialog();
+            alert.showDialog(ManagerHomeActivity.this);
+        }
+
 
         FragmentManager fm = getSupportFragmentManager();
 
@@ -126,6 +154,28 @@ public class ManagerHomeActivity extends AppCompatActivity
         return true;
 
 
+    }
+
+    private void scheduleNotification() {
+
+        Intent notificationIntent = new Intent(this, LowStockNotification.class);
+        notificationIntent.putExtra(LowStockNotification.NOTIFICATION,1);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 10);
+        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+
+    }
+
+    private Notification getNotification(String content) {
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentTitle("Scheduled Notification");
+        builder.setContentText(content);
+        builder.setSmallIcon(R.drawable.ic_info_outline_black_24dp);
+        return builder.build();
     }
 
 }

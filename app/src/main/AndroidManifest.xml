@@ -82,7 +82,10 @@
         <activity android:name=".Admin.EditRefundActivity" />
         <activity android:name=".PostActivity"
             android:label="Upload Post"
-            android:parentActivityName=".HomeActivity"></activity>
+            android:parentActivityName=".HomeActivity"/>
+        <receiver android:name=".Class.LowStockNotification" />
+
+        <activity android:name=".Admin.IgnoreLowStockActivity"></activity>
     </application>
 
 </manifest>

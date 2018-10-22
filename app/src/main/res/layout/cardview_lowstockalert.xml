@@ -1,0 +1,30 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+    <TextView
+        android:id="@+id/textViewProductName"
+        android:layout_weight="3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:text="Oat Krunch"/>
+    <TextView
+        android:id="@+id/textViewProductQuantity"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textAlignment="center"
+        android:textColor="@color/foreground_dark_color"
+        android:text="23"/>
+    <Button
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:padding="5dp"
+        android:textSize="12sp"
+        android:textColor="@color/foreground_dark_color"
+        android:text="Reorder"
+        android:textAllCaps="false"/>
+</LinearLayout>

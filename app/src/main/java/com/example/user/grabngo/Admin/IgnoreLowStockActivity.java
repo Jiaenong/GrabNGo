@@ -1,27 +1,17 @@
 package com.example.user.grabngo.Admin;
 
-
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
-import com.example.user.grabngo.Class.LowStockNotification;
 import com.example.user.grabngo.Class.Product;
 import com.example.user.grabngo.R;
-import com.example.user.grabngo.SaveSharedPreference;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,12 +21,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- */
-public class LowStockFragment extends Fragment {
+public class IgnoreLowStockActivity extends AppCompatActivity {
 
-    private NavigationView navigationView;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private List<Product> productList;
@@ -45,18 +31,14 @@ public class LowStockFragment extends Fragment {
     private CollectionReference mCollectionReference;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_low_stock, container, false);
-        setHasOptionsMenu(true);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.fragment_low_stock);
+        IgnoreLowStockActivity.this.setTitle("Manage Low Stock Product");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        getActivity().setTitle("Low Stock Product");
-        navigationView = (NavigationView)getActivity().findViewById(R.id.nav_view);
-        navigationView.getMenu().getItem(1).setChecked(true);
-
-        recyclerView = (RecyclerView)v.findViewById(R.id.recycleViewLowStock);
-        progressBar = (ProgressBar)v.findViewById(R.id.progressBar);
+        recyclerView = (RecyclerView)findViewById(R.id.recycleViewLowStock);
+        progressBar = (ProgressBar)findViewById(R.id.progressBar);
         productList = new ArrayList<>();
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Product");
@@ -64,23 +46,13 @@ public class LowStockFragment extends Fragment {
         recyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
 
-        lowStockAdapter = new LowStockAdapter(getActivity(),productList);
-
-        AlarmManager alarmMgr = (AlarmManager)getActivity().getSystemService(getActivity().ALARM_SERVICE);
-        Intent notificationIntent = new Intent(getActivity(), LowStockNotification.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0, notificationIntent, 0);
-        if(alarmMgr!=null){
-            alarmMgr.cancel(pendingIntent);
-            SaveSharedPreference.setCheckAlert(getActivity(),false);
-        }
-
-        return v;
+        lowStockAdapter = new LowStockAdapter(IgnoreLowStockActivity.this,productList);
     }
 
     public void show(){
         productList.clear();
 
-        mCollectionReference.whereLessThanOrEqualTo("stockAmount",100).whereEqualTo("lowStockAlert",true).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        mCollectionReference.whereLessThanOrEqualTo("stockAmount",100).whereEqualTo("lowStockAlert",false).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
@@ -92,8 +64,8 @@ public class LowStockFragment extends Fragment {
                     Product mProduct = new Product(image, name, stockAmount, documentSnapshot.getId());
                     productList.add(mProduct);
                 }
-                lowStockAdapter = new LowStockAdapter(getActivity(),productList);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
+                lowStockAdapter = new LowStockAdapter(IgnoreLowStockActivity.this,productList);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(IgnoreLowStockActivity.this);
                 recyclerView.setLayoutManager(mLayoutManager);
                 recyclerView.setItemAnimator(new DefaultItemAnimator());
                 recyclerView.setAdapter(lowStockAdapter);
@@ -113,22 +85,19 @@ public class LowStockFragment extends Fragment {
         show();
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_ignore_item:
-                Intent intent = new Intent(getActivity(),IgnoreLowStockActivity.class);
-                startActivity(intent);
+            case android.R.id.home:
+                finish();
                 return true;
-
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.low_stock,menu);
-        return;
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;
     }
-
 }

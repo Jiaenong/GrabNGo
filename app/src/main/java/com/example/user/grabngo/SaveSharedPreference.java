@@ -13,6 +13,7 @@ public class SaveSharedPreference {
     static final String PREF_CVV = "cvv";
     static final String PREF_CHECK_SAVE = "saved";
     static final String USER_TYPE = "user";
+    static final String LOW_STOCK_ALERT = "false";
 
     static SharedPreferences getSharedPreference(Context context)
     {
@@ -102,6 +103,18 @@ public class SaveSharedPreference {
     public static Boolean getCheckSave(Context context)
     {
         return getSharedPreference(context).getBoolean(PREF_CHECK_SAVE,false);
+    }
+
+    public static void setCheckAlert(Context context, Boolean save)
+    {
+        SharedPreferences.Editor editor = getSharedPreference(context).edit();
+        editor.putBoolean(LOW_STOCK_ALERT,save);
+        editor.commit();
+    }
+
+    public static Boolean getCheckAlert(Context context)
+    {
+        return getSharedPreference(context).getBoolean(LOW_STOCK_ALERT,false);
     }
 
     public static void clearData(Context context)

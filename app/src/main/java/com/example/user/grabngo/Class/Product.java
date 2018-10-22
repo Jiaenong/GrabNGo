@@ -2,8 +2,6 @@ package com.example.user.grabngo.Class;
 
 import com.google.firebase.firestore.ServerTimestamp;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Product {
@@ -21,6 +19,7 @@ public class Product {
     private String supplierKey;
     private String staffKey;
     private String documentID;
+    private boolean lowStockAlert;
 
     public Product()
     {
@@ -42,6 +41,7 @@ public class Product {
         this.modifiedDate = modifiedDate;
         this.supplierKey = supplierKey;
         this.staffKey = staffKey;
+        this.lowStockAlert = true;
     }
 
     public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, int stockAmount, String imageUrl, Date modifiedDate)
@@ -56,6 +56,7 @@ public class Product {
         this.imageUrl = imageUrl;
         this.modifiedDate = modifiedDate;
         this.barcode = barcode;
+        this.lowStockAlert = true;
     }
 
     public Product(String imageUrl, String productName, String price)
@@ -184,6 +185,14 @@ public class Product {
 
     public void setStaffKey(String staffKey) {
         this.staffKey = staffKey;
+    }
+
+    public boolean isLowStockAlert() {
+        return lowStockAlert;
+    }
+
+    public void setLowStockAlert(boolean lowStockAlert) {
+        this.lowStockAlert = lowStockAlert;
     }
 
 }

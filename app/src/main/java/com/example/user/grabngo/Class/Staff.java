@@ -6,17 +6,19 @@ public class Staff {
     private String name;
     private String password;
     private String phone;
+    private String profileUrl;
 
     public Staff(){
 
     }
 
-    public Staff(String address, String email, String name, String password, String phone) {
+    public Staff(String address, String email, String name, String password, String phone, String profileUrl) {
         this.address = address;
         this.email = email;
         this.name = name;
         this.password = password;
         this.phone = phone;
+        this.profileUrl = profileUrl;
     }
 
     public String getAddress() {
@@ -57,5 +59,13 @@ public class Staff {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getProfileUrl() {
+        return profileUrl;
+    }
+
+    public void setProfileUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
     }
 }
