@@ -94,12 +94,29 @@
                     app:srcCompat="@drawable/ic_insert_photo_black_24dp" />
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:fontFamily="sans-serif-medium"
                     android:text="Post Photo"
-                    android:textSize="25sp" />
+                    android:textSize="18sp" />
+
+                <ImageView
+                    android:id="@+id/imageViewUndo"
+                    android:layout_width="38dp"
+                    android:layout_height="35dp"
+                    android:layout_marginLeft="60dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    app:srcCompat="@drawable/ic_undo_black_24dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Undo Photo"
+                    android:textSize="18sp" />
 
             </LinearLayout>
 

@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,25 +23,29 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.util.Calendar;
+import java.util.Date;
 
 public class PostActivity extends AppCompatActivity {
     private static final int RC_PHOTO_PICKER = 2;
 
     private EditText editTextContent;
-    private ImageView imageViewPostPic, imageViewSelectPhoto;
+    private ImageView imageViewPostPic, imageViewSelectPhoto, imageViewUndo;
     private Button btnPost;
 
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mStorageReference;
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
+    private DocumentReference mDocumentReference;
 
-    private String image;
+    private String image, id;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -81,6 +86,9 @@ public class PostActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post);
 
+        Intent intent = getIntent();
+        final String time = intent.getStringExtra("time");
+
         mFirebaseStorage = FirebaseStorage.getInstance();
         mStorageReference = mFirebaseStorage.getReference().child("post_photo");
         mFirebaseFirestore = FirebaseFirestore.getInstance();
@@ -89,6 +97,7 @@ public class PostActivity extends AppCompatActivity {
         editTextContent = (EditText)findViewById(R.id.editTextContent);
         imageViewPostPic = (ImageView)findViewById(R.id.imageViewPostPic);
         imageViewSelectPhoto = (ImageView)findViewById(R.id.imageViewSelectPhoto);
+        imageViewUndo = (ImageView)findViewById(R.id.imageViewUndo);
         btnPost = (Button)findViewById(R.id.btnPost);
 
         imageViewSelectPhoto.setOnClickListener(new View.OnClickListener() {
@@ -100,25 +109,68 @@ public class PostActivity extends AppCompatActivity {
                 startActivityForResult(Intent.createChooser(intent,"Complete the action using"), RC_PHOTO_PICKER);
             }
         });
+        imageViewUndo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                image = null;
+                imageViewPostPic.setVisibility(View.GONE);
+            }
+        });
 
+        Log.i("Time", time);
+
+        if(time != null)
+        {
+            mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    Log.i("Testing ", "hello");
+                    for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                    {
+                        Log.i("Testing2 ","Hello");
+                        Post post = documentSnapshot.toObject(Post.class);
+                        String timesss = post.getPostDate()+"";
+                        if(time.equals(timesss))
+                        {
+                            String content = post.getContent();
+                            String picture = post.getPostImage();
+                            id = documentSnapshot.getId();
+                            editTextContent.setText(content);
+                            Glide.with(PostActivity.this).load(picture).into(imageViewPostPic);
+                            imageViewPostPic.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+            });
+        }
 
 
         btnPost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Calendar calendar = Calendar.getInstance();
-                java.sql.Timestamp currentTimeStamp = new java.sql.Timestamp(calendar.getTime().getTime());
-                String id = SaveSharedPreference.getID(PostActivity.this);
-                String content = editTextContent.getText().toString();
-                Post post = new Post(id, image, content, currentTimeStamp);
-                mCollectionReference.add(post).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Intent intent = new Intent(PostActivity.this, HomeActivity.class);
-                        startActivity(intent);
-                        Toast.makeText(PostActivity.this, "Post added successfully",Toast.LENGTH_LONG).show();
-                    }
-                });
+                if (time != null) {
+                    mDocumentReference = mFirebaseFirestore.document("Post/"+id);
+                    mDocumentReference.update("content", editTextContent.getText().toString());
+                    mDocumentReference.update("postImage",image);
+                    Intent intent1 = new Intent(PostActivity.this, HomeActivity.class);
+                    startActivity(intent1);
+                    Toast.makeText(PostActivity.this,"Edit Successfully",Toast.LENGTH_LONG).show();
+
+                } else {
+                    Calendar calendar = Calendar.getInstance();
+                    java.sql.Timestamp currentTimeStamp = new java.sql.Timestamp(calendar.getTime().getTime());
+                    String id = SaveSharedPreference.getID(PostActivity.this);
+                    String content = editTextContent.getText().toString();
+                    Post post = new Post(id, image, content, currentTimeStamp);
+                    mCollectionReference.add(post).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Intent intent = new Intent(PostActivity.this, HomeActivity.class);
+                            startActivity(intent);
+                            Toast.makeText(PostActivity.this, "Post added successfully", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
             }
         });
 
