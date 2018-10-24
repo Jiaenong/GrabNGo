@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +35,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -94,7 +96,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
         progressBarForum.setVisibility(View.VISIBLE);
         recyclerViewPost.setVisibility(View.GONE);
 
-        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        mCollectionReference.orderBy("postDate",Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 pList.clear();
@@ -115,6 +117,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
                 recyclerViewPost.setAdapter(adapter);
                 progressBarForum.setVisibility(View.GONE);
                 recyclerViewPost.setVisibility(View.VISIBLE);
+
             }
         });
 
@@ -161,7 +164,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
     public void onRefresh() {
         swipe_container.setRefreshing(true);
         pList.clear();
-        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        mCollectionReference.orderBy("postDate",Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
@@ -192,6 +195,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
         private int pos;
         private FirebaseFirestore mFirebaseFirestore;
         private DocumentReference mDocumentReference;
+        private CollectionReference gCollectionReference;
 
         @Override
         public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -245,6 +249,26 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
                     Log.i("Position ", holder.getAdapterPosition()+"");
                 }
             });
+            holder.relay.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Date time = post.getPostDate();
+                    gCollectionReference = mFirebaseFirestore.collection("Post");
+                    gCollectionReference.whereEqualTo("postDate",time).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            String id = "";
+                            for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                            {
+                                id = documentSnapshot.getId();
+                            }
+                            Intent intent = new Intent(getContext(),CommentActivity.class);
+                            intent.putExtra("postKey",id);
+                            startActivity(intent);
+                        }
+                    });
+                }
+            });
         }
 
         @Override
@@ -255,6 +279,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
         public class MyViewHolder extends RecyclerView.ViewHolder{
             private TextView textViewCustomerName, textViewTime, textViewPostContent;
             private ImageView imageViewPicture, imgView_postPic, imageViewMenu;
+            private RelativeLayout relay;
 
             public MyViewHolder(View view) {
                 super(view);
@@ -264,6 +289,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
                 imageViewPicture = (ImageView) view.findViewById(R.id.imageViewPicture);
                 imgView_postPic = (ImageView) view.findViewById(R.id.imgView_postPic);
                 imageViewMenu = (ImageView) view.findViewById(R.id.imageViewMenu);
+                relay = (RelativeLayout)view.findViewById(R.id.relay);
 
             }
         }

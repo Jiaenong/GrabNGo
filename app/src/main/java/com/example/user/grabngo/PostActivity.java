@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -117,8 +119,6 @@ public class PostActivity extends AppCompatActivity {
             }
         });
 
-        Log.i("Time", time);
-
         if(time != null)
         {
             mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -152,8 +152,7 @@ public class PostActivity extends AppCompatActivity {
                     mDocumentReference = mFirebaseFirestore.document("Post/"+id);
                     mDocumentReference.update("content", editTextContent.getText().toString());
                     mDocumentReference.update("postImage",image);
-                    Intent intent1 = new Intent(PostActivity.this, HomeActivity.class);
-                    startActivity(intent1);
+                    finish();
                     Toast.makeText(PostActivity.this,"Edit Successfully",Toast.LENGTH_LONG).show();
 
                 } else {
@@ -165,8 +164,7 @@ public class PostActivity extends AppCompatActivity {
                     mCollectionReference.add(post).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                         @Override
                         public void onSuccess(DocumentReference documentReference) {
-                            Intent intent = new Intent(PostActivity.this, HomeActivity.class);
-                            startActivity(intent);
+                            finish();
                             Toast.makeText(PostActivity.this, "Post added successfully", Toast.LENGTH_LONG).show();
                         }
                     });
@@ -174,5 +172,21 @@ public class PostActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;
     }
 }

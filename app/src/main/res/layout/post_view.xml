@@ -85,6 +85,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/textViewPostContent"
         android:layout_marginTop="5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="5dp"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         android:src="@drawable/initial"
@@ -105,14 +108,15 @@
         android:layout_below="@+id/imgView_line">
 
         <RelativeLayout
+            android:id="@+id/relay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1">
 
             <LinearLayout
+                android:id="@+id/layout5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/layout5"
                 android:layout_centerInParent="true">
 
                 <ImageView

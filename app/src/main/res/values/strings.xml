@@ -95,4 +95,6 @@
     <string name="post">Post</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="edit_comment">Edit Comment</string>
+    <string name="comment">Comment</string>
 </resources>

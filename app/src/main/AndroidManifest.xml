@@ -88,7 +88,10 @@
         <receiver android:name=".Class.LowStockNotification" />
 
         <activity android:name=".Admin.IgnoreLowStockActivity" />
-        <activity android:name=".Admin.AddSupplierActivity"></activity>
+        <activity android:name=".Admin.AddSupplierActivity" />
+        <activity android:name=".CommentActivity"
+            android:label="Comment"
+            android:parentActivityName=".HomeActivity"></activity>
     </application>
 
 </manifest>

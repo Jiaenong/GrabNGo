@@ -119,18 +119,10 @@ public class SignUpActivity extends AppCompatActivity {
         }else
             gender = radioButtonFemale.getText().toString();
         Customer customer = new Customer(email, password, name, gender, address, pic);
-        try {
-            Log.i("Testing ",email);
-            GMailSender sender = new GMailSender("jiaen.ong.jo@gmail.com","Ahen199765");
-            sender.sendMail("Sign Up Successfully!!",
-                    "Thanks for register to the GrabNGo, you can now enjoy the service provided by the system",
-                    "jiaen.ong.jo@gmail.com","ongje-pa15@student.tarc.edu.my");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         mDocumentReference.set(customer).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
+                emailSend(email);
                 AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(SignUpActivity.this, R.style.AlertDialogCustom));
                 builder.setTitle("Sign Up Success");
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -146,5 +138,15 @@ public class SignUpActivity extends AppCompatActivity {
                 alert.show();
             }
         });
+    }
+
+    private void emailSend(String email) {
+        String subject = "Registration Successfull !";
+        String message = "Welcome to GrabNGo, from now on you can start enjoy using the service provided by our system.";
+
+        SendeMail sm = new SendeMail(SignUpActivity.this, email, subject, message);
+        sm.execute();
+
+        return;
     }
 }
