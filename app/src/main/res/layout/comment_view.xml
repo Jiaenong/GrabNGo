@@ -4,13 +4,18 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <android.support.v7.widget.CardView
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
     <RelativeLayout
         android:id="@+id/relayLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginRight="15dp">
+        android:padding="10dp">
 
         <android.support.v7.widget.CardView
             android:id="@+id/cardview"
@@ -58,12 +63,13 @@
 
         <ImageView
             android:id="@+id/imageViewMenuButton"
-            android:layout_width="20dp"
-            android:layout_height="30dp"
+            android:layout_width="24dp"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_toRightOf="@+id/linearlayout6"
             android:scaleType="fitEnd"
             app:srcCompat="@drawable/ic_more_vert_black_24dp" />
 
     </RelativeLayout>
+    </android.support.v7.widget.CardView>
 </RelativeLayout>

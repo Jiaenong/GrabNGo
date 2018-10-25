@@ -34,6 +34,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.example.user.grabngo.Class.Comment;
 import com.example.user.grabngo.Class.Customer;
+import com.example.user.grabngo.Class.Staff;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -232,22 +233,38 @@ public class CommentActivity extends AppCompatActivity {
             Comment comment = commentList.get(position);
             holder.textViewComment.setText(comment.getCommentContent());
             holder.imageViewMenuButton.setVisibility(View.GONE);
-            if(key.equals(comment.getCustomerKey()))
+            if(key.equals(comment.getCustomerKey())||key.substring(0,1).equals("S"))
             {
                 holder.imageViewMenuButton.setVisibility(View.VISIBLE);
             }
-            String id = comment.getCustomerKey();
-            nDocumentReference = nFirebaseFirestore.document("Customer/"+id);
-            nDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    Customer customer = documentSnapshot.toObject(Customer.class);
-                    holder.textViewCustomerName.setText(customer.getName());
-                    if(!(customer.getProfilePic().equals(""))) {
-                        Glide.with(CommentActivity.this).load(customer.getProfilePic()).into(holder.imageViewCustomerPic);
+            String text = comment.getCustomerKey().substring(0,1);
+            if(text.equals("S"))
+            {
+                nDocumentReference = nFirebaseFirestore.document("Staff/"+comment.getCustomerKey());
+                nDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        Staff staff = documentSnapshot.toObject(Staff.class);
+                        holder.textViewCustomerName.setText(staff.getName());
+                        if(!(staff.getProfileUrl()).equals(""))
+                        {
+                            Glide.with(CommentActivity.this).load(staff.getProfileUrl()).into(holder.imageViewCustomerPic);
+                        }
                     }
-                }
-            });
+                });
+            }else {
+                nDocumentReference = nFirebaseFirestore.document("Customer/" + comment.getCustomerKey());
+                nDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        Customer customer = documentSnapshot.toObject(Customer.class);
+                        holder.textViewCustomerName.setText(customer.getName());
+                        if (!(customer.getProfilePic().equals(""))) {
+                            Glide.with(CommentActivity.this).load(customer.getProfilePic()).into(holder.imageViewCustomerPic);
+                        }
+                    }
+                });
+            }
             holder.imageViewMenuButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
