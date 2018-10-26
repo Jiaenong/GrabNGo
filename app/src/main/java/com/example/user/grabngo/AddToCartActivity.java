@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.user.grabngo.Class.Cart;
 import com.example.user.grabngo.Class.CartItem;
 import com.example.user.grabngo.Class.CartList;
 import com.example.user.grabngo.Class.Product;
@@ -126,10 +127,8 @@ public class AddToCartActivity extends AppCompatActivity {
                         {
                             Product product = documentSnapshot.toObject(Product.class);
                             String name = product.getProductName();
-                            String imageSrc = product.getImageUrl();
-                            String price = product.getPrice();
                             String key = documentSnapshot.getId();
-                            AddCart(name, imageSrc, price, key);
+                            AddCart(name, key);
                         }
                     }
                 });
@@ -141,14 +140,13 @@ public class AddToCartActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void AddCart(String name, String imageSrc, String price, String key)
+    private void AddCart(String name, String productRef)
     {
         String id = SaveSharedPreference.getID(AddToCartActivity.this);
         int qty = Integer.parseInt(quantity.getText().toString());
-        Double itemprice = Double.parseDouble(price);
         mCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
-        CartItem cartItem = new CartItem(name,imageSrc, qty, itemprice, key);
-        mCollectionReference.add(cartItem);
+        Cart cart = new Cart(name, productRef,qty);
+        mCollectionReference.add(cart);
     }
 
     @Override

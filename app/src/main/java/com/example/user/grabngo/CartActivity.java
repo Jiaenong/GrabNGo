@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -27,15 +28,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.user.grabngo.Class.Cart;
 import com.example.user.grabngo.Class.CartAdapter;
 import com.example.user.grabngo.Class.CartItem;
 import com.example.user.grabngo.Class.CartList;
 import com.example.user.grabngo.Class.Comment;
 import com.example.user.grabngo.Class.Coupon;
+import com.example.user.grabngo.Class.Product;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -54,6 +58,7 @@ public class CartActivity extends AppCompatActivity {
     private CollectionReference mCollectionReference;
     private ProgressBar progressBarCart;
     private int promoPrice;
+    private double totalPrice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +74,7 @@ public class CartActivity extends AppCompatActivity {
         progressBarCart = (ProgressBar)findViewById(R.id.progressBarCart);
         mRecyclerView = (RecyclerView)findViewById(R.id.cart_recycle_view);
         cartList = new ArrayList<>();
+
         String id = SaveSharedPreference.getID(CartActivity.this);
         progressBarCart.setVisibility(View.VISIBLE);
         mRecyclerView.setVisibility(View.GONE);
@@ -78,43 +84,64 @@ public class CartActivity extends AppCompatActivity {
         mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                double totalprice = 0;
+                totalPrice = 0;
+
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                 {
-                    CartItem cartItem = documentSnapshot.toObject(CartItem.class);
-                    String name = cartItem.getProductname();
-                    String imageSrc = cartItem.getImageSrc();
-                    int qty = cartItem.getQuantity();
-                    double price = cartItem.getPrice();
-                    CartItem cartitem = new CartItem(name, imageSrc, qty, price);
-                    cartList.add(cartitem);
-                    totalprice += price*qty;
-                }
-                mAdapter = new CartAdapter(cartList);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-                mRecyclerView.setLayoutManager(mLayoutManager);
-                mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-                mRecyclerView.setAdapter(mAdapter);
-                pricePayment.setText("RM " + String.format("%.2f",totalprice));
-                progressBarCart.setVisibility(View.GONE);
-                mRecyclerView.setVisibility(View.VISIBLE);
+                    Cart cart = documentSnapshot.toObject(Cart.class);
+                    cart.setCartRef(documentSnapshot.getId().toString());
+                    String productRef = cart.getProductRef();
 
-                if(cartList.isEmpty()){
-                    editTextPromo.setFocusable(false);
-                    btnApplyPromo.setOnClickListener(null);
-                    btnPayment.setBackgroundColor(getResources().getColor(R.color.foreground_light_color));
-
-                }else {
-                    btnPayment.setOnClickListener(new View.OnClickListener() {
+                    mFirebaseFirestore.collection("Product").document(productRef).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
-                        public void onClick(View view) {
+                        public void onSuccess(DocumentSnapshot documentSnapshot1) {
+                            Product product = documentSnapshot1.toObject(Product.class);
 
-                            Intent intent = new Intent(CartActivity.this, PaymentActivity.class);
-                            intent.putExtra("totalPrice",pricePayment.getText().toString());
-                            startActivity(intent);
+                            double price = Double.parseDouble(product.getPrice());
+                            if(product.getDiscount()!=0){
+                                double discountPercent = (100 - product.getDiscount())*0.01;
+                                price = price * discountPercent;
+                            }
+
+                            CartItem cartItem = new CartItem(product.getProductName(),
+                                    product.getImageUrl(),
+                                    cart.getQuantity(),
+                                    price,
+                                    cart.getCartRef());
+
+                            cartList.add(cartItem);
+                            totalPrice += price*cart.getQuantity();
+                            mAdapter = new CartAdapter(cartList);
+                            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                            mRecyclerView.setLayoutManager(mLayoutManager);
+                            mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+                            mRecyclerView.setAdapter(mAdapter);
+                            pricePayment.setText("RM " + String.format("%.2f",totalPrice));
+
+                            if(cartList.isEmpty()){
+                                editTextPromo.setFocusable(false);
+                                btnApplyPromo.setOnClickListener(null);
+                                btnPayment.setBackgroundColor(getResources().getColor(R.color.foreground_light_color));
+
+                            }else {
+                                btnPayment.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+
+                                        Intent intent = new Intent(CartActivity.this, PaymentActivity.class);
+                                        intent.putExtra("totalPrice",pricePayment.getText().toString());
+                                        startActivity(intent);
+                                    }
+                                });
+                            }
+
                         }
                     });
                 }
+
+                progressBarCart.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.VISIBLE);
+
             }
         });
 
@@ -124,6 +151,12 @@ public class CartActivity extends AppCompatActivity {
                 if(editTextPromo.getText().toString().equals("")){
                     return;
                 }
+
+                InputMethodManager inputManager = (InputMethodManager)
+                        getSystemService(INPUT_METHOD_SERVICE);
+
+                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
 
                 List<Coupon> couponList = new ArrayList<>();
                 String promoCode = editTextPromo.getText().toString();
@@ -187,6 +220,7 @@ public class CartActivity extends AppCompatActivity {
                 textViewPromo.setText("Promo Saved: RM 0.00");
                 double totalPrice = Double.parseDouble(pricePayment.getText().toString().substring(2));
                 double originalPrice = totalPrice+promoPrice;
+                promoPrice = 0;
                 pricePayment.setText("RM " + String.format("%.2f", originalPrice));
             }
         });
@@ -255,45 +289,68 @@ public class CartActivity extends AppCompatActivity {
             holder.imageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String name = cartItem.getProductname();
+
                     String id = SaveSharedPreference.getID(CartActivity.this);
-                    Log.i("Testing :",name);
                     mCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
-                    mCollectionReference.whereEqualTo("productname",name).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                        @Override
-                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                            double price = 0, totalPrice = 0;
-                            String key = "";
-                            int quantity = 0;
-                            String id = SaveSharedPreference.getID(CartActivity.this);
-                            for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                            {
-                                CartItem cart = documentSnapshot.toObject(CartItem.class);
-                                key = documentSnapshot.getId();
-                                price = cart.getPrice();
-                                quantity = cart.getQuantity();
 
+                    totalPrice = Double.parseDouble(pricePayment.getText().toString().substring(2));
+                    totalPrice -= cartItem.getPrice()*cartItem.getQuantity();
+                    if(totalPrice<=promoPrice && promoPrice!=0){
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(CartActivity.this, R.style.AlertDialogCustom));
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                btnApplyPromo.setVisibility(View.VISIBLE);
+                                editTextPromo.setVisibility(View.VISIBLE);
+                                btnChange.setVisibility(View.GONE);
+                                textViewAppliedPromo.setVisibility(View.GONE);
+                                editTextPromo.setText("");
+                                textViewPromo.setText("Promo Saved: RM 0.00");
+                                totalPrice += promoPrice;
+                                promoPrice =0;
+                                pricePayment.setText("RM " + String.format("%.2f", totalPrice));
+                                updateCart(position,cartItem);
                             }
-                            mDocumentReference = mFirebaseFirestore.document("Customer/"+id+"/Cart/"+key);
-                            mDocumentReference.delete();
-                            String text = pricePayment.getText().toString();
-                            totalPrice = Double.parseDouble(text.substring(2));
-                            totalPrice -= price*quantity;
-                            pricePayment.setText("RM " + String.format("%.2f",totalPrice));
-
-                            if(cartList.isEmpty()){
-                                editTextPromo.setFocusable(false);
-                                btnApplyPromo.setOnClickListener(null);
-                                btnPayment.setBackgroundColor(getResources().getColor(R.color.foreground_light_color));
-                                btnPayment.setOnClickListener(null);
+                        });
+                        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                return;
                             }
-                        }
-                    });
+                        });
+                        builder.setTitle("Warning");
+                        builder.setMessage("Promo only applicable with minimum purchase of RM " + promoPrice + ". Continue to delete?");
+                        AlertDialog alert = builder.create();
+                        alert.show();
 
-                    cart.remove(position);
-                    Toast.makeText(CartActivity.this, "Item removed from cart",Toast.LENGTH_SHORT).show();
-                    notifyItemRemoved(position);
-                    notifyItemRangeChanged(position,cart.size());
+                    }else {
+                        updateCart(position,cartItem);
+                    }
+
+
+
+                }
+            });
+        }
+
+        public void updateCart(int position, CartItem cartItem){
+            pricePayment.setText("RM " + String.format("%.2f",totalPrice));
+
+            cart.remove(position);
+            notifyItemRemoved(position);
+            notifyItemRangeChanged(position,cart.size());
+
+            if(cartList.isEmpty()){
+                editTextPromo.setFocusable(false);
+                btnApplyPromo.setOnClickListener(null);
+                btnPayment.setBackgroundColor(getResources().getColor(R.color.foreground_light_color));
+                btnPayment.setOnClickListener(null); }
+
+            mCollectionReference.document(cartItem.getProductKey()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    return;
                 }
             });
         }

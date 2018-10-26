@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.example.user.grabngo.Class.Cart;
 import com.example.user.grabngo.Class.CartItem;
 import com.example.user.grabngo.Class.CartList;
 import com.example.user.grabngo.Class.Payment;
@@ -31,6 +32,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 
 import org.w3c.dom.Text;
 
@@ -137,8 +139,8 @@ public class PaymentActivity extends AppCompatActivity {
         btnPayment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(progressDialog.isShowing())
-                    progressDialog.setMessage("Processing...");
+
+                progressDialog.setMessage("Processing...");
                 progressDialog.show();
                 items.clear();
                 if(switchSave.isChecked())
@@ -174,34 +176,48 @@ public class PaymentActivity extends AppCompatActivity {
                         mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                             @Override
                             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                String key = "";
-                                int quantity = 0;
+
                                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                                 {
-                                    CartItem cartItem = documentSnapshot.toObject(CartItem.class);
-                                    String item = cartItem.getProductname();
-                                    key = cartItem.getProductKey();
-                                    qty = cartItem.getQuantity();
-                                    quantity = cartItem.getQuantity();
-                                    double price = cartItem.getPrice();
-                                    PaymentDetail paymentDetail = new PaymentDetail(item, quantity, price);
-                                    pCollectionReference.add(paymentDetail).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                    Cart cart = documentSnapshot.toObject(Cart.class);
+                                    String key = cart.getProductRef();
+                                    int quantity = cart.getQuantity();
+
+                                    mFirebaseFirestore.collection("Product").document(key).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                         @Override
-                                        public void onSuccess(DocumentReference documentReference) {
-                                            return;
+                                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                            Product product = documentSnapshot.toObject(Product.class);
+
+                                            double price = Double.parseDouble(product.getPrice());
+                                            if(product.getDiscount()!=0){
+                                                double discountPercent = (100 - product.getDiscount())*0.01;
+                                                price = price * discountPercent;
+                                            }
+
+                                            PaymentDetail paymentDetail = new PaymentDetail(product.getProductName(), quantity, price);
+                                            pCollectionReference.add(paymentDetail).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                @Override
+                                                public void onSuccess(DocumentReference documentReference) {
+                                                    return;
+                                                }
+                                            });
+
+                                            nDocumentReference = mFirebaseFirestore.collection("Product").document(key);
+                                            int quantityStock = product.getStockAmount();
+                                            quantityStock -= quantity;
+                                            nDocumentReference.update("stockAmount",quantityStock).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    return;
+                                                }
+                                            });
+
                                         }
                                     });
+
+
                                 }
-                                nDocumentReference = mFirebaseFirestore.document("Product/"+key);
-                                nDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                    @Override
-                                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                        Product product = documentSnapshot.toObject(Product.class);
-                                        int quantity = product.getStockAmount();
-                                        quantity -= qty;
-                                        nDocumentReference.update("stockAmount",quantity);
-                                    }
-                                });
+
                             }
                         });
                         if(progressDialog.isShowing())
@@ -213,10 +229,6 @@ public class PaymentActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 int batchSize = 3;
                                 deleteCollection(batchSize);
-
-                                Intent intent = new Intent(PaymentActivity.this, HomeActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
                             }
                         });
                         builder.setMessage("Please check your email for the receipt.");
@@ -238,15 +250,20 @@ public class PaymentActivity extends AppCompatActivity {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 int deleted = 0;
+                WriteBatch batch = mFirebaseFirestore.batch();
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                 {
-                    documentSnapshot.getReference().delete();
-                    ++deleted;
+                    DocumentReference mDocumentReference = documentSnapshot.getReference();
+                    batch.delete(mDocumentReference);
                 }
-                if(deleted >= batchSize)
-                {
-                    deleteCollection(batchSize);
-                }
+                batch.commit().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Intent intent = new Intent(PaymentActivity.this, HomeActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                    }
+                });
             }
         });
 
