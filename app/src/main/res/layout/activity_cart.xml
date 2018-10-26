@@ -18,14 +18,77 @@
         android:id="@+id/cart_recycle_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="60dp"
+        android:layout_above="@id/promoCode"
         android:background="#ECEFF1">
 
     </android.support.v7.widget.RecyclerView>
 
     <LinearLayout
+        android:id="@+id/promoCode"
+        android:focusableInTouchMode="true"
+        android:focusable="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:orientation="horizontal"
+        android:background="@color/colorPrimary"
+        android:gravity="center_vertical"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:layout_above="@id/bottomFooter">
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/textViewAppliedPromo"
+            android:layout_weight="8"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:textColor="#fff"
+            android:paddingTop="5dp"
+            android:paddingLeft="20dp"
+            android:textSize="14sp"
+            android:paddingBottom="5dp"
+            android:text="Applied Promo Code : ADKFOF"/>
+        <Button
+            android:visibility="gone"
+            android:id="@+id/btn_change"
+            android:layout_weight="3"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_marginRight="10dp"
+            android:text="Change"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textAllCaps="false"/>
+
+        <EditText
+            android:id="@+id/editTextPromo"
+            android:layout_weight="8"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:background="#ECEFF1"
+            android:padding="4dp"
+            android:textSize="14sp"
+            android:hint="Promo Code"/>
+        <Button
+            android:id="@+id/btn_apply_promo"
+            android:layout_weight="3"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_marginRight="10dp"
+            android:text="Apply"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textAllCaps="false"/>
+    </LinearLayout>
+
+    <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="60dp"
+    android:id="@+id/bottomFooter"
     android:padding="10dp"
     android:orientation="horizontal"
     android:layout_alignParentBottom="true"
@@ -59,6 +122,7 @@
                 android:textSize="18sp" />
         </LinearLayout>
         <TextView
+            android:id="@+id/textViewPromo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Promo Saved: RM 0.00"
