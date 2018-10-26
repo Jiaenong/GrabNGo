@@ -18,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -48,6 +49,7 @@ public class StockOrderFragment extends Fragment {
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
     private FloatingActionButton fab;
+    private Button btnMakeOrder;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -62,6 +64,7 @@ public class StockOrderFragment extends Fragment {
 
         recyclerView = (RecyclerView)v.findViewById(R.id.recycleViewSupplier);
         progressBar = (ProgressBar)v.findViewById(R.id.progressBar);
+        btnMakeOrder = (Button)v.findViewById(R.id.btn_order);
         fab = (FloatingActionButton) v.findViewById(R.id.fab);
         supplierList = new ArrayList<>();
         mFirebaseFirestore = FirebaseFirestore.getInstance();
@@ -71,6 +74,14 @@ public class StockOrderFragment extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
 
         supplierAdapter = new SupplierAdapter(getActivity(),supplierList);
+
+        btnMakeOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(),MakeOrderActivity.class);
+                startActivity(intent);
+            }
+        });
 
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getActivity(), recyclerView, new RecyclerTouchListener.ClickListener() {
             @Override

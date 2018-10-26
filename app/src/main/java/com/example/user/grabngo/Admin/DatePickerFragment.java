@@ -28,6 +28,7 @@ import java.util.GregorianCalendar;
 public class DatePickerFragment extends DialogFragment {
     private DatePicker datePicker;
     private EditText editTextExpiredDate;
+    private static int number;
     private static final String ARG_DATE = "date";
     public static final String EXTRA_DATE = "com.example.user.piggyplanner.date";
 
@@ -40,12 +41,31 @@ public class DatePickerFragment extends DialogFragment {
         return fragment;
     }
 
+    public  static DatePickerFragment newInstancePromotion(Date date, int i){
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_DATE,date);
+        number = i;
+
+        DatePickerFragment fragment = new DatePickerFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         editTextExpiredDate = (EditText) getActivity().findViewById(R.id.editTextExpiry);
+
+        if(editTextExpiredDate==null){
+            if(number==1) {
+                editTextExpiredDate = (EditText) getActivity().findViewById(R.id.editTextStartDate);
+            }else{
+                editTextExpiredDate = (EditText) getActivity().findViewById(R.id.editTextEndDate);
+            }
+        }
+
         Date date = new Date();
         if(!editTextExpiredDate.getText().toString().equals("")){
             try {

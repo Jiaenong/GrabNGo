@@ -3,13 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#ECEFF1"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".Admin.PromotionFragment">
-    <LinearLayout
+    tools:context=".Admin.StockOrderFragment">
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#ECEFF1"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
@@ -17,7 +17,7 @@
             android:layout_above="@+id/linearLayout">
 
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/recycleViewPromotion"
+                android:id="@+id/recycleViewProduct"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
@@ -47,15 +47,24 @@
                 app:layout_constraintVertical_bias="0.446" />
         </android.support.constraint.ConstraintLayout>
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            >
+            <Button
+                android:id="@+id/btn_confirm"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/comfirm_color"
+                android:textColor="#fff"
+                android:text="Confirm"
+                android:textAllCaps="false"/>
+        </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scaleType="center"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/ic_add_white_24dp" />
+    </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

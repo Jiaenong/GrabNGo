@@ -1,18 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ECEFF1">
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
+
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:background="#ECEFF1"
+    android:layout_height="wrap_content">
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="#ECEFF1"
         tools:context=".Admin.DiscountDetailActivity">
 
         <android.support.v7.widget.CardView
+            android:id="@+id/cardViewCoupon"
+            android:visibility="gone"
             android:layout_margin="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -20,14 +38,17 @@
                 android:padding="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="440dp"
                 android:orientation="vertical">
                 <ImageView
+                    android:id="@+id/imageCouponPromotion"
                     android:layout_gravity="center_horizontal"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:layout_marginBottom="20dp"
                     android:src="@drawable/discount_coupon"/>
                 <TextView
+                    android:id="@+id/textCouponTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="5dp"
@@ -36,13 +57,14 @@
                     android:text="Enjoy RM 20 cash rebate !"/>
 
                 <TextView
-                    android:id="@+id/description"
+                    android:id="@+id/textCouponDescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="5dp"
                     android:text="Enjoy RM 20 cash rebate during the next purchase by applying the promo code given. Limited to first 100 customers only."/>
 
                 <TextView
+                    android:id="@+id/textCouponType"
                     android:gravity="center_vertical"
                     android:layout_marginTop="10dp"
                     android:layout_width="match_parent"
@@ -53,6 +75,7 @@
                     android:text="Promo Type  : Coupon"/>
 
                 <TextView
+                    android:id="@+id/textCouponDuration"
                     android:gravity="center_vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -62,15 +85,7 @@
                     android:text="Duration         : 25/7/2018 - 9/8/2018"/>
 
                 <TextView
-                    android:gravity="center_vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="5dp"
-                    android:drawableLeft="@drawable/ic_person_black_24dp"
-                    android:drawablePadding="12dp"
-                    android:text="Eligibility         : First 100 customers"/>
-
-                <TextView
+                    android:id="@+id/textCouponCoupon"
                     android:gravity="center_vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -80,6 +95,119 @@
                     android:text="Coupon code : EE123"/>
 
                 <TextView
+                    android:id="@+id/textCouponRebate"
+                    android:gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:drawableLeft="@drawable/ic_attach_money_black_24dp"
+                    android:drawablePadding="12dp"
+                    android:text="Cash Rebate  : RM 120"/>
+
+                <TextView
+                    android:id="@+id/textCouponStatus"
+                    android:gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:drawableLeft="@drawable/ic_status_black_24dp"
+                    android:drawablePadding="12dp"
+                    android:text="Status             : Ongoing"/>
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/cardViewDiscount"
+            android:layout_margin="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:padding="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="440dp"
+                android:orientation="vertical">
+                <ImageView
+                    android:id="@+id/imageDiscountPromotion"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginBottom="20dp"
+                    android:src="@drawable/discount_product"/>
+                <TextView
+                    android:id="@+id/textDiscountTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:textColor="@color/foreground_dark_color"
+                    android:textSize="18sp"
+                    android:text="Enjoy RM 20 cash rebate !"/>
+
+                <TextView
+                    android:id="@+id/textDiscountDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="Enjoy RM 20 cash rebate during the next purchase by applying the promo code given. Limited to first 100 customers only."/>
+
+                <TextView
+                    android:id="@+id/textDiscountType"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:drawableLeft="@drawable/ic_baseline_category_24px"
+                    android:drawablePadding="12dp"
+                    android:text="Promo Type  : Coupon"/>
+
+                <TextView
+                    android:id="@+id/textDiscountDuration"
+                    android:gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:drawableLeft="@drawable/ic_date_range_black_24dp"
+                    android:drawablePadding="12dp"
+                    android:text="Duration         : 25/7/2018 - 9/8/2018"/>
+
+                <TextView
+                    android:id="@+id/textDiscountPercent"
+                    android:gravity="center_vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:drawableLeft="@drawable/ic_discount_black"
+                    android:drawablePadding="12dp"
+                    android:text="Discount        : 20 %"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                <TextView
+                    android:gravity="center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:drawableLeft="@drawable/ic_view_headline_black_24dp"
+                    android:drawablePadding="12dp"
+                    android:text="Product List  :"/>
+
+                    <TextView
+                        android:id="@+id/textDiscountProduct"
+                        android:gravity="center_vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp"
+                        android:paddingRight="5dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textDiscountStatus"
                     android:gravity="center_vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -99,7 +227,7 @@
             android:layout_marginBottom="10dp"
             android:orientation="horizontal">
             <Button
-                android:id="@+id/btn_cancel"
+                android:id="@+id/btn_delete"
                 android:layout_weight="1"
                 android:layout_marginRight="5dp"
                 android:layout_width="wrap_content"
@@ -110,7 +238,7 @@
                 android:text="Delete"/>
 
             <Button
-                android:id="@+id/btn_save"
+                android:id="@+id/btn_edit"
                 android:layout_weight="1"
                 android:layout_marginLeft="5dp"
                 android:layout_width="wrap_content"
@@ -123,3 +251,4 @@
 
     </LinearLayout>
 </ScrollView>
+</RelativeLayout>

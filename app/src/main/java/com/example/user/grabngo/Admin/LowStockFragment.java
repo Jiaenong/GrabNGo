@@ -66,14 +66,6 @@ public class LowStockFragment extends Fragment {
 
         lowStockAdapter = new LowStockAdapter(getActivity(),productList);
 
-        /*AlarmManager alarmMgr = (AlarmManager)getActivity().getSystemService(getActivity().ALARM_SERVICE);
-        Intent notificationIntent = new Intent(getActivity(), LowStockNotification.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0, notificationIntent, 0);
-        if(alarmMgr!=null){
-            alarmMgr.cancel(pendingIntent);
-            SaveSharedPreference.setCheckAlert(getActivity(),false);
-        }*/
-
         return v;
     }
 

@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -12,16 +13,20 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.user.grabngo.Class.LowStockNotification;
+import com.example.user.grabngo.LoginActivity;
 import com.example.user.grabngo.R;
 import com.example.user.grabngo.SaveSharedPreference;
 import com.example.user.grabngo.ViewDialog;
 
 import java.util.Calendar;
+import java.util.Date;
 
 public class ManagerHomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -136,8 +141,35 @@ public class ManagerHomeActivity extends AppCompatActivity
             fm.beginTransaction().replace(R.id.fragment_container, fragment).commit();
 
         } else if (id == R.id.nav_share) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(ManagerHomeActivity.this);
+            builder.setTitle("Do you want to log out?");
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
 
+                    AlarmManager alarmMgr = (AlarmManager)ManagerHomeActivity.this.getSystemService(ManagerHomeActivity.this.ALARM_SERVICE);
+                    Intent notificationIntent = new Intent(ManagerHomeActivity.this, LowStockNotification.class);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(ManagerHomeActivity.this, 0, notificationIntent, 0);
+                    if(alarmMgr!=null){
+                        alarmMgr.cancel(pendingIntent);
+                        SaveSharedPreference.setCheckAlert(ManagerHomeActivity.this,false);
+                    }
 
+                    SaveSharedPreference.clearUser(ManagerHomeActivity.this);
+                    Intent intent = new Intent(ManagerHomeActivity.this,LoginActivity.class);
+                    startActivity(intent);
+                    finish();
+
+                }
+            });
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    return;
+                }
+            });
+            AlertDialog alert = builder.create();
+            alert.show();
 
         } else if (id == R.id.nav_manage){
 
@@ -159,12 +191,11 @@ public class ManagerHomeActivity extends AppCompatActivity
     private void scheduleNotification() {
 
         Intent notificationIntent = new Intent(this, LowStockNotification.class);
-        notificationIntent.putExtra(LowStockNotification.NOTIFICATION,1);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 10);
+        calendar.set(Calendar.HOUR_OF_DAY, 13);
+        calendar.set(Calendar.MINUTE,0);
         AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
 

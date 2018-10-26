@@ -11,13 +11,12 @@ public class Product {
     private String category;
     private String expired;
     private String shelfLocation;
-    private int stockAmount;
+    private int stockAmount, discount;
     private String imageUrl;
     private String barcode;
     private String modifiedStaffName;
     private @ServerTimestamp Date modifiedDate;
     private String supplierKey;
-    private String staffKey;
     private String documentID;
     private boolean lowStockAlert;
 
@@ -40,8 +39,8 @@ public class Product {
         this.modifiedStaffName = modifiedStaffName;
         this.modifiedDate = modifiedDate;
         this.supplierKey = supplierKey;
-        this.staffKey = staffKey;
         this.lowStockAlert = true;
+        this.discount = discount;
     }
 
     public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, int stockAmount, String imageUrl, Date modifiedDate)
@@ -179,14 +178,6 @@ public class Product {
         this.supplierKey = supplierKey;
     }
 
-    public String getStaffKey() {
-        return staffKey;
-    }
-
-    public void setStaffKey(String staffKey) {
-        this.staffKey = staffKey;
-    }
-
     public boolean isLowStockAlert() {
         return lowStockAlert;
     }
@@ -195,4 +186,11 @@ public class Product {
         this.lowStockAlert = lowStockAlert;
     }
 
+    public int getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(int discount) {
+        this.discount = discount;
+    }
 }
