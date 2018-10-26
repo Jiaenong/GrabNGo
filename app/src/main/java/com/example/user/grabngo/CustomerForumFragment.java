@@ -23,17 +23,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.user.grabngo.Class.Customer;
 import com.example.user.grabngo.Class.Post;
+import com.example.user.grabngo.Class.Staff;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -94,7 +97,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
         progressBarForum.setVisibility(View.VISIBLE);
         recyclerViewPost.setVisibility(View.GONE);
 
-        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        mCollectionReference.orderBy("postDate",Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 pList.clear();
@@ -115,6 +118,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
                 recyclerViewPost.setAdapter(adapter);
                 progressBarForum.setVisibility(View.GONE);
                 recyclerViewPost.setVisibility(View.VISIBLE);
+
             }
         });
 
@@ -161,7 +165,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
     public void onRefresh() {
         swipe_container.setRefreshing(true);
         pList.clear();
-        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        mCollectionReference.orderBy("postDate",Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
@@ -192,6 +196,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
         private int pos;
         private FirebaseFirestore mFirebaseFirestore;
         private DocumentReference mDocumentReference;
+        private CollectionReference gCollectionReference;
 
         @Override
         public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -213,25 +218,43 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
             String time = sdformat.format(post.getPostDate());
             holder.textViewTime.setText(time);
             holder.imageViewMenu.setVisibility(View.GONE);
-            String id = SaveSharedPreference.getID(getContext());
-            if(id.equals(post.getCustomerKey()))
+            final String id = SaveSharedPreference.getID(getContext());
+            Log.i("ID ", id.substring(0,1));
+            if(id.equals(post.getCustomerKey())||id.substring(0,1).equals("S"))
             {
                 holder.imageViewMenu.setVisibility(View.VISIBLE);
             }
-            mDocumentReference = mFirebaseFirestore.document("Customer/"+post.getCustomerKey());
-            mDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    Customer customer = documentSnapshot.toObject(Customer.class);
-                    String name = customer.getName();
-                    String image = customer.getProfilePic();
-                    holder.textViewCustomerName.setText(name);
-                    if(!(customer.getProfilePic().equals("")))
-                    {
-                        Glide.with(getActivity()).load(customer.getProfilePic()).into(holder.imageViewPicture);
+            String text = post.getCustomerKey().substring(0,1);
+            if(text.equals("S"))
+            {
+                mDocumentReference = mFirebaseFirestore.document("Staff/"+post.getCustomerKey());
+                mDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        Staff staff = documentSnapshot.toObject(Staff.class);
+                        String name = staff.getName();
+                        holder.textViewCustomerName.setText(name);
+                        if(!(staff.getProfileUrl().equals("")))
+                        {
+                            Glide.with(getActivity()).load(staff.getProfileUrl()).into(holder.imageViewPicture);
+                        }
                     }
-                }
-            });
+                });
+            }else {
+                mDocumentReference = mFirebaseFirestore.document("Customer/" + post.getCustomerKey());
+                mDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        Customer customer = documentSnapshot.toObject(Customer.class);
+                        String name = customer.getName();
+                        String image = customer.getProfilePic();
+                        holder.textViewCustomerName.setText(name);
+                        if (!(customer.getProfilePic().equals(""))) {
+                            Glide.with(getActivity()).load(customer.getProfilePic()).into(holder.imageViewPicture);
+                        }
+                    }
+                });
+            }
             holder.imageViewMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -245,6 +268,26 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
                     Log.i("Position ", holder.getAdapterPosition()+"");
                 }
             });
+            holder.relay.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Date time = post.getPostDate();
+                    gCollectionReference = mFirebaseFirestore.collection("Post");
+                    gCollectionReference.whereEqualTo("postDate",time).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            String id = "";
+                            for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                            {
+                                id = documentSnapshot.getId();
+                            }
+                            Intent intent = new Intent(getContext(),CommentActivity.class);
+                            intent.putExtra("postKey",id);
+                            startActivity(intent);
+                        }
+                    });
+                }
+            });
         }
 
         @Override
@@ -255,6 +298,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
         public class MyViewHolder extends RecyclerView.ViewHolder{
             private TextView textViewCustomerName, textViewTime, textViewPostContent;
             private ImageView imageViewPicture, imgView_postPic, imageViewMenu;
+            private RelativeLayout relay;
 
             public MyViewHolder(View view) {
                 super(view);
@@ -264,6 +308,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
                 imageViewPicture = (ImageView) view.findViewById(R.id.imageViewPicture);
                 imgView_postPic = (ImageView) view.findViewById(R.id.imgView_postPic);
                 imageViewMenu = (ImageView) view.findViewById(R.id.imageViewMenu);
+                relay = (RelativeLayout)view.findViewById(R.id.relay);
 
             }
         }

@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.example.user.grabngo.CustomerForumFragment;
 import com.example.user.grabngo.R;
 
 /**
@@ -62,7 +63,7 @@ public class StaffHomeFragment extends Fragment {
         cardViewForum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Fragment fragment = new ForumFragment();
+                Fragment fragment = new CustomerForumFragment();
                 fm.beginTransaction().replace(R.id.fragment_container, fragment).addToBackStack(null).commit();
             }
         });
