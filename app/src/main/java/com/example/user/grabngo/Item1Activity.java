@@ -106,7 +106,7 @@ public class Item1Activity extends AppCompatActivity {
                         recyclerViewPaymentDetail.setLayoutManager(mLayoutManager);
                         recyclerViewPaymentDetail.setItemAnimator(new DefaultItemAnimator());
                         recyclerViewPaymentDetail.setAdapter(adapter);
-                        textViewTotalPayment.setText("RM "+ String.format("%.2f",totalPayment));
+                        textViewTotalPayment.setText("RM "+String.format("%.2f",totalPayment));
                         progressBarDetail.setVisibility(View.GONE);
                         layout1.setVisibility(View.VISIBLE);
                         layout2.setVisibility(View.VISIBLE);

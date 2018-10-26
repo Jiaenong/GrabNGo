@@ -5,7 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,9 +17,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.user.grabngo.Class.Product;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -29,10 +36,13 @@ import java.util.Locale;
 
 public class SearchActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
     private ListView listViewSearch;
-    private List<Product> productList;
+    private RecyclerView recyclerViewSearchResult;
+    private ProgressBar progressBarSearch;
+    private List<Product> productList, pList;
     SearchView searchView = null;
 
     private ListViewAdapter adapter;
+    private SearchResultAdapter adapter2;
 
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
@@ -43,9 +53,14 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         setContentView(R.layout.activity_search);
 
         listViewSearch = (ListView)findViewById(R.id.listViewSearch);
+        recyclerViewSearchResult = (RecyclerView)findViewById(R.id.recycleViewSearchResult);
+        progressBarSearch = (ProgressBar)findViewById(R.id.progressBarSearch);
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Product");
         productList = new ArrayList<>();
+        pList = new ArrayList<>();
+
+        progressBarSearch.setVisibility(View.GONE);
 
         mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
@@ -70,6 +85,20 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                 listViewSearch.setAdapter(adapter);
             }
         });
+        recyclerViewSearchResult.addOnItemTouchListener(new RecyclerTouchListener(SearchActivity.this, recyclerViewSearchResult, new RecyclerTouchListener.ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                Product product = pList.get(position);
+                Intent intent2 = new Intent(SearchActivity.this, ProductDetailActivity.class);
+                intent2.putExtra("productName", product.getProductName());
+                startActivity(intent2);
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        }));
     }
 
     @Override
@@ -86,6 +115,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             searchView.setSearchableInfo(searchManager.getSearchableInfo(SearchActivity.this.getComponentName()));
             searchView.setOnQueryTextListener(this);
             searchView.setIconified(false);
+            searchView.clearFocus();
         }
         return true;
     }
@@ -97,6 +127,33 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
 
     @Override
     public boolean onQueryTextSubmit(String query) {
+        String text = query;
+        listViewSearch.setVisibility(View.GONE);
+        progressBarSearch.setVisibility(View.VISIBLE);
+        recyclerViewSearchResult.setVisibility(View.GONE);
+        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                pList.clear();
+                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                {
+                    Product product = documentSnapshot.toObject(Product.class);
+                    String name = product.getProductName();
+                    String imageUrl = product.getImageUrl();
+                    String price = product.getPrice();
+                    Product product2 = new Product(imageUrl, name, price);
+                    pList.add(product2);
+                }
+                adapter2 = new SearchResultAdapter(pList);
+                adapter2.searchFilter(text);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                recyclerViewSearchResult.setLayoutManager(mLayoutManager);
+                recyclerViewSearchResult.setItemAnimator(new DefaultItemAnimator());
+                recyclerViewSearchResult.setAdapter(adapter2);
+                progressBarSearch.setVisibility(View.GONE);
+                recyclerViewSearchResult.setVisibility(View.VISIBLE);
+            }
+        });
         return false;
     }
 
@@ -167,6 +224,71 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                 {
                     if(product.getProductName().toLowerCase(Locale.getDefault()).contains(charText)){
                         listProduct.add(product);
+                    }
+                }
+            }
+            notifyDataSetChanged();
+        }
+    }
+
+    public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapter.MyViewHolder>{
+        private List<Product> listP;
+        private ArrayList<Product> arrayList;
+
+        @Override
+        public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View resultView = LayoutInflater.from(parent.getContext()).inflate(R.layout.searchresult_view, parent, false);
+            return new MyViewHolder(resultView);
+        }
+
+        @Override
+        public void onBindViewHolder(MyViewHolder holder, int position) {
+            Product product3 = listP.get(position);
+            holder.product_name.setText(product3.getProductName());
+            holder.product_price.setText(product3.getPrice());
+            Glide.with(SearchActivity.this).load(product3.getImageUrl()).into(holder.image_product);
+            Log.i("name ",product3.getProductName());
+            Log.i("imageurl ",product3.getImageUrl());
+        }
+
+        @Override
+        public int getItemCount() {
+            return listP.size();
+        }
+
+        public class MyViewHolder extends RecyclerView.ViewHolder{
+            public TextView product_name, product_price;
+            public ImageView image_product;
+
+            public MyViewHolder(View view)
+            {
+                super(view);
+                product_name = (TextView)view.findViewById(R.id.productname);
+                product_price = (TextView)view.findViewById(R.id.product_price);
+                image_product = (ImageView)view.findViewById(R.id.imageproduct);
+            }
+        }
+
+        public SearchResultAdapter(List<Product> list)
+        {
+            listP = list;
+            this.arrayList = new ArrayList<Product>();
+            this.arrayList.addAll(listP);
+        }
+
+        public void searchFilter(String text)
+        {
+            text = text.toLowerCase(Locale.getDefault());
+            listP.clear();
+            if(text.length() == 0)
+            {
+                listP.addAll(arrayList);
+            }else{
+                for(Product product : arrayList)
+                {
+                    if(product.getProductName().toLowerCase(Locale.getDefault()).contains(text))
+                    {
+                        listP.add(product);
                     }
                 }
             }
