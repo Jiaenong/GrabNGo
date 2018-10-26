@@ -3,6 +3,7 @@ package com.example.user.grabngo;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,7 +37,7 @@ import org.w3c.dom.Text;
 public class ProductDetailActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
-    private TextView textViewName, textViewPrice, textViewProducer, textViewCategory, textViewExpired, textViewStock, textViewLocation;
+    private TextView textViewName, textViewPrice, textViewProducer, textViewCategory, textViewExpired, textViewStock, textViewLocation, textViewOriPrice, textViewDiscount;
     private ImageView imageViewProduct;
 
     private FirebaseFirestore mFirebaseFirestore;
@@ -43,6 +45,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     private DocumentReference mDocumentReference;
     private ProgressBar progressBarProductDetail;
     private CardView cardViewProduct1, cardViewProduct2;
+    private LinearLayout linearLayoutPromo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +59,11 @@ public class ProductDetailActivity extends AppCompatActivity {
         textViewExpired = (TextView)findViewById(R.id.text_view_expired);
         textViewStock = (TextView)findViewById(R.id.text_view_stock);
         textViewLocation = (TextView)findViewById(R.id.text_view_location);
+        textViewOriPrice = (TextView)findViewById(R.id.textViewProductOriPrice);
+        textViewDiscount = (TextView)findViewById(R.id.textViewDiscount);
         imageViewProduct = (ImageView)findViewById(R.id.product_image);
         progressBarProductDetail = (ProgressBar)findViewById(R.id.progressBarProductDetail);
+        linearLayoutPromo = (LinearLayout)findViewById(R.id.linearLayoutPromo);
         cardViewProduct1 = (CardView)findViewById(R.id.cardViewProduct1);
         cardViewProduct2 = (CardView)findViewById(R.id.cardViewProduct2);
 
@@ -91,8 +97,21 @@ public class ProductDetailActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 Product product = documentSnapshot.toObject(Product.class);
+
+                if(product.getDiscount()!=0){
+                    linearLayoutPromo.setVisibility(View.VISIBLE);
+                    textViewOriPrice.setText("RM " + product.getPrice());
+                    textViewOriPrice.setPaintFlags(textViewOriPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    double price = Double.parseDouble(product.getPrice());
+                    double discountPercent = (100 - product.getDiscount())*0.01;
+                    price = price * discountPercent;
+                    textViewPrice.setText("RM " + String.format("%.2f",price));
+                    textViewDiscount.setText("-" + product.getDiscount() + "%");
+                }else{
+                    textViewPrice.setText("RM " + product.getPrice());
+                }
+
                 textViewName.setText(product.getProductName());
-                textViewPrice.setText("RM " + product.getPrice());
                 textViewProducer.setText("Producer               : " + product.getProducer());
                 textViewCategory.setText("Category               : " + product.getCategory());
                 textViewExpired.setText("Expired Date        : " + product.getExpired());

@@ -1,6 +1,7 @@
 package com.example.user.grabngo;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +29,19 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Product product = productList.get(position);
         holder.name.setText(product.getProductName());
-        holder.price.setText("RM " + product.getPrice());
+
+        if(product.getDiscount()!=0){
+            holder.originalPrice.setVisibility(View.VISIBLE);
+            holder.originalPrice.setText("RM " + product.getPrice());
+            holder.originalPrice.setPaintFlags(holder.originalPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            double price = Double.parseDouble(product.getPrice());
+            double discountPercent = (100 - product.getDiscount())*0.01;
+            price = price * discountPercent;
+            holder.price.setText("RM " + String.format("%.2f",price));
+        }else{
+            holder.price.setText("RM " + product.getPrice());
+        }
+
         Glide.with(mContext).load(product.getImageUrl()).into(holder.imageViewProduct);
     }
 
@@ -38,13 +51,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
-        public TextView name, price;
+        public TextView name, price, originalPrice;
         public ImageView  imageViewProduct;
 
         public MyViewHolder(View view)
         {
             super(view);
             name = (TextView)view.findViewById(R.id.textViewProductName);
+            originalPrice = (TextView)view.findViewById(R.id.textViewProductOriPrice);
             price = (TextView)view.findViewById(R.id.textViewProductPrice);
             imageViewProduct = (ImageView)view.findViewById(R.id.imageViewProductImage);
         }

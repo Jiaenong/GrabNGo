@@ -29,6 +29,7 @@ import com.example.user.grabngo.Class.Product;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -91,106 +92,34 @@ public class ProductsFragment extends Fragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 progressBar.setVisibility(View.VISIBLE);
                 recyclerView.setVisibility(View.GONE);
+                productList.clear();
                 String selectedItem = adapterView.getItemAtPosition(i).toString();
-                FragmentManager fm = getFragmentManager();
-                switch (selectedItem){
-                    case "All":
-                        productList.clear();
-                        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                            @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                                {
-                                    Product product = documentSnapshot.toObject(Product.class);
-                                    String image = product.getImageUrl();
-                                    String name = product.getProductName();
-                                    String price = product.getPrice();
-                                    Product mProduct = new Product(image, name, price);
-                                    productList.add(mProduct);
-                                }
-                                productAdapter = new ProductAdapter(getActivity(),productList);
-                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2);
-                                recyclerView.setLayoutManager(mLayoutManager);
-                                recyclerView.setItemAnimator(new DefaultItemAnimator());
-                                recyclerView.setAdapter(productAdapter);
-                                progressBar.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                            }
-                        });
-                        break;
-                    case "Personal Care":
-                        productList.clear();
-                        mCollectionReference.whereEqualTo("category","Personal Care").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                            @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                                {
-                                    Product product = documentSnapshot.toObject(Product.class);
-                                    String image = product.getImageUrl();
-                                    String name = product.getProductName();
-                                    String price = product.getPrice();
-                                    Product mProduct = new Product(image, name, price);
-                                    productList.add(mProduct);
-                                }
-                                productAdapter = new ProductAdapter(getActivity(),productList);
-                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(),2);
-                                recyclerView.setLayoutManager(mLayoutManager);
-                                recyclerView.setItemAnimator(new DefaultItemAnimator());
-                                recyclerView.setAdapter(productAdapter);
-                                progressBar.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                            }
-                        });
-                        break;
-                    case "Household":
-                        productList.clear();
-                        mCollectionReference.whereEqualTo("category","Household").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                            @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                                {
-                                    Product product = documentSnapshot.toObject(Product.class);
-                                    String image = product.getImageUrl();
-                                    String name = product.getProductName();
-                                    String price = product.getPrice();
-                                    Product mProduct = new Product(image, name, price);
-                                    productList.add(mProduct);
-                                }
-                                productAdapter = new ProductAdapter(getActivity(),productList);
-                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(),2);
-                                recyclerView.setLayoutManager(mLayoutManager);
-                                recyclerView.setItemAnimator(new DefaultItemAnimator());
-                                recyclerView.setAdapter(productAdapter);
-                                progressBar.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                            }
-                        });
-                        break;
-                    case "Food and Beverages":
-                        productList.clear();
-                        mCollectionReference.whereEqualTo("category","Food and Beverages").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                            @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                                {
-                                    Product product = documentSnapshot.toObject(Product.class);
-                                    String image = product.getImageUrl();
-                                    String name = product.getProductName();
-                                    String price = product.getPrice();
-                                    Product mProduct = new Product(image, name, price);
-                                    productList.add(mProduct);
-                                }
-                                productAdapter = new ProductAdapter(getActivity(),productList);
-                                RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getActivity(),2);
-                                recyclerView.setLayoutManager(mLayoutManager);
-                                recyclerView.setItemAnimator(new DefaultItemAnimator());
-                                recyclerView.setAdapter(productAdapter);
-                                progressBar.setVisibility(View.GONE);
-                                recyclerView.setVisibility(View.VISIBLE);
-                            }
-                        });
-                        break;
+                Query query = null;
+
+                if(i==0){
+                    query = mCollectionReference;
+                }else{
+                    query = mCollectionReference.whereEqualTo("category",selectedItem);
                 }
+
+                query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                        {
+                            Product product = documentSnapshot.toObject(Product.class);
+                            productList.add(product);
+                        }
+                        productAdapter = new ProductAdapter(getActivity(),productList);
+                        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(getContext(),2);
+                        recyclerView.setLayoutManager(mLayoutManager);
+                        recyclerView.setItemAnimator(new DefaultItemAnimator());
+                        recyclerView.setAdapter(productAdapter);
+                        progressBar.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                    }
+                });
+
             }
 
             @Override

@@ -28,25 +28,45 @@
                 android:id="@+id/textViewProductName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/imageViewProductImage"
                 android:layout_alignParentStart="true"
+                android:layout_below="@+id/imageViewProductImage"
                 android:layout_marginTop="3dp"
-                android:maxLines="2"
                 android:ellipsize="end"
+                android:maxLines="2"
                 android:text="TextView"
                 android:textColor="@color/foreground_dark_color"
                 android:textSize="15sp" />
 
-            <TextView
-                android:id="@+id/textViewProductPrice"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textViewProductName"
                 android:layout_alignParentStart="true"
-                android:text="TextView"
-                android:textColor="@color/price_color"
-                android:textSize="12sp" />
+                android:layout_marginTop="3dp"
+                android:layout_below="@+id/textViewProductName"
+                android:orientation="horizontal">
 
+                <TextView
+                    android:id="@+id/textViewProductOriPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/textViewProductName"
+                    android:paddingRight="5dp"
+                    android:text="TextView"
+                    android:textColor="@color/foreground_light_color"
+                    android:textSize="13sp"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/textViewProductPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/textViewProductName"
+                    android:text="TextView"
+                    android:textColor="@color/price_color"
+                    android:textSize="13sp" />
+            </LinearLayout>
         </RelativeLayout>
     </android.support.v7.widget.CardView>
 
