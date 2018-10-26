@@ -73,6 +73,11 @@ public class Product {
         this.documentID = documentID;
     }
 
+    public Product(String productName)
+    {
+        this.productName = productName;
+    }
+
     public String getDocumentID() {
         return documentID;
     }

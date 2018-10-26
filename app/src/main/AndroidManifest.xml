@@ -88,14 +88,18 @@
         <receiver android:name=".Class.LowStockNotification" />
 
         <activity android:name=".Admin.IgnoreLowStockActivity" />
-        <activity android:name=".Admin.AddSupplierActivity"/>
-        <activity android:name=".CommentActivity"
+        <activity android:name=".Admin.AddSupplierActivity" />
+        <activity
+            android:name=".CommentActivity"
             android:label="Comment"
-            android:parentActivityName=".HomeActivity"/>
+            android:parentActivityName=".HomeActivity" />
         <activity android:name=".Admin.MakeOrderActivity" />
         <activity android:name=".Admin.AddPromotionActivity" />
         <activity android:name=".Admin.EditPromotionActivity" />
-        <activity android:name=".Admin.SelectProductActivity"></activity>
+        <activity android:name=".Admin.SelectProductActivity" />
+        <activity android:name=".SearchActivity"
+            android:label="Search"
+            android:parentActivityName=".HomeActivity"></activity>
     </application>
 
 </manifest>

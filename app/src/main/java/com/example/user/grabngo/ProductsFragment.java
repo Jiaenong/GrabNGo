@@ -209,6 +209,9 @@ public class ProductsFragment extends Fragment {
             case R.id.cart:
                 startActivity(new Intent(getActivity(),CartActivity.class));
                 return true;
+            case R.id.action_search:
+                startActivity(new Intent(getActivity(),SearchActivity.class));
+                return true;
 
         }
 
