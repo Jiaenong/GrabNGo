@@ -42,14 +42,14 @@ class SendeMail extends AsyncTask<Void,Void,Void> {
     protected void onPreExecute() {
         super.onPreExecute();
         //Showing progress dialog while sending email
-        progressDialog = ProgressDialog.show(context,"Sending...", "Please Wait...",false,false);
+        //progressDialog = ProgressDialog.show(context,"Sending...", "Please Wait...",false,false);
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         //Dismissing the progress dialog
-        progressDialog.dismiss();
+        //progressDialog.dismiss();
         //Showing a success message
         Toast.makeText(context, "Success",Toast.LENGTH_LONG).show();
         return;
@@ -92,7 +92,7 @@ class SendeMail extends AsyncTask<Void,Void,Void> {
             Transport.send(mm);
 
         } catch (MessagingException e) {
-            Toast.makeText(context,"Error",Toast.LENGTH_LONG).show();
+            Toast.makeText(context,"Error: "+e,Toast.LENGTH_LONG).show();
 
             e.printStackTrace();
         }

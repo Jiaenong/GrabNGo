@@ -97,9 +97,11 @@
         <activity android:name=".Admin.AddPromotionActivity" />
         <activity android:name=".Admin.EditPromotionActivity" />
         <activity android:name=".Admin.SelectProductActivity" />
-        <activity android:name=".SearchActivity"
+        <activity
+            android:name=".SearchActivity"
             android:label="Search"
-            android:parentActivityName=".HomeActivity"></activity>
+            android:parentActivityName=".HomeActivity" />
+        <activity android:name=".ForgetPasswordActivity"></activity>
     </application>
 
 </manifest>
