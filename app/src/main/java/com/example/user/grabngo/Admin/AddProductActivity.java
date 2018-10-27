@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -37,6 +38,7 @@ import android.widget.Toast;
 
 import com.example.user.grabngo.Class.Product;
 import com.example.user.grabngo.Class.Staff;
+import com.example.user.grabngo.Class.Supplier;
 import com.example.user.grabngo.LoginActivity;
 import com.example.user.grabngo.R;
 import com.example.user.grabngo.SaveSharedPreference;
@@ -50,6 +52,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -57,6 +61,7 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -78,9 +83,9 @@ public class AddProductActivity extends AppCompatActivity {
     private ImageView imageViewProduct;
     private Button btnSubmit, btnCamera, btnGallery;
     private Uri filePath;
-    private String pictureFilePath;
-    private EditText editTextName, editTextPrice, editTextProducer, editTextExpiredDate, editTextAmount, editTextLocation, editTextBarcode;
-    private Spinner spinnerCategory;
+    private String pictureFilePath, supplierKey;
+    private EditText editTextName, editTextPrice, editTextExpiredDate, editTextAmount, editTextLocation, editTextBarcode;
+    private Spinner spinnerCategory, spinnerProducer;
     private Staff staff;
 
     private FirebaseFirestore mFirebaseFirestore;
@@ -103,7 +108,7 @@ public class AddProductActivity extends AppCompatActivity {
         editTextAmount = (EditText)findViewById(R.id.editTextAmount);
         editTextExpiredDate = (EditText)findViewById(R.id.editTextExpiry);
         editTextLocation = (EditText)findViewById(R.id.editTextLocation);
-        editTextProducer = (EditText)findViewById(R.id.editTextProducer);
+        spinnerProducer = (Spinner)findViewById(R.id.spinner_producer);
         editTextBarcode = (EditText)findViewById(R.id.editTextBarcode);
         imageButtonBarcode = (ImageButton)findViewById(R.id.imageButtonBarcode);
 
@@ -113,6 +118,48 @@ public class AddProductActivity extends AppCompatActivity {
         mStorageReference = mFirebaseStorage.getReference();
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Product");
+
+        try {
+            Field popup = Spinner.class.getDeclaredField("mPopup");
+            popup.setAccessible(true);
+
+            // Get private mPopup member variable and try cast to ListPopupWindow
+            android.widget.ListPopupWindow popupWindow = (android.widget.ListPopupWindow) popup.get(spinnerProducer);
+            // Set popupWindow height to 500px
+            popupWindow.setHeight(600);
+        }
+        catch (NoClassDefFoundError | ClassCastException | NoSuchFieldException | IllegalAccessException e) {
+            // silently fail...
+        }
+
+        mFirebaseFirestore.collection("Supplier").orderBy("name").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                List<String> supplierNameList = new ArrayList<>();
+                List<String> supplierRefList = new ArrayList<>();
+                for(QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots){
+                    Supplier supplier = documentSnapshot.toObject(Supplier.class);
+                    supplierNameList.add(supplier.getName());
+                    supplierRefList.add(documentSnapshot.getId().toString());
+                }
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(AddProductActivity.this, R.layout.support_simple_spinner_dropdown_item, supplierNameList);
+                adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+                spinnerProducer.setAdapter(adapter);
+
+                spinnerProducer.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        supplierKey = supplierRefList.get(i);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                });
+            }
+        });
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(AddProductActivity.this ,R.array.product_category, R.layout.support_simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
@@ -286,18 +333,23 @@ public class AddProductActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<Uri> task) {
                     if (task.isSuccessful()) {
                         Uri downloadUri = task.getResult();
+                        String expiryDate = "None";
+                        if(!editTextExpiredDate.getText().toString().equals("")){
+                            expiryDate = editTextExpiredDate.getText().toString();
+                        }
 
                         final Product product = new Product(editTextBarcode.getText().toString(),
                                 editTextName.getText().toString(),
-                                editTextProducer.getText().toString(),
+                                spinnerProducer.getSelectedItem().toString(),
                                 editTextPrice.getText().toString(),
                                 spinnerCategory.getSelectedItem().toString(),
-                                editTextExpiredDate.getText().toString(),
+                                expiryDate,
                                 editTextLocation.getText().toString(),
                                 Integer.parseInt(editTextAmount.getText().toString()),
                                 downloadUri.toString(),
                                 staff.getName(),
-                                null);
+                                null,
+                                supplierKey);
 
                         mCollectionReference.add(product).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override

@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.user.grabngo.Class.Product;
 import com.example.user.grabngo.Class.Staff;
+import com.example.user.grabngo.Class.Supplier;
 import com.example.user.grabngo.R;
 import com.example.user.grabngo.SaveSharedPreference;
 import com.example.user.grabngo.ScanBarcodeActivity;
@@ -53,8 +55,11 @@ import com.google.firebase.storage.UploadTask;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 public class EditProductActivity extends AppCompatActivity {
@@ -72,11 +77,12 @@ public class EditProductActivity extends AppCompatActivity {
     private Button btnSubmit, btnCamera, btnGallery;
     private Uri filePath;
     private String pictureFilePath, oldImgUrl, selectedProduct;
-    private EditText editTextName, editTextPrice, editTextProducer, editTextExpiredDate, editTextAmount, editTextLocation, editTextBarcode;
-    private Spinner spinnerCategory;
+    private EditText editTextName, editTextPrice, editTextExpiredDate, editTextAmount, editTextLocation, editTextBarcode;
+    private Spinner spinnerCategory, spinnerProducer;
     private ProgressBar progressBar;
     private LinearLayout linearLayout;
     private Staff staff;
+    private String supplierKey;
 
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
@@ -96,12 +102,13 @@ public class EditProductActivity extends AppCompatActivity {
         btnCamera = (Button) findViewById(R.id.btn_camera);
         btnGallery = (Button) findViewById(R.id.btn_gallery);
         spinnerCategory = (Spinner)findViewById(R.id.spinner_category);
+        spinnerProducer = (Spinner)findViewById(R.id.spinner_producer);
         editTextName = (EditText)findViewById(R.id.editTextProductName);
         editTextPrice = (EditText)findViewById(R.id.editTextPrice);
         editTextAmount = (EditText)findViewById(R.id.editTextAmount);
         editTextExpiredDate = (EditText)findViewById(R.id.editTextExpiry);
         editTextLocation = (EditText)findViewById(R.id.editTextLocation);
-        editTextProducer = (EditText)findViewById(R.id.editTextProducer);
+
         editTextBarcode = (EditText)findViewById(R.id.editTextBarcode);
         imageButtonBarcode = (ImageButton)findViewById(R.id.imageButtonBarcode);
         progressBar = (ProgressBar)findViewById(R.id.progressBar);
@@ -123,37 +130,83 @@ public class EditProductActivity extends AppCompatActivity {
         selectedProduct = intent.getStringExtra("productID");
 
         String id = SaveSharedPreference.getID(EditProductActivity.this);
+
         FirebaseFirestore.getInstance().collection("Staff").document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 staff = documentSnapshot.toObject(Staff.class);
-
             }
         });
 
-        mCollectionReference.document(selectedProduct).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                            progressBar.setVisibility(View.GONE);
-                            linearLayout.setVisibility(View.VISIBLE);
-                            Product product = documentSnapshot.toObject(Product.class);
+        try {
+            Field popup = Spinner.class.getDeclaredField("mPopup");
+            popup.setAccessible(true);
 
-                            oldImgUrl = product.getImageUrl();
-                            editTextBarcode.setText(product.getBarcode());
-                            editTextName.setText(product.getProductName());
-                            editTextPrice.setText(product.getPrice());
-                            for(int i =0; i<spinnerCategory.getAdapter().getCount(); i++){
-                                if(spinnerCategory.getItemAtPosition(i).equals(product.getCategory()))
-                                    spinnerCategory.setSelection(i);
-                            }
-                            editTextProducer.setText(product.getProducer());
-                            editTextExpiredDate.setText(product.getExpired());
-                            editTextAmount.setText(""+product.getStockAmount());
-                            editTextLocation.setText(product.getShelfLocation());
-                            Glide.with(EditProductActivity.this).load(product.getImageUrl()).into(imageViewProduct);
+            // Get private mPopup member variable and try cast to ListPopupWindow
+            android.widget.ListPopupWindow popupWindow = (android.widget.ListPopupWindow) popup.get(spinnerProducer);
+            // Set popupWindow height to 500px
+            popupWindow.setHeight(600);
+        }
+        catch (NoClassDefFoundError | ClassCastException | NoSuchFieldException | IllegalAccessException e) {
+            // silently fail...
+        }
 
+        mFirebaseFirestore.collection("Supplier").orderBy("name").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                List<String> supplierNameList = new ArrayList<>();
+                List<String> supplierRefList = new ArrayList<>();
+                for(QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots){
+                    Supplier supplier = documentSnapshot.toObject(Supplier.class);
+                    supplierNameList.add(supplier.getName());
+                    supplierRefList.add(documentSnapshot.getId().toString());
+                }
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(EditProductActivity.this, R.layout.support_simple_spinner_dropdown_item, supplierNameList);
+                adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+                spinnerProducer.setAdapter(adapter);
+
+                spinnerProducer.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        supplierKey = supplierRefList.get(i);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+
+                    }
+                });
+
+                mCollectionReference.document(selectedProduct).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        progressBar.setVisibility(View.GONE);
+                        linearLayout.setVisibility(View.VISIBLE);
+                        Product product = documentSnapshot.toObject(Product.class);
+
+                        oldImgUrl = product.getImageUrl();
+                        editTextBarcode.setText(product.getBarcode());
+                        editTextName.setText(product.getProductName());
+                        editTextPrice.setText(product.getPrice());
+                        for(int i =0; i<spinnerCategory.getAdapter().getCount(); i++){
+                            if(spinnerCategory.getItemAtPosition(i).equals(product.getCategory()))
+                                spinnerCategory.setSelection(i);
                         }
-                    });
+                        for(int i =0; i<spinnerProducer.getAdapter().getCount(); i++){
+                            if(spinnerProducer.getItemAtPosition(i).equals(product.getProducer()))
+                                spinnerProducer.setSelection(i);
+                        }
+                        editTextExpiredDate.setText(product.getExpired());
+                        editTextAmount.setText(""+product.getStockAmount());
+                        editTextLocation.setText(product.getShelfLocation());
+                        Glide.with(EditProductActivity.this).load(product.getImageUrl()).into(imageViewProduct);
+
+                    }
+                });
+            }
+        });
+
 
 
         editTextExpiredDate.setOnClickListener(new View.OnClickListener() {
@@ -325,13 +378,14 @@ public class EditProductActivity extends AppCompatActivity {
                 "price", editTextPrice.getText().toString(),
                 "barcode", editTextBarcode.getText().toString(),
                 "category", spinnerCategory.getSelectedItem().toString(),
-                "producer", editTextProducer.getText().toString(),
+                "producer", spinnerProducer.getSelectedItem().toString(),
                 "expired", editTextExpiredDate.getText().toString(),
                 "imageUrl", picURL,
                 "shelfLocation", editTextLocation.getText().toString(),
                 "stockAmount", Integer.parseInt(editTextAmount.getText().toString()),
                 "modifiedStaffName", staff.getName(),
-                "modifiedDate", FieldValue.serverTimestamp())
+                "modifiedDate", FieldValue.serverTimestamp(),
+                "supplierKey", supplierKey)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

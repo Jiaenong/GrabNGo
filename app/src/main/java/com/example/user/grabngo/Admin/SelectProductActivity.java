@@ -8,6 +8,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -162,6 +163,8 @@ public class SelectProductActivity extends AppCompatActivity {
 
         private List<SelectProduct> productList;
         List<SelectProduct> promoList = new ArrayList<>();
+        private SparseBooleanArray itemStateArray= new SparseBooleanArray();
+
 
         public class MyViewHolder extends RecyclerView.ViewHolder {
             public TextView product, price, quantity;
@@ -177,15 +180,36 @@ public class SelectProductActivity extends AppCompatActivity {
                 productImage = (ImageView)view.findViewById(R.id.image_product);
                 imageButton = (ImageButton)view.findViewById(R.id.button_delete);
                 checkBox = (CheckBox)view.findViewById(R.id.checkBoxPromo);
+                checkBox.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        int adapterPosition = getAdapterPosition();
+                        if (!itemStateArray.get(adapterPosition, false)) {
+                            checkBox.setChecked(true);
+                            itemStateArray.put(adapterPosition, true);
+                        }
+                        else  {
+                            checkBox.setChecked(false);
+                            itemStateArray.put(adapterPosition, false);
+                        }
+                    }
+                });
             }
         }
 
         public SelectProductAdapter(List<SelectProduct> productList){
-
+            for(int i=0; i<productList.size(); i++){
+                itemStateArray.put(i, false);
+            }
             this.productList = productList;
         }
 
         public List<SelectProduct> getPromoList(){
+            for(int i=0; i<itemStateArray.size(); i++){
+                if(itemStateArray.get(i, true)){
+                    promoList.add(productList.get(i));
+                }
+            }
             return promoList;
         }
 
@@ -197,6 +221,12 @@ public class SelectProductActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(MyViewHolder holder, final int position) {
+            if (!itemStateArray.get(position, false)) {
+                holder.checkBox.setChecked(false);}
+            else {
+                holder.checkBox.setChecked(true);
+            }
+
             final SelectProduct selectProduct = productList.get(position);
             holder.imageButton.setVisibility(View.GONE);
             holder.checkBox.setVisibility(View.VISIBLE);
@@ -205,18 +235,6 @@ public class SelectProductActivity extends AppCompatActivity {
             holder.price.setText("RM "+String.format("%.2f",Double.parseDouble(selectProduct.getPrice())));
             holder.quantity.setText("Quantity: "+selectProduct.getQuantity());
             Glide.with(SelectProductActivity.this).load(selectProduct.getImgUrl()).into(holder.productImage);
-
-
-            holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    if(b){
-                        promoList.add(selectProduct);
-                    }else{
-                        promoList.remove(selectProduct);
-                    }
-                }
-            });
 
         }
 

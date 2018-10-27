@@ -25,6 +25,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.user.grabngo.Class.Product;
 import com.example.user.grabngo.Class.Refund;
 import com.example.user.grabngo.Class.Supplier;
 import com.example.user.grabngo.R;
@@ -37,6 +38,9 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -321,7 +325,25 @@ public class AddSupplierActivity extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            Toast.makeText(AddSupplierActivity.this, "Changes has been saved", Toast.LENGTH_SHORT).show();
+
+                            mFirebaseFirestore.collection("Product").whereEqualTo("supplierKey",selectedSupplier).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                @Override
+                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                    WriteBatch batch = mFirebaseFirestore.batch();
+                                    for(QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots){
+                                        DocumentReference mDocumentReference = documentSnapshot.getReference();
+                                        batch.update(mDocumentReference,"producer",editTextName.getText().toString());
+                                    }
+                                    batch.commit().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Toast.makeText(AddSupplierActivity.this, "Changes has been saved", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                            });
+
+
                         }
                     });
 

@@ -97,9 +97,9 @@ public class ProductsFragment extends Fragment {
                 Query query = null;
 
                 if(i==0){
-                    query = mCollectionReference;
+                    query = mCollectionReference.orderBy("productName");
                 }else{
-                    query = mCollectionReference.whereEqualTo("category",selectedItem);
+                    query = mCollectionReference.whereEqualTo("category",selectedItem).orderBy("productName");
                 }
 
                 query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {

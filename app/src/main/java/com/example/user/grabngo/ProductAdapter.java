@@ -29,7 +29,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Product product = productList.get(position);
         holder.name.setText(product.getProductName());
-
+        holder.originalPrice.setVisibility(View.GONE);
         if(product.getDiscount()!=0){
             holder.originalPrice.setVisibility(View.VISIBLE);
             holder.originalPrice.setText("RM " + product.getPrice());

@@ -21,12 +21,14 @@
         <item>Personal Care</item>
         <item>Household</item>
         <item>Food and Beverages</item>
+        <item>Electronic</item>
     </string-array>
 
     <string-array name="product_category">
         <item>Personal Care</item>
         <item>Household</item>
         <item>Food and Beverages</item>
+        <item>Electronic</item>
     </string-array>
 
     <string-array name="report">

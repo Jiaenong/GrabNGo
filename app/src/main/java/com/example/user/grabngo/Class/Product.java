@@ -25,7 +25,7 @@ public class Product {
 
     }
 
-    public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, int stockAmount, String imageUrl, String modifiedStaffName, Date modifiedDate)
+    public Product(String barcode, String productName, String producer, String price, String category, String expired, String shelfLocation, int stockAmount, String imageUrl, String modifiedStaffName, Date modifiedDate, String supplierKey)
     {
         this.productName = productName;
         this.producer = producer;
