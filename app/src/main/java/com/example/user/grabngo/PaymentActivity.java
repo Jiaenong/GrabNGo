@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.example.user.grabngo.Class.Cart;
 import com.example.user.grabngo.Class.CartItem;
 import com.example.user.grabngo.Class.CartList;
+import com.example.user.grabngo.Class.Customer;
 import com.example.user.grabngo.Class.Payment;
 import com.example.user.grabngo.Class.PaymentDetail;
 import com.example.user.grabngo.Class.Product;
@@ -54,9 +55,9 @@ public class PaymentActivity extends AppCompatActivity {
 
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference, nCollectionReference, pCollectionReference;
-    private DocumentReference mDocumentReference, nDocumentReference;
+    private DocumentReference mDocumentReference, nDocumentReference, pDocumentReference;
 
-    private List<String> items;
+    private List<String> items, itemsprice;
     private List<Integer> amounts;
     private String paymentID;
     private int qty;
@@ -80,7 +81,14 @@ public class PaymentActivity extends AppCompatActivity {
                         String id = documentSnapshot.getId();
                         int num = Integer.parseInt(id.substring(4));
                         num++;
-                        paymentID = "PA000"+num;
+                        if(num > 9)
+                        {
+                            int numss = Integer.parseInt(id.substring(3));
+                            numss++;
+                            paymentID = "PA00"+numss;
+                        }else {
+                            paymentID = "PA000" + num;
+                        }
                         break;
                     }
                 }
@@ -91,6 +99,7 @@ public class PaymentActivity extends AppCompatActivity {
         String text = intent.getStringExtra("totalPrice");
 
         items = new ArrayList<>();
+        itemsprice = new ArrayList<>();
         amounts = new ArrayList<>();
         progressDialog = new ProgressDialog(this);
         editTextCardNumber = (EditText)findViewById(R.id.editTextCardNumber);
@@ -143,6 +152,7 @@ public class PaymentActivity extends AppCompatActivity {
                 progressDialog.setMessage("Processing...");
                 progressDialog.show();
                 items.clear();
+                amounts.clear();
                 if(switchSave.isChecked())
                 {
                     Boolean save = true;
@@ -182,7 +192,7 @@ public class PaymentActivity extends AppCompatActivity {
                                     Cart cart = documentSnapshot.toObject(Cart.class);
                                     String key = cart.getProductRef();
                                     int quantity = cart.getQuantity();
-
+                                    amounts.add(quantity);
                                     mFirebaseFirestore.collection("Product").document(key).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                         @Override
                                         public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -193,7 +203,8 @@ public class PaymentActivity extends AppCompatActivity {
                                                 double discountPercent = (100 - product.getDiscount())*0.01;
                                                 price = price * discountPercent;
                                             }
-
+                                            items.add(product.getProductName());
+                                            itemsprice.add(product.getPrice());
                                             PaymentDetail paymentDetail = new PaymentDetail(product.getProductName(), quantity, price);
                                             pCollectionReference.add(paymentDetail).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                 @Override
@@ -229,6 +240,7 @@ public class PaymentActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 int batchSize = 3;
                                 deleteCollection(batchSize);
+                                sendMail();
                             }
                         });
                         builder.setMessage("Please check your email for the receipt.");
@@ -267,6 +279,32 @@ public class PaymentActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void sendMail()
+    {
+        String id = SaveSharedPreference.getID(PaymentActivity.this);
+        pDocumentReference = mFirebaseFirestore.document("Customer/"+id);
+        pDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                Log.i("Testing ", "hello");
+                Customer customer = documentSnapshot.toObject(Customer.class);
+                String email = customer.getEmail();
+                String subject = "Payment successfull ! This is your receipt";
+                String message = "";
+                StringBuilder sb = new StringBuilder();
+                for(int i = 0; i<items.size(); i++)
+                {
+                    Double amount = Double.parseDouble(itemsprice.get(i)) * amounts.get(i);
+                    sb.append(items.get(i)+": "+amounts.get(i)+"  "+"RM"+amount+"\n");
+                    message = sb.toString()+"\n"+"Total Payment: "+paymentPrice.getText().toString();
+                }
+                SendeMail sm = new SendeMail(PaymentActivity.this, email, subject, message);
+                sm.execute();
+            }
+        });
+        return;
     }
 
     @Override

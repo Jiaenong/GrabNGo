@@ -1,7 +1,10 @@
 package com.example.user.grabngo;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.Toast;
 
 import com.example.user.grabngo.Class.Customer;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -21,6 +25,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 public class SignUpActivity extends AppCompatActivity {
     private ImageView btn_back;
@@ -47,7 +61,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Customer");
-        mCollectionReference.orderBy("email",Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        /*mCollectionReference.orderBy("email",Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 if(queryDocumentSnapshots.isEmpty()){
@@ -56,6 +70,7 @@ public class SignUpActivity extends AppCompatActivity {
                     for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                     {
                         String key = documentSnapshot.getId();
+                        Log.i("key ", key);
                         int num = Integer.parseInt(key.substring(3));
                         num++;
                         autoID = "C000"+num;
@@ -63,7 +78,7 @@ public class SignUpActivity extends AppCompatActivity {
                     }
                 }
             }
-        });
+        });*/
 
         btn_back = (ImageView)findViewById(R.id.btn_back);
 
@@ -119,18 +134,19 @@ public class SignUpActivity extends AppCompatActivity {
         }else
             gender = radioButtonFemale.getText().toString();
         Customer customer = new Customer(email, password, name, gender, address, pic);
-        mDocumentReference.set(customer).addOnSuccessListener(new OnSuccessListener<Void>() {
+        mCollectionReference.add(customer).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
-            public void onSuccess(Void aVoid) {
-                emailSend(email);
+            public void onSuccess(DocumentReference documentReference) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(SignUpActivity.this, R.style.AlertDialogCustom));
                 builder.setTitle("Sign Up Success");
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
+                        emailSend(email);
+                        finish();
+                        //Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+                        //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        //startActivity(intent);
                     }
                 });
                 builder.setMessage("Please login your account to proceed.");
@@ -138,6 +154,12 @@ public class SignUpActivity extends AppCompatActivity {
                 alert.show();
             }
         });
+        /*mDocumentReference.set(customer).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+
+            }
+        });*/
     }
 
     private void emailSend(String email) {
@@ -150,3 +172,4 @@ public class SignUpActivity extends AppCompatActivity {
         return;
     }
 }
+

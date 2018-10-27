@@ -1,5 +1,6 @@
 package com.example.user.grabngo;
 
+import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.Window;
@@ -35,6 +37,7 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar progressBarLogIn;
     private View view1, view2;
     private TextView textViewForgetPassword;
+    private String condition;
 
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
@@ -78,6 +81,14 @@ public class LoginActivity extends AppCompatActivity {
         mManagerCollectionReference = mFirebaseFirestore.collection("Manager");
 
         progressBarLogIn.setVisibility(View.GONE);
+
+        textViewForgetPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, ForgetPasswordActivity.class);
+                startActivity(intent);
+            }
+        });
 
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,11 +157,12 @@ public class LoginActivity extends AppCompatActivity {
                                 Customer customer = documentSnapshot.toObject(Customer.class);
                                 String email = editTextEmail.getText().toString();
                                 String password = editTextPassword.getText().toString();
+
                                 if (email.equals(customer.getEmail()) && password.equals(customer.getPassword())) {
                                     check++;
                                     String id = documentSnapshot.getId();
-                                    SaveSharedPreference.setID(LoginActivity.this,id,"customer");
-                                    SaveSharedPreference.setCheckLogin(LoginActivity.this,true);
+                                    SaveSharedPreference.setID(LoginActivity.this, id, "customer");
+                                    SaveSharedPreference.setCheckLogin(LoginActivity.this, true);
                                     Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                                     startActivity(intent);
                                     finish();
@@ -163,15 +175,17 @@ public class LoginActivity extends AppCompatActivity {
                                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                                         for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                                             Staff staff = documentSnapshot.toObject(Staff.class);
-                                            if (email.equals(staff.getEmail()) && password.equals(staff.getPassword())) {
-                                                check++;
-                                                String id = documentSnapshot.getId();
-                                                SaveSharedPreference.setID(LoginActivity.this,id,"staff");
-                                                SaveSharedPreference.setCheckLogin(LoginActivity.this,true);
-                                                Intent intent = new Intent(LoginActivity.this, StaffHomeActivity.class);
-                                                startActivity(intent);
-                                                finish();
-                                                break;
+                                            {
+                                                if (email.equals(staff.getEmail()) && password.equals(staff.getPassword())) {
+                                                    check++;
+                                                    String id = documentSnapshot.getId();
+                                                    SaveSharedPreference.setID(LoginActivity.this,id,"staff");
+                                                    SaveSharedPreference.setCheckLogin(LoginActivity.this,true);
+                                                    Intent intent = new Intent(LoginActivity.this, StaffHomeActivity.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                    break;
+                                                }
                                             }
                                         }
 
