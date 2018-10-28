@@ -240,7 +240,7 @@ public class PaymentActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 int batchSize = 3;
                                 deleteCollection(batchSize);
-                                sendMail();
+                                //sendMail();
                             }
                         });
                         builder.setMessage("Please check your email for the receipt.");
