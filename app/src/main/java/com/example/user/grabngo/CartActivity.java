@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -142,7 +143,6 @@ public class CartActivity extends AppCompatActivity {
 
                 progressBarCart.setVisibility(View.GONE);
                 mRecyclerView.setVisibility(View.VISIBLE);
-
             }
         });
 

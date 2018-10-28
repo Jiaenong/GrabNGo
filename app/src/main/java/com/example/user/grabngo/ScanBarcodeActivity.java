@@ -15,6 +15,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -145,20 +146,32 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ZXingScann
                 @Override
                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                     for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                        check++;
                         Product product = documentSnapshot.toObject(Product.class);
                         String barcode = product.getBarcode();
                         if (barcode.equals(scanResult)) {
+                            check++;
                             Intent intent = new Intent(ScanBarcodeActivity.this, AddToCartActivity.class);
                             intent.putExtra("barcode", scanResult);
                             startActivity(intent);
                             finish();
                         }
                     }
-                    if (check == 0) {
-                        Toast.makeText(ScanBarcodeActivity.this, "Invalid Barcode", Toast.LENGTH_SHORT).show();
-                        scannerView.resumeCameraPreview(ScanBarcodeActivity.this);
+                    if(check == 0) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(ScanBarcodeActivity.this, R.style.AlertDialogCustom));
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                                scannerView.resumeCameraPreview(ScanBarcodeActivity.this);
+                                dialogInterface.cancel();
+                            }
+                        });
+                        builder.setTitle("Error");
+                        builder.setMessage("Invalide Barcode !");
+                        AlertDialog alert = builder.create();
+                        alert.show();
                     }
+
                 }
             });
         }

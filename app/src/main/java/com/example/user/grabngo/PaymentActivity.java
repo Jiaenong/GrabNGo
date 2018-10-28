@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -52,6 +54,8 @@ public class PaymentActivity extends AppCompatActivity {
     private EditText editTextCardNumber, editTextCardName, editTextExpDate, editTextCVV;
     private Switch switchSave;
     private ProgressDialog progressDialog;
+    private ProgressBar progressBar;
+    private ScrollView scrollViewPayment;
 
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference, nCollectionReference, pCollectionReference;
@@ -67,6 +71,18 @@ public class PaymentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
+        progressDialog = new ProgressDialog(this);
+        editTextCardNumber = (EditText)findViewById(R.id.editTextCardNumber);
+        editTextCardName = (EditText)findViewById(R.id.editTextCardName);
+        editTextExpDate = (EditText)findViewById(R.id.editTextExpDate);
+        editTextCVV = (EditText)findViewById(R.id.editTextCVV);
+        switchSave = (Switch)findViewById(R.id.switchSave);
+        progressBar = (ProgressBar)findViewById(R.id.progressBarPayment);
+        scrollViewPayment = (ScrollView)findViewById(R.id.scrollViewPayment);
+
+        progressBar.setVisibility(View.VISIBLE);
+        scrollViewPayment.setVisibility(View.GONE);
+
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         nCollectionReference = mFirebaseFirestore.collection("Payment");
         nCollectionReference.orderBy("payDate", Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -75,7 +91,9 @@ public class PaymentActivity extends AppCompatActivity {
                 if(queryDocumentSnapshots.isEmpty())
                 {
                     paymentID = "PA0001";
-                }else{
+                    progressBar.setVisibility(View.GONE);
+                    scrollViewPayment.setVisibility(View.VISIBLE);
+              }else{
                     for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                     {
                         String id = documentSnapshot.getId();
@@ -86,8 +104,12 @@ public class PaymentActivity extends AppCompatActivity {
                             int numss = Integer.parseInt(id.substring(3));
                             numss++;
                             paymentID = "PA00"+numss;
+                            progressBar.setVisibility(View.GONE);
+                            scrollViewPayment.setVisibility(View.VISIBLE);
                         }else {
                             paymentID = "PA000" + num;
+                            progressBar.setVisibility(View.GONE);
+                            scrollViewPayment.setVisibility(View.VISIBLE);
                         }
                         break;
                     }
@@ -101,12 +123,6 @@ public class PaymentActivity extends AppCompatActivity {
         items = new ArrayList<>();
         itemsprice = new ArrayList<>();
         amounts = new ArrayList<>();
-        progressDialog = new ProgressDialog(this);
-        editTextCardNumber = (EditText)findViewById(R.id.editTextCardNumber);
-        editTextCardName = (EditText)findViewById(R.id.editTextCardName);
-        editTextExpDate = (EditText)findViewById(R.id.editTextExpDate);
-        editTextCVV = (EditText)findViewById(R.id.editTextCVV);
-        switchSave = (Switch)findViewById(R.id.switchSave);
 
         if(SaveSharedPreference.getCheckSave(PaymentActivity.this))
         {
