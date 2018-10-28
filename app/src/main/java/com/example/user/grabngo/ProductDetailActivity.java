@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -70,7 +71,6 @@ public class ProductDetailActivity extends AppCompatActivity {
         cardViewProduct1.setVisibility(View.GONE);
         cardViewProduct2.setVisibility(View.GONE);
         progressBarProductDetail.setVisibility(View.VISIBLE);
-
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Product");
 

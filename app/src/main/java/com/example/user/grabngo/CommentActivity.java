@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -145,7 +146,6 @@ public class CommentActivity extends AppCompatActivity {
 
         progressBarComment.setVisibility(View.VISIBLE);
         recyclerViewComment.setVisibility(View.GONE);
-
         messageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
