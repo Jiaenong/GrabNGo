@@ -118,13 +118,12 @@ public class CartActivity extends AppCompatActivity {
                             mRecyclerView.setItemAnimator(new DefaultItemAnimator());
                             mRecyclerView.setAdapter(mAdapter);
                             pricePayment.setText("RM " + String.format("%.2f",totalPrice));
+                            Toast.makeText(CartActivity.this, ""+cartList.size(), Toast.LENGTH_SHORT).show();
 
-                            if(cartList.isEmpty()){
-                                editTextPromo.setFocusable(false);
-                                btnApplyPromo.setOnClickListener(null);
-                                btnPayment.setBackgroundColor(getResources().getColor(R.color.foreground_light_color));
-
-                            }else {
+                            if(!cartList.isEmpty()){
+                                editTextPromo.setFocusableInTouchMode(true);
+                                editTextPromo.setFocusable(true);
+                                btnPayment.setBackgroundColor(getResources().getColor(R.color.price_color));
                                 btnPayment.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
@@ -134,11 +133,13 @@ public class CartActivity extends AppCompatActivity {
                                         startActivity(intent);
                                     }
                                 });
-                            }
 
+                            }
                         }
+
                     });
                 }
+
 
                 progressBarCart.setVisibility(View.GONE);
                 mRecyclerView.setVisibility(View.VISIBLE);
