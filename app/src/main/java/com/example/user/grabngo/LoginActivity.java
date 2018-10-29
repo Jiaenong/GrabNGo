@@ -37,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar progressBarLogIn;
     private View view1, view2;
     private TextView textViewForgetPassword;
-    private String condition;
+    private String tag;
 
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
@@ -52,6 +52,8 @@ public class LoginActivity extends AppCompatActivity {
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_login);
 
+        Intent intent1 = getIntent();
+        tag = intent1.getStringExtra("tag");
         btnSignUp = (Button)findViewById(R.id.btn_signup);
         btnLogin = (Button)findViewById(R.id.btn_login);
         editTextEmail = (EditText)findViewById(R.id.editText_email);
@@ -164,6 +166,7 @@ public class LoginActivity extends AppCompatActivity {
                                     SaveSharedPreference.setID(LoginActivity.this, id, "customer");
                                     SaveSharedPreference.setCheckLogin(LoginActivity.this, true);
                                     Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                    intent.putExtra("tag",tag);
                                     startActivity(intent);
                                     finish();
                                     break;

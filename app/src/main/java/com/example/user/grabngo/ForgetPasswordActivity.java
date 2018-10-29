@@ -66,6 +66,7 @@ public class ForgetPasswordActivity extends AppCompatActivity {
         SendeMail sm = new SendeMail(ForgetPasswordActivity.this, email, subject, message);
         sm.execute();
         Intent intent = new Intent(ForgetPasswordActivity.this,LoginActivity.class);
+        intent.putExtra("tag","TAG");
         startActivity(intent);
         return;
     }

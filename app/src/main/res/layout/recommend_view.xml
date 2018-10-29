@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingTop="10dp"
+    android:paddingRight="10dp">
+
+    <ImageView
+        android:id="@+id/imageViewProductImage"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/grocery_oatkrunch" />
+
+    <TextView
+        android:id="@+id/textViewProductName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="Oat Krunch"
+        android:textColor="@color/foreground_color"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/textViewProductPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="RM 8.60 "
+        android:textColor="@color/price_color"
+        android:textSize="12sp" />
+
+</LinearLayout>

@@ -34,6 +34,8 @@ public class ForgetPasswordFragment extends Fragment {
     private FirebaseFirestore mFirebaseFirestore;
     private DocumentReference mDocumentReference;
 
+    public HomeActivity homeActivity;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -52,6 +54,7 @@ public class ForgetPasswordFragment extends Fragment {
         editTextRetypePassword = (EditText)v.findViewById(R.id.editTextRetypePassword);
         btnSave = (Button)v.findViewById(R.id.btn_save);
         btnCancel = (Button)v.findViewById(R.id.btn_cancel);
+        homeActivity = (HomeActivity)getActivity();
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,6 +123,7 @@ public class ForgetPasswordFragment extends Fragment {
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                homeActivity.tag = null;
                 Fragment accountFragment = new AccountFragment();
                 fm.beginTransaction().replace(R.id.fragment_container,accountFragment).commit();
             }
