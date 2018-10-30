@@ -22,11 +22,14 @@ import com.example.user.grabngo.Admin.ForumFragment;
 import java.lang.reflect.Field;
 
 public class HomeActivity extends AppCompatActivity {
+    public String tag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        Intent intent2 = getIntent();
+        tag = intent2.getStringExtra("tag");
 
         final android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
 
@@ -62,9 +65,17 @@ public class HomeActivity extends AppCompatActivity {
         };
 
         Fragment fragment = fm.findFragmentById(R.id.fragment_container);
-        if(fragment==null){
-            fragment = new HomeFragment();
-            fm.beginTransaction().add(R.id.fragment_container, fragment).commit();
+        if(tag != null)
+        {
+            if(fragment==null){
+                fragment = new AccountFragment();
+                fm.beginTransaction().add(R.id.fragment_container, fragment).commit();
+            }
+        }else {
+            if (fragment == null) {
+                fragment = new HomeFragment();
+                fm.beginTransaction().add(R.id.fragment_container, fragment).commit();
+            }
         }
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);

@@ -101,7 +101,8 @@
             android:name=".SearchActivity"
             android:label="Search"
             android:parentActivityName=".HomeActivity" />
-        <activity android:name=".ForgetPasswordActivity"></activity>
+        <activity android:name=".ForgetPasswordActivity" />
+        <activity android:name=".RecommendActivity"></activity>
     </application>
 
 </manifest>

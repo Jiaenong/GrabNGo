@@ -65,6 +65,8 @@ public class AccountFragment extends Fragment {
     private DocumentReference mDocumentReference;
     private StorageReference mStorageReference;
 
+    public HomeActivity homeActivity;
+
     private static final int RC_PHOTO_PICKER = 2;
 
     @Override
@@ -141,29 +143,34 @@ public class AccountFragment extends Fragment {
         linearLayoutAccount = (LinearLayout)v.findViewById(R.id.linearLayoutAccount);
 
         final FragmentManager fm = getFragmentManager();
+        homeActivity = (HomeActivity)getActivity();
+        if(homeActivity.tag != null)
+        {
+            Fragment forgetPasswordFragment = new ForgetPasswordFragment();
+            fm.beginTransaction().replace(R.id.fragment_container,forgetPasswordFragment).commit();
+        }else {
+            progressBarAccount.setVisibility(View.VISIBLE);
+            linearLayoutAccount.setVisibility(View.GONE);
 
-        progressBarAccount.setVisibility(View.VISIBLE);
-        linearLayoutAccount.setVisibility(View.GONE);
-
-        mDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Customer customer = documentSnapshot.toObject(Customer.class);
-                textViewName.setText("Name: "+customer.getName());
-                textViewGender.setText("Gender: "+customer.getGender());
-                textViewEmail.setText("Email: "+customer.getEmail());
-                textViewAddress.setText("Address: "+customer.getAddress());
-                if(customer.getProfilePic().equals(""))
-                {
-                    imageViewProfilePic.setImageResource(R.drawable.user);
-                }else{
-                    Glide.with(getActivity()).load(customer.getProfilePic()).into(imageViewProfilePic);
-                    textViewUploadPic.setText("Choose other Picture");
+            mDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    Customer customer = documentSnapshot.toObject(Customer.class);
+                    textViewName.setText("Name: " + customer.getName());
+                    textViewGender.setText("Gender: " + customer.getGender());
+                    textViewEmail.setText("Email: " + customer.getEmail());
+                    textViewAddress.setText("Address: " + customer.getAddress());
+                    if (customer.getProfilePic().equals("")) {
+                        imageViewProfilePic.setImageResource(R.drawable.user);
+                    } else {
+                        Glide.with(getActivity()).load(customer.getProfilePic()).into(imageViewProfilePic);
+                        textViewUploadPic.setText("Choose other Picture");
+                    }
+                    progressBarAccount.setVisibility(View.GONE);
+                    linearLayoutAccount.setVisibility(View.VISIBLE);
                 }
-                progressBarAccount.setVisibility(View.GONE);
-                linearLayoutAccount.setVisibility(View.VISIBLE);
-            }
-        });
+            });
+        }
 
         imageViewProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override

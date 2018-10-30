@@ -2,9 +2,10 @@ package com.example.user.grabngo.Class;
 
 import com.google.firebase.firestore.ServerTimestamp;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Product {
+public class Product implements Serializable {
     private String productName;
     private String producer;
     private String price;
