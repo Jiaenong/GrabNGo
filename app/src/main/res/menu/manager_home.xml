@@ -8,7 +8,7 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_print"
         android:title="Print"
         android:icon="@drawable/ic_print_black_24dp"
         app:showAsAction="always" />

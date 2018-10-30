@@ -49,5 +49,6 @@ dependencies {
     implementation files('libs/additionnal.jar')
     implementation files('libs/mail.jar')
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
+    implementation 'com.itextpdf:itextg:5.5.10'
 }
 apply plugin: 'com.google.gms.google-services'

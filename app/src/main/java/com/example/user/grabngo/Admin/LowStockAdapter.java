@@ -41,14 +41,6 @@ public class LowStockAdapter extends RecyclerView.Adapter<LowStockAdapter.MyView
         holder.name.setText(product.getProductName());
         holder.stockAmount.setText("Stock Amount: " + product.getStockAmount());
         Glide.with(mContext).load(product.getImageUrl()).into(holder.imageViewProduct);
-        holder.btnReorder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(mContext,MakeOrderActivity.class);
-                intent.putExtra("productName",product.getProductName());
-                mContext.startActivity(intent);
-            }
-        });
 
         if(mContext instanceof IgnoreLowStockActivity) {
             holder.btnRestore.setOnClickListener(new View.OnClickListener() {
@@ -62,6 +54,15 @@ public class LowStockAdapter extends RecyclerView.Adapter<LowStockAdapter.MyView
             });
 
         }else{
+            holder.btnReorder.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(mContext,MakeOrderActivity.class);
+                    intent.putExtra("productName",product.getProductName());
+                    mContext.startActivity(intent);
+                }
+            });
+
             holder.btnIgnore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

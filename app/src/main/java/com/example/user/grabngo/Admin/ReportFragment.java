@@ -1,11 +1,20 @@
 package com.example.user.grabngo.Admin;
 
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.print.PrintAttributes;
+import android.print.PrintDocumentAdapter;
+import android.print.PrintManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -44,6 +53,7 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.gms.common.api.GoogleApi;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -55,15 +65,25 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.storage.FirebaseStorage;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 
 import org.w3c.dom.Text;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -75,6 +95,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import io.grpc.okhttp.internal.framed.Settings;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -201,15 +223,14 @@ public class ReportFragment extends Fragment {
                 }
 
                 textViewReportTitle.setVisibility(View.VISIBLE);
-                textViewReportTitle.setText(spinnerReportType.getSelectedItem().toString());
                 hideShow();
 
                 if(i==1){
-
+                    textViewReportTitle.setText(spinnerReportType.getSelectedItem().toString() + " of " + spinnerFilter.getSelectedItem().toString());
                     salesReport();
 
                 }else if(i==2){
-
+                    textViewReportTitle.setText(spinnerReportType.getSelectedItem().toString() + " of " + spinnerMonth.getSelectedItem().toString() + " " + spinnerYear.getSelectedItem().toString());
                     moveToOuterCollection();
 
                 }
@@ -601,23 +622,83 @@ public class ReportFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_pdf:
-                Bitmap bitmap;
+                int selectedReport = spinnerReportType.getSelectedItemPosition();
+                String title="";
+                Bitmap bitmap=null;
+                if(selectedReport==1 && !barChart.isEmpty()){
+                    bitmap = barChart.getChartBitmap();
+                    title = spinnerReportType.getSelectedItem().toString() + " of " + spinnerFilter.getSelectedItem().toString();
+                }else if(selectedReport==2 && !barChartProduct.isEmpty()){
+                    bitmap = barChartProduct.getChartBitmap();
+                    title = spinnerReportType.getSelectedItem().toString() + " of " + spinnerMonth.getSelectedItem().toString() + " " + spinnerYear.getSelectedItem().toString();
+                }else {
+                    Toast.makeText(getActivity(),"No chart data available",Toast.LENGTH_SHORT).show();
+                    return true;
+                }
 
-                bitmap = barChart.getChartBitmap();
-
-                String root = Environment.getExternalStorageDirectory().getAbsolutePath();
-                File myDir = new File(root + "/documents");
-                File file = new File(myDir,"graph.JPEG");
+                Document doc = new Document();
+                String saveLocation = Environment.getExternalStorageDirectory() + "/Chart.pdf";
 
                 try {
-                    FileOutputStream out = new FileOutputStream(file);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-                    out.flush();
-                    out.close();
+                    PdfWriter.getInstance(doc,new FileOutputStream(saveLocation));
+                    doc.open();
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    Image image = Image.getInstance(stream.toByteArray());
+                    image.scaleToFit(500, 700);
+                    image.setAbsolutePosition(50, 70);
+                    Font f = new Font(Font.FontFamily.TIMES_ROMAN, 25.0f, Font.BOLD, BaseColor.BLACK);
+                    Chunk c = new Chunk(title, f);
+                    Paragraph p1 = new Paragraph(c);
+                    p1.setAlignment(Paragraph.ALIGN_CENTER);
+                    doc.add(new Paragraph(p1));
+                    doc.add(image);
+                    doc.close();
 
-                } catch (Exception e) {
+                    Toast.makeText(getActivity(),"PDF is generated",Toast.LENGTH_SHORT).show();
+                    File file = new File(saveLocation);
+                    Intent target = new Intent(Intent.ACTION_VIEW);
+                    target.setDataAndType(Uri.fromFile(file),"application/pdf");
+                    target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    Intent intent = Intent.createChooser(target,"Open file");
+
+                    try{
+                        startActivity(intent);
+                    }catch (ActivityNotFoundException e){
+                        Toast.makeText(getActivity(),"There are no PDF viewer installed",Toast.LENGTH_SHORT).show();
+                    }
+
+                } catch (DocumentException e) {
+                    e.printStackTrace();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
+
+
+                return true;
+
+            case R.id.action_print:
+
+                String filelocation = Environment.getExternalStorageDirectory() + "/Chart.pdf";
+                try
+                {
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        PrintManager printManager=(PrintManager) getActivity().getSystemService(Context.PRINT_SERVICE);
+                        PrintDocumentAdapter printAdapter = new PdfDocumentAdapter(getActivity(),filelocation );
+                        printManager.print("Document", printAdapter,new PrintAttributes.Builder().build());
+                    }else{
+                        Toast.makeText(getActivity(),"Only android version KitKat and above support printing service",Toast.LENGTH_SHORT).show();
+                    }
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+
                 return true;
 
         }
