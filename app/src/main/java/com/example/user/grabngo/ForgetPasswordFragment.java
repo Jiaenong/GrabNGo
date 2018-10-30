@@ -68,10 +68,10 @@ public class ForgetPasswordFragment extends Fragment {
                         Customer customer = documentSnapshot.toObject(Customer.class);
                         String password = customer.getPassword();
                         Log.i("Testing",password);
-                        if(!(oldPass.equals(password)))
+                        if(oldPass.equals("") || newPass.equals("") || retypePass.equals(""))
                         {
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            builder.setTitle("Password not match with old password !");
+                            builder.setTitle("All field must be fill up !");
                             builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -92,10 +92,10 @@ public class ForgetPasswordFragment extends Fragment {
                             });
                             AlertDialog alert = builder.create();
                             alert.show();
-                        }else if(oldPass.equals("") && newPass.equals("") && retypePass.equals(""))
+                        }else if(!(oldPass.equals(password)))
                         {
                             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            builder.setTitle("All field must be fill up !");
+                            builder.setTitle("Password not match with old password !");
                             builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {

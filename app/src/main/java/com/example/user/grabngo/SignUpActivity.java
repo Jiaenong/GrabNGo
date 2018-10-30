@@ -46,6 +46,7 @@ public class SignUpActivity extends AppCompatActivity {
     private CollectionReference mCollectionReference;
 
     private String autoID;
+    private int check = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,30 +95,114 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String password = editTextPassword.getText().toString();
+                String email = editTextEmailAddress.getText().toString();
+                String name = editTextCustomerName.getText().toString();
+                String address = editTextAddress.getText().toString();
                 String retypepassword = editTextRetypePassword.getText().toString();
-                if(!(retypepassword.equals(password)))
-                {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(SignUpActivity.this, R.style.AlertDialogCustom));
-                    builder.setTitle("Sign Up Fail");
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            editTextEmailAddress.setText("");
-                            editTextPassword.setText("");
-                            editTextRetypePassword.setText("");
-                            editTextAddress.setText("");
-                            editTextCustomerName.setText("");
-                            return;
+                mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                        {
+                            Customer customer = documentSnapshot.toObject(Customer.class);
+                            String customerEmail = customer.getEmail();
+                            if(email.equals(customerEmail))
+                            {
+                                check++;
+                                AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(SignUpActivity.this, R.style.AlertDialogCustom));
+                                builder.setTitle("Sign Up Fail");
+                                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        editTextEmailAddress.setText("");
+                                        editTextPassword.setText("");
+                                        editTextRetypePassword.setText("");
+                                        editTextAddress.setText("");
+                                        editTextCustomerName.setText("");
+                                        check = 0;
+                                        return;
+                                    }
+                                });
+                                builder.setMessage("This email has already been register, use another email.");
+                                AlertDialog alert = builder.create();
+                                alert.show();
+                            }
                         }
-                    });
-                    builder.setMessage("Invalid retype password.");
-                    AlertDialog alert = builder.create();
-                    alert.show();
-                }else {
-                    SaveCustomer();
-                }
+                        if(!(retypepassword.equals(password)))
+                        {
+                            check++;
+                            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(SignUpActivity.this, R.style.AlertDialogCustom));
+                            builder.setTitle("Sign Up Fail");
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    editTextEmailAddress.setText("");
+                                    editTextPassword.setText("");
+                                    editTextRetypePassword.setText("");
+                                    editTextAddress.setText("");
+                                    editTextCustomerName.setText("");
+                                    check = 0;
+                                    return;
+                                }
+                            });
+                            builder.setMessage("Invalid retype password.");
+                            AlertDialog alert = builder.create();
+                            alert.show();
+                        }else if(password.equals("")||email.equals("")||name.equals("")||address.equals("")||retypepassword.equals(""))
+                        {
+                            check++;
+                            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(SignUpActivity.this, R.style.AlertDialogCustom));
+                            builder.setTitle("Sign Up Fail");
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    editTextEmailAddress.setText("");
+                                    editTextPassword.setText("");
+                                    editTextRetypePassword.setText("");
+                                    editTextAddress.setText("");
+                                    editTextCustomerName.setText("");
+                                    check = 0;
+                                    return;
+                                }
+                            });
+                            builder.setMessage("All field are required to enter !");
+                            AlertDialog alert = builder.create();
+                            alert.show();
+                        }
+                        else if(isEmailValid(email) == false)
+                        {
+                            check++;
+                            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(SignUpActivity.this, R.style.AlertDialogCustom));
+                            builder.setTitle("Sign Up Fail");
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    editTextEmailAddress.setText("");
+                                    editTextPassword.setText("");
+                                    editTextRetypePassword.setText("");
+                                    editTextAddress.setText("");
+                                    editTextCustomerName.setText("");
+                                    check = 0;
+                                    return;
+                                }
+                            });
+                            builder.setMessage("Invalid email format !");
+                            AlertDialog alert = builder.create();
+                            alert.show();
+                        }
+                        if(check == 0)
+                        {
+                            SaveCustomer();
+                        }
+                    }
+                });
             }
         });
+    }
+
+    public static boolean isEmailValid(String email) {
+        Log.i("Testing", "hello");
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
     private void SaveCustomer()

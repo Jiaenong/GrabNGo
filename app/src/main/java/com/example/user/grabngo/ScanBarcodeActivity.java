@@ -166,6 +166,7 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ZXingScann
                                 dialogInterface.cancel();
                             }
                         });
+                        builder.setCancelable(false);
                         builder.setTitle("Error");
                         builder.setMessage("Invalide Barcode !");
                         AlertDialog alert = builder.create();

@@ -50,11 +50,13 @@ public class HomeFragment extends Fragment {
     List<String> myProductList;
     List<Product>productList;
     List<Product> newProduct;
+    List<PaymentList> pList;
     private RecommendAdapter adapter;
     private PaymentList paymentList1;
+    private int check = 0;
 
     private FirebaseFirestore mFirebaseFirestore;
-    private CollectionReference mCollectionReference, nCollectionReference, pCollectionReference;
+    private CollectionReference mCollectionReference, nCollectionReference, pCollectionReference, oCollectionReference, qCollectionReference;
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -75,6 +77,8 @@ public class HomeFragment extends Fragment {
         textViewRecommendMore = (TextView)v.findViewById(R.id.textViewRecommendMore);
         progressBarProductHome.setVisibility(View.VISIBLE);
         scrollViewHome.setVisibility(View.GONE);
+
+        pList = new ArrayList<>();
 
         textViewNewMore.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,8 +130,9 @@ public class HomeFragment extends Fragment {
        readData(new MyCallBack() {
            @Override
            public void onCallBack(List<PaymentList> myList) {
-               int numss = 0;
+               Log.i("myList Size ", myList.size()+"");
                myProductList = new ArrayList<>();
+               int numss = myList.get(0).getProductNum();
                for(int i = 0; i<myList.size();i++)
                {
                    if(myList.get(i).getProductNum()>numss);
@@ -140,26 +145,26 @@ public class HomeFragment extends Fragment {
                        }
                    }
                }
-               Log.i("Size ",myProductList.size()+"");
-               readSecondData(new MySecondCallBack() {
-                   @Override
-                   public void onSecondCallBack(List<Product> mySecondList) {
-                       productList = new ArrayList<>();
-                       for(int i = 0; i< mySecondList.size(); i++)
-                       {
-                           productList.add(mySecondList.get(i));
+                   readSecondData(new MySecondCallBack() {
+                       @Override
+                       public void onSecondCallBack(List<Product> mySecondList) {
+                           productList = new ArrayList<>();
+                           for(int i = 0; i< mySecondList.size(); i++)
+                           {
+                               productList.add(mySecondList.get(i));
+                           }
+                           adapter = new RecommendAdapter(productList);
+                           RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false);
+                           recyclerViewRecommend.setLayoutManager(mLayoutManager);
+                           recyclerViewRecommend.setItemAnimator(new DefaultItemAnimator());
+                           recyclerViewRecommend.setAdapter(adapter);
+                           progressBarProductHome.setVisibility(View.GONE);
+                           scrollViewHome.setVisibility(View.VISIBLE);
+                           //Log.i("Product Size ",mySecondList.size()+"");
                        }
-                       adapter = new RecommendAdapter(mySecondList);
-                       RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false);
-                       recyclerViewRecommend.setLayoutManager(mLayoutManager);
-                       recyclerViewRecommend.setItemAnimator(new DefaultItemAnimator());
-                       recyclerViewRecommend.setAdapter(adapter);
-                       progressBarProductHome.setVisibility(View.GONE);
-                       scrollViewHome.setVisibility(View.VISIBLE);
-                       Log.i("Product Size ",mySecondList.size()+"");
-                   }
-               });
-           }
+                   });
+               }
+
        });
 
        getNewItem();
@@ -239,10 +244,13 @@ public class HomeFragment extends Fragment {
         mCollectionReference.whereEqualTo("customerKey",id).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                boolean stop = false;
                 String key = "";
                 List<PaymentList> myList = new ArrayList<>();
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                 {
+                    Log.i("Test ", "Hello");
+                    check++;
                     key = documentSnapshot.getId();
                     nCollectionReference = mFirebaseFirestore.collection("Payment").document(key).collection("PaymentDetail");
                     nCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -256,7 +264,7 @@ public class HomeFragment extends Fragment {
                                 boolean check = true;
                                 PaymentDetail paymentDetail = documentSnapshot.toObject(PaymentDetail.class);
                                 String name = paymentDetail.getProductName();
-                                Log.i("Name ",name);
+                                //Log.i("Name ",name);
                                 if(myList.isEmpty())
                                 {
                                     PaymentList paymentList = new PaymentList(name, quantity);
@@ -264,14 +272,14 @@ public class HomeFragment extends Fragment {
                                 }else{
                                     for (int i = 0; i < myList.size(); i++) {
                                         if (name.equals(myList.get(i).getProductName())) {
-                                            Log.i("Equal ",myList.get(i).getProductName());
+                                            //Log.i("Equal ",myList.get(i).getProductName());
                                             int qty = myList.get(i).getProductNum();
                                             qty++;
                                             myList.get(i).setProductNum(qty);
                                             check = false;
                                             break;
                                         }else{
-                                            Log.i("Not Equal ",myList.get(i).getProductName());
+                                            //Log.i("Not Equal ",myList.get(i).getProductName());
                                             int num = 1;
                                             paymentList1 = new PaymentList(name, num);
                                         }
@@ -287,6 +295,63 @@ public class HomeFragment extends Fragment {
                         }
                     });
                 }
+                if(check == 0)
+                {
+                    Log.i("testinh ", "Ooi");
+                    oCollectionReference = mFirebaseFirestore.collection("Payment");
+                    oCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                            {
+                                String id = documentSnapshot.getId();
+                                qCollectionReference = mFirebaseFirestore.collection("Payment").document(id).collection("PaymentDetail");
+                                qCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                        int quantity = 1;
+                                        int numss = 0;
+                                        for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                                        {
+                                            int number = 0;
+                                            boolean check = true;
+                                            PaymentDetail paymentDetail = documentSnapshot.toObject(PaymentDetail.class);
+                                            String name = paymentDetail.getProductName();
+                                            //Log.i("Name ",name);
+                                            if(myList.isEmpty())
+                                            {
+                                                PaymentList paymentList = new PaymentList(name, quantity);
+                                                myList.add(paymentList);
+                                            }else{
+                                                for (int i = 0; i < myList.size(); i++) {
+                                                    if (name.equals(myList.get(i).getProductName())) {
+                                                        //Log.i("Equal ",myList.get(i).getProductName());
+                                                        int qty = myList.get(i).getProductNum();
+                                                        qty++;
+                                                        myList.get(i).setProductNum(qty);
+                                                        check = false;
+                                                        break;
+                                                    }else{
+                                                        //Log.i("Not Equal ",myList.get(i).getProductName());
+                                                        int num = 1;
+                                                        paymentList1 = new PaymentList(name, num);
+                                                    }
+                                                }
+                                                if(check == true)
+                                                {
+                                                    myList.add(paymentList1);
+                                                }
+                                            }
+
+                                        }
+                                        myCallBack.onCallBack(myList);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
+                //myCallBack.onCallBack(myList);
             }
         });
     }
