@@ -1,6 +1,7 @@
 package com.example.user.grabngo.Admin;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +41,14 @@ public class LowStockAdapter extends RecyclerView.Adapter<LowStockAdapter.MyView
         holder.name.setText(product.getProductName());
         holder.stockAmount.setText("Stock Amount: " + product.getStockAmount());
         Glide.with(mContext).load(product.getImageUrl()).into(holder.imageViewProduct);
+        holder.btnReorder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(mContext,MakeOrderActivity.class);
+                intent.putExtra("productName",product.getProductName());
+                mContext.startActivity(intent);
+            }
+        });
 
         if(mContext instanceof IgnoreLowStockActivity) {
             holder.btnRestore.setOnClickListener(new View.OnClickListener() {

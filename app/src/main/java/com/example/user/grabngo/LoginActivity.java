@@ -73,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
                 Intent intent = new Intent(LoginActivity.this, ManagerHomeActivity.class);
                 startActivity(intent);
             }
+            finish();
         }
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();

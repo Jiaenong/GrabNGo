@@ -32,9 +32,9 @@
     </string-array>
 
     <string-array name="report">
+        <item>-Select a report-</item>
         <item>Monthly Sales Report</item>
         <item>Best Selling Report</item>
-        <item>Summary Report</item>
     </string-array>
 
     <string-array name="month">
@@ -52,7 +52,22 @@
     </string-array>
 
     <string-array name="refundMonth">
-        <item>------------------</item>
+        <item>----------</item>
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+
+    <string-array name="reportMonth">
         <item>January</item>
         <item>February</item>
         <item>March</item>

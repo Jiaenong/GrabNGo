@@ -113,7 +113,6 @@ public class MakeOrderActivity extends AppCompatActivity {
         orderList = new ArrayList<>();
 
         setSpinnerHeight(spinnerSupplier,800);
-        setSpinnerHeight(spinnerProduct,600);
 
         collectionReferenceSupplier.orderBy("name").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
@@ -152,8 +151,35 @@ public class MakeOrderActivity extends AppCompatActivity {
                                 ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(MakeOrderActivity.this, R.layout.support_simple_spinner_dropdown_item, productList);
                                 adapter1.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
                                 spinnerProduct.setAdapter(adapter1);
+
+                                String productName = getIntent().getStringExtra("productName");
+
+                                if(productName!=null){
+                                    firebaseFirestore.collection("Product").whereEqualTo("productName",productName).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                            Product product = queryDocumentSnapshots.getDocuments().get(0).toObject(Product.class);
+
+                                            for(int i =0; i<spinnerSupplier.getAdapter().getCount(); i++){
+                                                if(spinnerSupplier.getItemAtPosition(i).equals(product.getProducer())){
+                                                    spinnerSupplier.setSelection(i);
+                                                }
+                                            }
+
+                                            for(int i =0; i<productList.size(); i++){
+                                                if(spinnerProduct.getItemAtPosition(i).equals(productName)){
+                                                    spinnerProduct.setSelection(i);
+                                                    getIntent().removeExtra("productName");
+                                                }
+                                            }
+                                        }
+                                    });
+
+                                }
+
                                 linearLayoutDefaultOrder.setVisibility(View.VISIBLE);
                                 progressBar.setVisibility(View.GONE);
+
                             }
                         });
                     }
@@ -199,14 +225,15 @@ public class MakeOrderActivity extends AppCompatActivity {
 
                      Order order = new Order();
 
+                    content = "Hi, we are from Econsave and would like to make an order with your company. \n\n Below are products we would like to order: \n\n";
                     if(spinnerProduct.getSelectedItemPosition()==0){
                         order.setName(editTextProduct.getText().toString());
-                        content += editTextProduct.getText().toString() + "\t";
+                        content += "1. " + editTextProduct.getText().toString() + "\t";
                     }else {
                         order.setName(spinnerProduct.getSelectedItem().toString());
-                        content += spinnerProduct.getSelectedItem().toString() + "\t";
+                        content += "1. " + spinnerProduct.getSelectedItem().toString() + "\t";
                     }
-                    content += editTextQuantity.getText().toString() + "\n";
+                    content += " - " + editTextQuantity.getText().toString() + " units\n";
                     order.setQuantity(editTextQuantity.getText().toString());
                     orders.add(order);
 
@@ -217,14 +244,15 @@ public class MakeOrderActivity extends AppCompatActivity {
                         EditText editTextQtyTemp = (EditText)viewTemp.findViewById(R.id.editTextQuantity);
                         EditText editTextProductTemp = (EditText)viewTemp.findViewById(R.id.editTextProduct);
 
+                        int num = i+2;
                         if(spinnerProductTemp.getSelectedItemPosition()==0){
                             order.setName(editTextProductTemp.getText().toString());
-                            content += editTextProductTemp.getText().toString() + "\t";
+                            content += num + ". " + editTextProductTemp.getText().toString() + "\t";
                         }else {
                             order.setName(spinnerProductTemp.getSelectedItem().toString());
-                            content += spinnerProductTemp.getSelectedItem().toString() + "\t";
+                            content += num + ". " + spinnerProductTemp.getSelectedItem().toString() + "\t";
                         }
-                        content += editTextQuantity.getText().toString() + "\n";
+                        content += " - " + editTextQtyTemp.getText().toString() + " units\n";
                         order.setQuantity(editTextQtyTemp.getText().toString());
                         orders.add(order);
 
@@ -244,7 +272,7 @@ public class MakeOrderActivity extends AppCompatActivity {
                     emailIntent.putExtra(Intent.EXTRA_TEXT   , content);
 
                     try {
-                        startActivity(createEmailOnlyChooserIntent(emailIntent, "Send via email"));
+                        startActivityForResult(createEmailOnlyChooserIntent(emailIntent, "Send via email"),2);
                     } catch (android.content.ActivityNotFoundException ex) {
                         Toast.makeText(MakeOrderActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
                     }
@@ -308,7 +336,6 @@ public class MakeOrderActivity extends AppCompatActivity {
         int number = orderList.size()+2;
         textViewOrder.setText("Order "+number);
 
-        setSpinnerHeight(spinnerProductExtra,600);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(MakeOrderActivity.this, R.layout.support_simple_spinner_dropdown_item, productList);
         adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
         spinnerProductExtra.setAdapter(adapter);
@@ -391,6 +418,19 @@ public class MakeOrderActivity extends AppCompatActivity {
         }
 
         return noError;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == 2) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+
+            }else{
+                finish();
+            }
+        }
     }
 
     @Override

@@ -125,7 +125,7 @@ public class RefundDetailActivity extends AppCompatActivity {
 
                     }
                 });
-                builder.setTitle("Delete the product?");
+                builder.setTitle("Delete the refund?");
                 AlertDialog alert = builder.create();
                 alert.show();
             }

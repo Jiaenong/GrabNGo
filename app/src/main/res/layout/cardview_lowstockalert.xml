@@ -19,6 +19,7 @@
         android:textColor="@color/foreground_dark_color"
         android:text="23"/>
     <Button
+        android:id="@+id/btn_reorder"
         android:layout_weight="1"
         android:layout_width="0dp"
         android:layout_height="30dp"

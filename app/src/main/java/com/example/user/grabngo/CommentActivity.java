@@ -109,10 +109,7 @@ public class CommentActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return true;
-    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -124,6 +121,8 @@ public class CommentActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

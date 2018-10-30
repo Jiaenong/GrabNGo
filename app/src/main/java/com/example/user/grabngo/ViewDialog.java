@@ -3,6 +3,7 @@ package com.example.user.grabngo;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.user.grabngo.Admin.MakeOrderActivity;
 import com.example.user.grabngo.Class.Product;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -110,7 +112,14 @@ public class LowStockAdapter extends RecyclerView.Adapter<LowStockAdapter.MyView
         final Product product = productList.get(position);
         holder.name.setText(product.getProductName());
         holder.stockAmount.setText("" + product.getStockAmount());
-
+        holder.btnReorder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(mContext,MakeOrderActivity.class);
+                intent.putExtra("productName",product.getProductName());
+                mContext.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -129,6 +138,7 @@ public class LowStockAdapter extends RecyclerView.Adapter<LowStockAdapter.MyView
             super(view);
             name = (TextView)view.findViewById(R.id.textViewProductName);
             stockAmount = (TextView)view.findViewById(R.id.textViewProductQuantity);
+            btnReorder = (Button)view.findViewById(R.id.btn_reorder);
 
         }
     }

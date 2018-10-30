@@ -1,6 +1,7 @@
 package com.example.user.grabngo;
 
 import android.content.Intent;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -32,6 +34,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 public class AddToCartActivity extends AppCompatActivity {
@@ -40,9 +44,10 @@ public class AddToCartActivity extends AppCompatActivity {
     private ImageButton btn_add, btn_minus;
     private EditText quantity;
     private ImageView imageView;
-    private TextView textViewPrice, textViewProduct, textViewProducer, textViewCategory, textViewExpired, textViewStock, textViewLocation;
+    private TextView textViewPrice, textViewProduct, textViewProducer, textViewCategory, textViewExpired, textViewStock, textViewLocation, textViewDiscount, textViewOriPrice;
     private ProgressBar progressBar;
     private ScrollView scrollView;
+    private LinearLayout linearLayoutPromo;
 
     private FirebaseFirestore mFirebaseFirestore;
     private DocumentReference mDocumentReference;
@@ -66,12 +71,15 @@ public class AddToCartActivity extends AppCompatActivity {
         textViewExpired = (TextView)findViewById(R.id.text_view_expired);
         textViewStock = (TextView)findViewById(R.id.text_view_stock);
         textViewLocation = (TextView)findViewById(R.id.text_view_location);
+        textViewOriPrice = (TextView)findViewById(R.id.textViewProductOriPrice);
+        textViewDiscount = (TextView)findViewById(R.id.textViewDiscount);
         imageView = (ImageView)findViewById(R.id.product_image);
         quantity = (EditText)findViewById(R.id.edit_text_quantity);
         btn_add = (ImageButton)findViewById(R.id.button_plus);
         btn_minus = (ImageButton)findViewById(R.id.button_minus);
         progressBar = (ProgressBar)findViewById(R.id.progressBarAddToCart);
         scrollView = (ScrollView)findViewById(R.id.scrollview);
+        linearLayoutPromo = (LinearLayout)findViewById(R.id.linearLayoutPromo);
 
         progressBar.setVisibility(View.VISIBLE);
         scrollView.setVisibility(View.GONE);
@@ -103,9 +111,22 @@ public class AddToCartActivity extends AppCompatActivity {
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                 {
                     Product product = documentSnapshot.toObject(Product.class);
+
+                    if(product.getDiscount()!=0){
+                        linearLayoutPromo.setVisibility(View.VISIBLE);
+                        textViewOriPrice.setText("RM " + product.getPrice());
+                        textViewOriPrice.setPaintFlags(textViewOriPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                        double price = Double.parseDouble(product.getPrice());
+                        double discountPercent = (100 - product.getDiscount())*0.01;
+                        price = price * discountPercent;
+                        textViewPrice.setText("RM " + String.format("%.2f",price));
+                        textViewDiscount.setText("-" + product.getDiscount() + "%");
+                    }else{
+                        textViewPrice.setText("RM " + product.getPrice());
+                    }
+
                     Glide.with(AddToCartActivity.this).load(product.getImageUrl()).into(imageView);
                     textViewProduct.setText(product.getProductName());
-                    textViewPrice.setText("RM " + product.getPrice());
                     textViewProducer.setText("Producer               : " + product.getProducer());
                     textViewCategory.setText("Category               : " + product.getCategory());
                     textViewExpired.setText("Expired Date        : " + product.getExpired());

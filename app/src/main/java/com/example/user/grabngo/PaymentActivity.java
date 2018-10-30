@@ -19,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.user.grabngo.Class.Cart;
 import com.example.user.grabngo.Class.CartItem;
@@ -167,8 +168,7 @@ public class PaymentActivity extends AppCompatActivity {
 
                 progressDialog.setMessage("Processing...");
                 progressDialog.show();
-                items.clear();
-                amounts.clear();
+
                 if(switchSave.isChecked())
                 {
                     Boolean save = true;
@@ -198,6 +198,7 @@ public class PaymentActivity extends AppCompatActivity {
                     public void onSuccess(Void aVoid) {
 
                         pCollectionReference = mFirebaseFirestore.collection("Payment").document(paymentID).collection("PaymentDetail");
+
                         mCollectionReference = mFirebaseFirestore.collection("Customer/"+id+"/Cart");
                         mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                             @Override
@@ -244,9 +245,13 @@ public class PaymentActivity extends AppCompatActivity {
 
 
                                 }
+                                deleteCollection();
 
                             }
                         });
+
+
+
                         if(progressDialog.isShowing())
                             progressDialog.dismiss();
                         AlertDialog.Builder builder = new AlertDialog.Builder(PaymentActivity.this);
@@ -254,9 +259,10 @@ public class PaymentActivity extends AppCompatActivity {
                         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                int batchSize = 3;
-                                deleteCollection(batchSize);
-                                //sendMail();
+                                sendMail();
+                                Intent intent = new Intent(PaymentActivity.this, HomeActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
                             }
                         });
                         builder.setMessage("Please check your email for the receipt.");
@@ -271,7 +277,7 @@ public class PaymentActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void deleteCollection(final int batchSize) {
+    private void deleteCollection() {
         String id = SaveSharedPreference.getID(PaymentActivity.this);
         nCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
         nCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -287,9 +293,7 @@ public class PaymentActivity extends AppCompatActivity {
                 batch.commit().addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Intent intent = new Intent(PaymentActivity.this, HomeActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
+                        return;
                     }
                 });
             }
@@ -310,6 +314,7 @@ public class PaymentActivity extends AppCompatActivity {
                 String subject = "Payment successfull ! This is your receipt";
                 String message = "";
                 StringBuilder sb = new StringBuilder();
+                Log.i("Check",items.size()+"");
                 for(int i = 0; i<items.size(); i++)
                 {
                     Double amount = Double.parseDouble(itemsprice.get(i)) * amounts.get(i);

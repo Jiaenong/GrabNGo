@@ -118,7 +118,6 @@ public class CartActivity extends AppCompatActivity {
                             mRecyclerView.setItemAnimator(new DefaultItemAnimator());
                             mRecyclerView.setAdapter(mAdapter);
                             pricePayment.setText("RM " + String.format("%.2f",totalPrice));
-                            Toast.makeText(CartActivity.this, ""+cartList.size(), Toast.LENGTH_SHORT).show();
 
                             if(!cartList.isEmpty()){
                                 editTextPromo.setFocusableInTouchMode(true);

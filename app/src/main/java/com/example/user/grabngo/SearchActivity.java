@@ -3,6 +3,7 @@ package com.example.user.grabngo;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -144,11 +145,11 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                 {
                     Product product = documentSnapshot.toObject(Product.class);
-                    String name = product.getProductName();
+                    /*String name = product.getProductName();
                     String imageUrl = product.getImageUrl();
                     String price = product.getPrice();
-                    Product product2 = new Product(imageUrl, name, price);
-                    pList.add(product2);
+                    Product product2 = new Product(imageUrl, name, price);*/
+                    pList.add(product);
                 }
                 adapter2 = new SearchResultAdapter(pList);
                 adapter2.searchFilter(text);
@@ -251,10 +252,22 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         public void onBindViewHolder(MyViewHolder holder, int position) {
             Product product3 = listP.get(position);
             holder.product_name.setText(product3.getProductName());
-            holder.product_price.setText(product3.getPrice());
+
+            holder.ori_product_price.setVisibility(View.GONE);
+            if(product3.getDiscount()!=0){
+                holder.ori_product_price.setVisibility(View.VISIBLE);
+                holder.ori_product_price.setText("RM " + product3.getPrice());
+                holder.ori_product_price.setPaintFlags(holder.ori_product_price.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                double price = Double.parseDouble(product3.getPrice());
+                double discountPercent = (100 - product3.getDiscount())*0.01;
+                price = price * discountPercent;
+                holder.product_price.setText("RM " + String.format("%.2f",price));
+            }else{
+                holder.product_price.setText("RM " + product3.getPrice());
+            }
+
             Glide.with(SearchActivity.this).load(product3.getImageUrl()).into(holder.image_product);
-            Log.i("name ",product3.getProductName());
-            Log.i("imageurl ",product3.getImageUrl());
+
         }
 
         @Override
@@ -263,7 +276,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         }
 
         public class MyViewHolder extends RecyclerView.ViewHolder{
-            public TextView product_name, product_price;
+            public TextView product_name, product_price, ori_product_price;
             public ImageView image_product;
 
             public MyViewHolder(View view)
@@ -272,6 +285,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
                 product_name = (TextView)view.findViewById(R.id.productname);
                 product_price = (TextView)view.findViewById(R.id.product_price);
                 image_product = (ImageView)view.findViewById(R.id.imageproduct);
+                ori_product_price = (TextView)view.findViewById(R.id.textViewProductOriPrice);
             }
         }
 

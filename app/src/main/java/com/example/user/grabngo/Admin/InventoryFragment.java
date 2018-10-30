@@ -237,6 +237,8 @@ public class InventoryFragment extends Fragment {
 
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.inventory_menu,menu);
+        MenuItem item = menu.findItem(R.id.report);
+        item.setVisible(false);
         return;
     }
 

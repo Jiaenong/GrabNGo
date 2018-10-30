@@ -255,20 +255,5 @@ public class RefundFragment extends Fragment {
         show();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.report:
-                Toast.makeText(getActivity(),"Report",Toast.LENGTH_SHORT).show();
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.inventory_menu,menu);
-        return;
-    }
 
 }

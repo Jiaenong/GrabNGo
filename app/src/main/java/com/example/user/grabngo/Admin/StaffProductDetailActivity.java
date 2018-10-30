@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.user.grabngo.Class.Customer;
 import com.example.user.grabngo.Class.Product;
 import com.example.user.grabngo.R;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -102,6 +103,25 @@ public class StaffProductDetailActivity extends AppCompatActivity {
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
+
+                                mFirebaseFirestore.collection("Customer").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                        for(QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots){
+                                            Customer customer = documentSnapshot.toObject(Customer.class);
+
+                                            mFirebaseFirestore.collection("Customer").document(documentSnapshot.getId().toString()).collection("Cart").whereEqualTo("productRef",selectedProduct).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                                @Override
+                                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                                    for(QueryDocumentSnapshot documentSnapshot1:queryDocumentSnapshots){
+                                                        documentSnapshot1.getReference().delete();
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+
                                 Toast.makeText(StaffProductDetailActivity.this, "Product successfully deleted",Toast.LENGTH_SHORT).show();
                                 pDialog.dismiss();
                                 finish();

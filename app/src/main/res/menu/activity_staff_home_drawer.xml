@@ -10,19 +10,19 @@
             android:icon="@drawable/ic_home_black_24dp"
             android:title="Home" />
         <item
-            android:id="@+id/nav_camera"
+            android:id="@+id/nav_inventory"
             android:icon="@drawable/ic_storage_black"
             android:title="Inventory" />
         <item
-            android:id="@+id/nav_gallery"
+            android:id="@+id/nav_refund"
             android:icon="@drawable/ic_refund_black"
             android:title="Refund" />
         <item
-            android:id="@+id/nav_slideshow"
+            android:id="@+id/nav_forum"
             android:icon="@drawable/ic_conversation_black"
             android:title="QnA Forum" />
         <item
-            android:id="@+id/nav_manage"
+            android:id="@+id/nav_account"
             android:icon="@drawable/ic_person_black_24dp"
             android:title="Account" />
 
@@ -31,7 +31,7 @@
     <group android:checkableBehavior="single"
         android:id="@+id/group2">
             <item
-                android:id="@+id/nav_share"
+                android:id="@+id/nav_logout"
                 android:icon="@drawable/ic_logout_black"
                 android:title="Logout" />
     </group>

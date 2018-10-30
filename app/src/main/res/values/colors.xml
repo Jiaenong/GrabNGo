@@ -11,4 +11,14 @@
     <color name="cancel_color">#C21807</color>
     <color name="comfirm_color">#3ebf20</color>
     <color name="disable_button">#E0E0E0</color>
+    
+    <color name="graph_red">#FF0033</color>
+    <color name="graph_orange">#FF7700</color>
+    <color name="graph_yellow">#FFAA00</color>
+    <color name="graph_green">#AADD22</color>
+    <color name="graph_blue">#0088ff</color>
+    <color name="graph_purple">#C77DF3</color>
+    <color name="graph_indigo">#9911AA</color>
+    <color name="graph_pink">#E3256B</color>
+
 </resources>

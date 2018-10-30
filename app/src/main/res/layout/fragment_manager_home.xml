@@ -20,7 +20,6 @@
         android:orientation="horizontal"
         android:layout_marginBottom="10dp">
         <android.support.v7.widget.CardView
-            android:id="@+id/low_stock"
             android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -40,10 +39,10 @@
                     android:textStyle="bold"
                     android:textSize="12sp"/>
                 <TextView
+                    android:id="@+id/textViewTodaySales"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="5dp"
-                    android:text="RM 1400.00"
                     android:textAlignment="center"
                     android:textColor="#fff"
                     android:textSize="16sp"/>
@@ -70,10 +69,10 @@
                     android:textAlignment="center"
                     android:textSize="12sp"/>
                 <TextView
+                    android:id="@+id/textViewYesterSales"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="5dp"
-                    android:text="RM 940.00"
                     android:textAlignment="center"
                     android:textColor="#fff"
                     android:textSize="16sp"/>

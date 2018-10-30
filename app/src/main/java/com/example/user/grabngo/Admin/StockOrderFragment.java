@@ -154,22 +154,4 @@ public class StockOrderFragment extends Fragment {
         show();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_search:
-                Toast.makeText(getActivity(),"GOOD",Toast.LENGTH_SHORT).show();
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.inventory_menu,menu);
-        MenuItem item = menu.findItem(R.id.report);
-        item.setVisible(false);
-        return;
-    }
-
 }
