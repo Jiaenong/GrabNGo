@@ -1,6 +1,7 @@
 package com.example.user.grabngo;
 
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -67,6 +68,8 @@ public class AccountFragment extends Fragment {
 
     public HomeActivity homeActivity;
 
+    Context thiscontext;
+
     private static final int RC_PHOTO_PICKER = 2;
 
     @Override
@@ -123,6 +126,7 @@ public class AccountFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_account, container, false);
 
         setHasOptionsMenu(true);
+        thiscontext = container.getContext();
         String id = SaveSharedPreference.getID(getContext());
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mFirebaseStorage = FirebaseStorage.getInstance();
@@ -163,7 +167,7 @@ public class AccountFragment extends Fragment {
                     if (customer.getProfilePic().equals("")) {
                         imageViewProfilePic.setImageResource(R.drawable.user);
                     } else {
-                        Glide.with(getActivity()).load(customer.getProfilePic()).into(imageViewProfilePic);
+                        Glide.with(thiscontext).load(customer.getProfilePic()).into(imageViewProfilePic);
                         textViewUploadPic.setText("Choose other Picture");
                     }
                     progressBarAccount.setVisibility(View.GONE);
