@@ -167,6 +167,8 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     @Override
     public boolean onQueryTextChange(String newText) {
         String text = newText;
+        listViewSearch.setVisibility(View.VISIBLE);
+        recyclerViewSearchResult.setVisibility(View.GONE);
         adapter.filter(text);
         return false;
     }

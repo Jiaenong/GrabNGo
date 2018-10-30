@@ -69,6 +69,8 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
     private List<Post> pList;
     private PostAdapter adapter;
 
+    Context thiscontext;
+
     public CustomerForumFragment() {
 
     }
@@ -85,6 +87,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_forum2, container, false);
         setHasOptionsMenu(true);
+        thiscontext = container.getContext();
         nFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = nFirebaseFirestore.collection("Post");
 
@@ -98,7 +101,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
         progressBarForum.setVisibility(View.VISIBLE);
         recyclerViewPost.setVisibility(View.GONE);
 
-        mCollectionReference.orderBy("postDate",Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        mCollectionReference.orderBy("postDate",Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 pList.clear();
@@ -161,7 +164,15 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
     }
 
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        String id = SaveSharedPreference.getID(getActivity());
         inflater.inflate(R.menu.cart,menu);
+        if(id.substring(0,1).equals("S"))
+        {
+            MenuItem item = menu.findItem(R.id.action_search);
+            MenuItem items = menu.findItem(R.id.cart);
+            item.setVisible(false);
+            items.setVisible(false);
+        }
         return;
     }
 
@@ -169,7 +180,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
     public void onRefresh() {
         swipe_container.setRefreshing(true);
         pList.clear();
-        mCollectionReference.orderBy("postDate",Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        mCollectionReference.orderBy("postDate",Query.Direction.DESCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
@@ -240,7 +251,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
                         holder.textViewCustomerName.setText(name);
                         if(!(staff.getProfileUrl().equals("")))
                         {
-                            Glide.with(getActivity()).load(staff.getProfileUrl()).into(holder.imageViewPicture);
+                            Glide.with(thiscontext).load(staff.getProfileUrl()).into(holder.imageViewPicture);
                         }
                     }
                 });
@@ -254,7 +265,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
                         String image = customer.getProfilePic();
                         holder.textViewCustomerName.setText(name);
                         if (!(customer.getProfilePic().equals(""))) {
-                            Glide.with(getActivity()).load(customer.getProfilePic()).into(holder.imageViewPicture);
+                            Glide.with(thiscontext).load(customer.getProfilePic()).into(holder.imageViewPicture);
                         }
                     }
                 });

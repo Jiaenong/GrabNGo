@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -40,6 +41,7 @@ public class PostActivity extends AppCompatActivity {
     private EditText editTextContent;
     private ImageView imageViewPostPic, imageViewSelectPhoto, imageViewUndo;
     private Button btnPost;
+    private ProgressBar progressBarPost;
 
     private FirebaseStorage mFirebaseStorage;
     private StorageReference mStorageReference;
@@ -52,6 +54,7 @@ public class PostActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        progressBarPost.setVisibility(View.VISIBLE);
         if(requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK)
         {
             Uri selectedImageUri = data.getData();
@@ -73,6 +76,7 @@ public class PostActivity extends AppCompatActivity {
                     {
                         Uri downloadUri = task.getResult();
                         image = downloadUri.toString();
+                        progressBarPost.setVisibility(View.GONE);
                         imageViewPostPic.setVisibility(View.VISIBLE);
                         Glide.with(PostActivity.this).load(image).into(imageViewPostPic);
                     }else{
@@ -101,6 +105,8 @@ public class PostActivity extends AppCompatActivity {
         imageViewSelectPhoto = (ImageView)findViewById(R.id.imageViewSelectPhoto);
         imageViewUndo = (ImageView)findViewById(R.id.imageViewUndo);
         btnPost = (Button)findViewById(R.id.btnPost);
+        progressBarPost = (ProgressBar)findViewById(R.id.progressBarPost);
+        progressBarPost.setVisibility(View.GONE);
 
         imageViewSelectPhoto.setOnClickListener(new View.OnClickListener() {
             @Override

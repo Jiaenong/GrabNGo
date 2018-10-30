@@ -1,5 +1,6 @@
 package com.example.user.grabngo;
 
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -7,11 +8,15 @@ import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -66,6 +71,8 @@ public class PaymentActivity extends AppCompatActivity {
     private List<Integer> amounts;
     private String paymentID;
     private int qty;
+
+    private DatePickerDialog datePickerDialog;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -134,6 +141,23 @@ public class PaymentActivity extends AppCompatActivity {
             switchSave.setChecked(true);
         }
 
+        editTextExpDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Calendar calendar = Calendar.getInstance();
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+                datePickerDialog = new DatePickerDialog(PaymentActivity.this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        editTextExpDate.setText(month+"/"+year);
+                    }
+                },year,month,day);
+                datePickerDialog.show();
+            }
+        });
+
         paymentPrice = (TextView)findViewById(R.id.price_payment);
         paymentPrice.setText(text);
 
@@ -165,112 +189,127 @@ public class PaymentActivity extends AppCompatActivity {
         btnPayment.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String cardNumber = editTextCardNumber.getText().toString();
+                String cardName = editTextCardName.getText().toString();
+                String expDate = editTextExpDate.getText().toString();
+                String cvv = editTextCVV.getText().toString();
 
-                progressDialog.setMessage("Processing...");
-                progressDialog.show();
-
-                if(switchSave.isChecked())
+                if(cardName.equals("")||cardNumber.equals("")||expDate.equals("")||cvv.equals(""))
                 {
-                    Boolean save = true;
-                    String cardNumber = editTextCardNumber.getText().toString();
-                    String cardName = editTextCardName.getText().toString();
-                    String expDate = editTextExpDate.getText().toString();
-                    String cvv = editTextCVV.getText().toString();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(PaymentActivity.this);
+                    builder.setTitle("Payment Fail");
+                    builder.setCancelable(false);
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            editTextCardName.setText("");
+                            editTextCardNumber.setText("");
+                            editTextExpDate.setText("");
+                            editTextCVV.setText("");
+                            alert.cancel();
+                        }
+                    });
+                    builder.setMessage("All field are required to enter !");
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }else {
+                    progressDialog.setMessage("Processing...");
+                    progressDialog.show();
+                    if (switchSave.isChecked()) {
+                        Boolean save = true;
+                        SaveSharedPreference.setCardNumber(PaymentActivity.this, cardNumber);
+                        SaveSharedPreference.setCardName(PaymentActivity.this, cardName);
+                        SaveSharedPreference.setExpDate(PaymentActivity.this, expDate);
+                        SaveSharedPreference.setCVV(PaymentActivity.this, cvv);
+                        SaveSharedPreference.setCheckSave(PaymentActivity.this, save);
+                    } else {
+                        SaveSharedPreference.clearData(PaymentActivity.this);
+                    }
+                    final String id = SaveSharedPreference.getID(PaymentActivity.this);
+                    Calendar calendar = Calendar.getInstance();
+                    final java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(calendar.getTime().getTime());
 
-                    SaveSharedPreference.setCardNumber(PaymentActivity.this,cardNumber);
-                    SaveSharedPreference.setCardName(PaymentActivity.this,cardName);
-                    SaveSharedPreference.setExpDate(PaymentActivity.this, expDate);
-                    SaveSharedPreference.setCVV(PaymentActivity.this, cvv);
-                    SaveSharedPreference.setCheckSave(PaymentActivity.this, save);
-                }else{
-                    SaveSharedPreference.clearData(PaymentActivity.this);
-                }
-                final String id = SaveSharedPreference.getID(PaymentActivity.this);
-                Calendar calendar = Calendar.getInstance();
-                final java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(calendar.getTime().getTime());
+                    String text = paymentPrice.getText().toString();
+                    double price = Double.parseDouble(text.substring(2));
+                    Payment payment = new Payment(currentTimestamp, price, id);
+                    mDocumentReference = mFirebaseFirestore.document("Payment/" + paymentID);
+                    mDocumentReference.set(payment).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
 
-                String text = paymentPrice.getText().toString();
-                double price = Double.parseDouble(text.substring(2));
-                Payment payment = new Payment(currentTimestamp, price, id);
-                mDocumentReference = mFirebaseFirestore.document("Payment/"+paymentID);
-                mDocumentReference.set(payment).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
+                            pCollectionReference = mFirebaseFirestore.collection("Payment").document(paymentID).collection("PaymentDetail");
 
-                        pCollectionReference = mFirebaseFirestore.collection("Payment").document(paymentID).collection("PaymentDetail");
+                            mCollectionReference = mFirebaseFirestore.collection("Customer/" + id + "/Cart");
+                            mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                @Override
+                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 
-                        mCollectionReference = mFirebaseFirestore.collection("Customer/"+id+"/Cart");
-                        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                            @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                    for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                                        Cart cart = documentSnapshot.toObject(Cart.class);
+                                        String key = cart.getProductRef();
+                                        int quantity = cart.getQuantity();
+                                        amounts.add(quantity);
+                                        mFirebaseFirestore.collection("Product").document(key).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                Product product = documentSnapshot.toObject(Product.class);
 
-                                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                                {
-                                    Cart cart = documentSnapshot.toObject(Cart.class);
-                                    String key = cart.getProductRef();
-                                    int quantity = cart.getQuantity();
-                                    amounts.add(quantity);
-                                    mFirebaseFirestore.collection("Product").document(key).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                        @Override
-                                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                            Product product = documentSnapshot.toObject(Product.class);
+                                                double price = Double.parseDouble(product.getPrice());
+                                                if (product.getDiscount() != 0) {
+                                                    double discountPercent = (100 - product.getDiscount()) * 0.01;
+                                                    price = price * discountPercent;
+                                                }
+                                                items.add(product.getProductName());
+                                                itemsprice.add(product.getPrice());
+                                                PaymentDetail paymentDetail = new PaymentDetail(product.getProductName(), quantity, price);
+                                                pCollectionReference.add(paymentDetail).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentReference documentReference) {
+                                                        return;
+                                                    }
+                                                });
 
-                                            double price = Double.parseDouble(product.getPrice());
-                                            if(product.getDiscount()!=0){
-                                                double discountPercent = (100 - product.getDiscount())*0.01;
-                                                price = price * discountPercent;
+                                                nDocumentReference = mFirebaseFirestore.collection("Product").document(key);
+                                                int quantityStock = product.getStockAmount();
+                                                quantityStock -= quantity;
+                                                nDocumentReference.update("stockAmount", quantityStock).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        return;
+                                                    }
+                                                });
+
                                             }
-                                            items.add(product.getProductName());
-                                            itemsprice.add(product.getPrice());
-                                            PaymentDetail paymentDetail = new PaymentDetail(product.getProductName(), quantity, price);
-                                            pCollectionReference.add(paymentDetail).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                                @Override
-                                                public void onSuccess(DocumentReference documentReference) {
-                                                    return;
-                                                }
-                                            });
+                                        });
 
-                                            nDocumentReference = mFirebaseFirestore.collection("Product").document(key);
-                                            int quantityStock = product.getStockAmount();
-                                            quantityStock -= quantity;
-                                            nDocumentReference.update("stockAmount",quantityStock).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                @Override
-                                                public void onSuccess(Void aVoid) {
-                                                    return;
-                                                }
-                                            });
 
-                                        }
-                                    });
-
+                                    }
+                                    deleteCollection();
 
                                 }
-                                deleteCollection();
-
-                            }
-                        });
+                            });
 
 
-
-                        if(progressDialog.isShowing())
-                            progressDialog.dismiss();
-                        AlertDialog.Builder builder = new AlertDialog.Builder(PaymentActivity.this);
-                        builder.setTitle("Payment Success");
-                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                sendMail();
-                                Intent intent = new Intent(PaymentActivity.this, HomeActivity.class);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                            }
-                        });
-                        builder.setMessage("Please check your email for the receipt.");
-                        AlertDialog alert = builder.create();
-                        alert.show();
-                    }
-                });
-
+                            if (progressDialog.isShowing())
+                                progressDialog.dismiss();
+                            AlertDialog.Builder builder = new AlertDialog.Builder(PaymentActivity.this);
+                            builder.setTitle("Payment Success");
+                            builder.setCancelable(false);
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    sendMail();
+                                    Intent intent = new Intent(PaymentActivity.this, HomeActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
+                                }
+                            });
+                            builder.setMessage("Please check your email for the receipt.");
+                            AlertDialog alert = builder.create();
+                            alert.show();
+                        }
+                    });
+                }
             }
         });
 
