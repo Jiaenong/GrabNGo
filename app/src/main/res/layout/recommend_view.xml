@@ -32,4 +32,16 @@
         android:textColor="@color/price_color"
         android:textSize="12sp" />
 
+    <TextView
+        android:id="@+id/textViewProductOriPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textViewProductName"
+        android:paddingRight="5dp"
+        android:text="TextView"
+        android:textColor="@color/foreground_light_color"
+        android:textSize="12sp"
+        android:visibility="gone"/>
+
 </LinearLayout>

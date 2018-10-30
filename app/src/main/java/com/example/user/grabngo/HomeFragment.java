@@ -2,6 +2,7 @@ package com.example.user.grabngo;
 
 
 import android.content.Intent;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -182,12 +183,8 @@ public class HomeFragment extends Fragment {
                 int i = 0;
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                 {
-                    Product produtc3 = documentSnapshot.toObject(Product.class);
-                    String name = produtc3.getProductName();
-                    String imageurl = produtc3.getImageUrl();
-                    String price = produtc3.getPrice();
-                    Product product4 = new Product(imageurl, name, price);
-                    newProduct.add(product4);
+                    Product product3 = documentSnapshot.toObject(Product.class);
+                    newProduct.add(product3);
                     i++;
                     if(i == 5)
                     {
@@ -220,11 +217,7 @@ public class HomeFragment extends Fragment {
                     for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                     {
                         Product product = documentSnapshot.toObject(Product.class);
-                        String name = product.getProductName();
-                        String price = product.getPrice();
-                        String image = product.getImageUrl();
-                        Product product1 = new Product(image, name, price);
-                        mySecondList.add(product1);
+                        mySecondList.add(product);
                     }
                     mySecondCallBack.onSecondCallBack(mySecondList);
                 }
@@ -389,7 +382,17 @@ public class HomeFragment extends Fragment {
         public void onBindViewHolder(MyViewHolder holder, int position) {
             Product product = listProduct.get(position);
             holder.textViewProductName.setText(product.getProductName());
-            holder.textViewProductPrice.setText("RM "+product.getPrice());
+            if(product.getDiscount()!=0){
+                holder.textViewOriPrice.setVisibility(View.VISIBLE);
+                holder.textViewOriPrice.setText("RM " + product.getPrice());
+                holder.textViewOriPrice.setPaintFlags(holder.textViewOriPrice.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                double price = Double.parseDouble(product.getPrice());
+                double discountPercent = (100 - product.getDiscount())*0.01;
+                price = price * discountPercent;
+                holder.textViewProductPrice.setText("RM " + String.format("%.2f",price));
+            }else{
+                holder.textViewProductPrice.setText("RM " + product.getPrice());
+            }
             Glide.with(getActivity()).load(product.getImageUrl()).into(holder.imageViewProductImage);
         }
 
@@ -399,7 +402,7 @@ public class HomeFragment extends Fragment {
         }
 
         public class MyViewHolder extends RecyclerView.ViewHolder{
-            public TextView textViewProductName, textViewProductPrice;
+            public TextView textViewProductName, textViewProductPrice, textViewOriPrice;
             public ImageView imageViewProductImage;
 
             public MyViewHolder(View view)
@@ -408,6 +411,7 @@ public class HomeFragment extends Fragment {
                 textViewProductName = (TextView)view.findViewById(R.id.textViewProductName);
                 textViewProductPrice = (TextView)view.findViewById(R.id.textViewProductPrice);
                 imageViewProductImage = (ImageView)view.findViewById(R.id.imageViewProductImage);
+                textViewOriPrice = (TextView)view.findViewById(R.id.textViewProductOriPrice);
             }
         }
 
