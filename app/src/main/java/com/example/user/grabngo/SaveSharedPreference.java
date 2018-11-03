@@ -10,7 +10,7 @@ public class SaveSharedPreference {
     static final String PREF_CARD_NUMBER = "cardNumber";
     static final String PREF_CARD_NAME = "cardName";
     static final String PREF_EXP_DATE = "expDate";
-    static final String PREF_CVV = "cvv";
+    static final String PREF_SAVE_DATE = "saveDate";
     static final String PREF_CHECK_SAVE = "saved";
     static final String USER_TYPE = "user";
     static final String LOW_STOCK_ALERT = "false";
@@ -59,6 +59,18 @@ public class SaveSharedPreference {
         return getSharedPreference(context).getString(PREF_CARD_NAME,"");
     }
 
+    public static void setSaveDate(Context context, String saveDate)
+    {
+        SharedPreferences.Editor editor = getSharedPreference(context).edit();
+        editor.putString(PREF_SAVE_DATE, saveDate);
+        editor.commit();
+    }
+
+    public static String getSaveDate(Context context)
+    {
+        return getSharedPreference(context).getString(PREF_SAVE_DATE,"");
+    }
+
     public static void setExpDate(Context context, String expDate)
     {
         SharedPreferences.Editor editor = getSharedPreference(context).edit();
@@ -68,17 +80,6 @@ public class SaveSharedPreference {
     public static String getExpDate(Context context)
     {
         return getSharedPreference(context).getString(PREF_EXP_DATE,"");
-    }
-
-    public static void setCVV(Context context, String cvv)
-    {
-        SharedPreferences.Editor editor = getSharedPreference(context).edit();
-        editor.putString(PREF_CVV, cvv);
-        editor.commit();
-    }
-    public static String getCVV(Context context)
-    {
-        return getSharedPreference(context).getString(PREF_CVV,"");
     }
 
     public static void setCheckLogin(Context context, Boolean login)
@@ -123,8 +124,8 @@ public class SaveSharedPreference {
         editor.remove(PREF_CARD_NUMBER);
         editor.remove(PREF_CARD_NAME);
         editor.remove(PREF_EXP_DATE);
-        editor.remove(PREF_CVV);
         editor.remove(PREF_CHECK_SAVE);
+        editor.remove(PREF_SAVE_DATE);
         editor.commit();
     }
 

@@ -70,6 +70,7 @@
                 android:id="@+id/editTextExpDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:focusableInTouchMode="false"
                 android:layout_weight="1"
                 android:hint="Expiration date"
                 android:inputType="date" />

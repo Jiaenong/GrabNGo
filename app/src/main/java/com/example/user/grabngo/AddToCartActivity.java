@@ -53,6 +53,8 @@ public class AddToCartActivity extends AppCompatActivity {
     private DocumentReference mDocumentReference;
     private CollectionReference mCollectionReference;
 
+    private int check = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -167,8 +169,27 @@ public class AddToCartActivity extends AppCompatActivity {
         String id = SaveSharedPreference.getID(AddToCartActivity.this);
         int qty = Integer.parseInt(quantity.getText().toString());
         mCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
-        Cart cart = new Cart(name, productRef,qty);
-        mCollectionReference.add(cart);
+        mCollectionReference.whereEqualTo("productName",name).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                {
+                    check++;
+                    Cart cart1 = documentSnapshot.toObject(Cart.class);
+                    String key = documentSnapshot.getId();
+                    int num = cart1.getQuantity();
+                    if(name.equals(cart1.getProductName()))
+                    {
+                        mDocumentReference = mFirebaseFirestore.document("Customer/"+id+"/Cart/"+key);
+                        mDocumentReference.update("quantity",num+qty);
+                    }
+                }
+                if(check == 0) {
+                    Cart cart = new Cart(name, productRef, qty);
+                    mCollectionReference.add(cart);
+                }
+            }
+        });
     }
 
     @Override

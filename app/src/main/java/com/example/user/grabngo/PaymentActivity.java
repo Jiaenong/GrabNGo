@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -45,9 +47,11 @@ import com.google.firebase.firestore.WriteBatch;
 
 import org.w3c.dom.Text;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +77,7 @@ public class PaymentActivity extends AppCompatActivity {
     private List<Integer> amounts;
     private String paymentID;
     private int qty;
+    private String expDates;
 
     private DatePickerDialog datePickerDialog;
 
@@ -136,10 +141,11 @@ public class PaymentActivity extends AppCompatActivity {
 
         if(SaveSharedPreference.getCheckSave(PaymentActivity.this))
         {
-            editTextCardNumber.setText(SaveSharedPreference.getCardNumber(PaymentActivity.this));
+            String number = SaveSharedPreference.getCardNumber(PaymentActivity.this);
+            editTextCardNumber.setText("XXXXXXXXXXXX"+number.substring(12));
             editTextCardName.setText(SaveSharedPreference.getCardName(PaymentActivity.this));
             editTextExpDate.setText(SaveSharedPreference.getExpDate(PaymentActivity.this));
-            editTextCVV.setText(SaveSharedPreference.getCVV(PaymentActivity.this));
+            expDates = SaveSharedPreference.getSaveDate(PaymentActivity.this);
             switchSave.setChecked(true);
         }
 
@@ -153,9 +159,11 @@ public class PaymentActivity extends AppCompatActivity {
                 datePickerDialog = new DatePickerDialog(PaymentActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        editTextExpDate.setText(month+"/"+year);
+                        expDates = dayOfMonth+"-"+month+"-"+year;
+                        editTextExpDate.setText((month+1)+"/"+year);
                     }
                 },year,month,day);
+                ((ViewGroup)datePickerDialog.getDatePicker()).findViewById(Resources.getSystem().getIdentifier("day","id","android")).setVisibility(View.GONE);
                 datePickerDialog.show();
             }
         });
@@ -214,7 +222,40 @@ public class PaymentActivity extends AppCompatActivity {
                     builder.setMessage("All field are required to enter !");
                     AlertDialog alert = builder.create();
                     alert.show();
-                }else {
+                }else if(cardNumber.length() != 16)
+                {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(PaymentActivity.this);
+                    builder.setTitle("Payment Fail");
+                    builder.setCancelable(false);
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            editTextCardName.setFocusable(true);
+                            editTextCVV.setText("");
+                            alert.cancel();
+                        }
+                    });
+                    builder.setMessage("The Card Number should be 16 digit !");
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }else if(checkDate() == false)
+                {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(PaymentActivity.this);
+                    builder.setTitle("Payment Fail");
+                    builder.setCancelable(false);
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            editTextExpDate.setFocusable(true);
+                            editTextCVV.setText("");
+                            alert.cancel();
+                        }
+                    });
+                    builder.setMessage("The card has already expired !");
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }
+                else {
                     progressDialog.setMessage("Processing...");
                     progressDialog.show();
                     if (switchSave.isChecked()) {
@@ -222,7 +263,7 @@ public class PaymentActivity extends AppCompatActivity {
                         SaveSharedPreference.setCardNumber(PaymentActivity.this, cardNumber);
                         SaveSharedPreference.setCardName(PaymentActivity.this, cardName);
                         SaveSharedPreference.setExpDate(PaymentActivity.this, expDate);
-                        SaveSharedPreference.setCVV(PaymentActivity.this, cvv);
+                        SaveSharedPreference.setCheckSave(PaymentActivity.this, save);
                         SaveSharedPreference.setCheckSave(PaymentActivity.this, save);
                     } else {
                         SaveSharedPreference.clearData(PaymentActivity.this);
@@ -316,6 +357,28 @@ public class PaymentActivity extends AppCompatActivity {
         });
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    public boolean checkDate()
+    {
+        boolean check = true;
+        try {
+            Calendar c = Calendar.getInstance();
+            SimpleDateFormat sd = new SimpleDateFormat("dd-MM-yyyy");
+            Date date = sd.parse(expDates);
+            Date currentDate = c.getTime();
+            if(date.after(currentDate))
+            {
+                check = true;
+            }else{
+                check = false;
+            }
+
+        }catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+        return check;
     }
 
     private void updatePromotion(){

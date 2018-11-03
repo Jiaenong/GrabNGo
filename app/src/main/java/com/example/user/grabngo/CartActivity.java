@@ -278,19 +278,23 @@ public class CartActivity extends AppCompatActivity {
         private FirebaseFirestore mFirebaseFirestore;
         private CollectionReference mCollectionReference;
         private DocumentReference mDocumentReference;
+        private double totalPay = 0;
 
         public class MyViewHolder extends RecyclerView.ViewHolder {
-            public TextView product, price, quantity;
+            public TextView product, price;
+            public EditText edit_text_cartQuantity;
             public ImageView productImage;
-            public ImageButton imageButton;
+            public ImageButton imageButton, button_remove, button_add;
 
             public MyViewHolder(View view) {
                 super(view);
+                edit_text_cartQuantity = (EditText)view.findViewById(R.id.edit_text_cartQuantity);
                 price = (TextView) view.findViewById(R.id.product_price);
                 product = (TextView) view.findViewById(R.id.product_name);
-                quantity = (TextView) view.findViewById(R.id.product_quantity);
                 productImage = (ImageView)view.findViewById(R.id.image_product);
                 imageButton = (ImageButton)view.findViewById(R.id.button_delete);
+                button_remove = (ImageButton)view.findViewById(R.id.button_remove);
+                button_add = (ImageButton)view.findViewById(R.id.button_add);
             }
         }
 
@@ -310,8 +314,65 @@ public class CartActivity extends AppCompatActivity {
             final CartItem cartItem = cart.get(position);
             holder.product.setText(cartItem.getProductname());
             holder.price.setText("RM "+String.format("%.2f",cartItem.getPrice()));
-            holder.quantity.setText("Quantity: "+cartItem.getQuantity());
+            holder.edit_text_cartQuantity.setText(cartItem.getQuantity()+"");
             Glide.with(CartActivity.this).load(cartItem.getImageSrc()).into(holder.productImage);
+
+            holder.button_remove.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int quantity = Integer.parseInt(holder.edit_text_cartQuantity.getText().toString());
+                    if(quantity == 1)
+                    {
+                        return;
+                    }
+                    quantity--;
+                    totalPay = cartItem.getPrice()*quantity;
+                    holder.edit_text_cartQuantity.setText(quantity+"");
+                    pricePayment.setText("RM " + String.format("%.2f",(totalPrice-(cartItem.getPrice()*cartItem.getQuantity()))+totalPay));
+                    int finalQuantity = quantity;
+                    String id = SaveSharedPreference.getID(CartActivity.this);
+                    mCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
+                    mCollectionReference.whereEqualTo("productName",cartItem.getProductname()).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            String key = "";
+                            for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                            {
+                                key = documentSnapshot.getId();
+                            }
+                            mDocumentReference = mFirebaseFirestore.document("Customer/"+id+"/Cart/"+key);
+                            mDocumentReference.update("quantity", finalQuantity);
+                        }
+                    });
+
+                }
+            });
+
+            holder.button_add.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int quantity = Integer.parseInt(holder.edit_text_cartQuantity.getText().toString());
+                    quantity++;
+                    totalPay = cartItem.getPrice()*quantity;
+                    holder.edit_text_cartQuantity.setText(quantity+"");
+                    pricePayment.setText("RM " + String.format("%.2f",(totalPrice-(cartItem.getPrice()*cartItem.getQuantity()))+totalPay));
+                    String id = SaveSharedPreference.getID(CartActivity.this);
+                    mCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
+                    int finalQuantity = quantity;
+                    mCollectionReference.whereEqualTo("productName",cartItem.getProductname()).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            String key = "";
+                            for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                            {
+                                key = documentSnapshot.getId();
+                            }
+                            mDocumentReference = mFirebaseFirestore.document("Customer/"+id+"/Cart/"+key);
+                            mDocumentReference.update("quantity", finalQuantity);
+                        }
+                    });
+                }
+            });
 
             holder.imageButton.setOnClickListener(new View.OnClickListener() {
                 @Override

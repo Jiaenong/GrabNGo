@@ -2,6 +2,7 @@ package com.example.user.grabngo;
 
 
 import android.app.ActionBar;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
@@ -52,7 +53,6 @@ public class ProductDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_detail);
-
         textViewName = (TextView)findViewById(R.id.text_view_product_name);
         textViewPrice = (TextView)findViewById(R.id.text_view_product_price);
         textViewProducer = (TextView)findViewById(R.id.text_view_producer);
@@ -117,7 +117,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                 textViewExpired.setText("Expired Date        : " + product.getExpired());
                 textViewStock.setText("Stock Amount     : " + product.getStockAmount());
                 textViewLocation.setText("Shelf location      : " + product.getShelfLocation());
-                Glide.with(ProductDetailActivity.this).load(product.getImageUrl()).into(imageViewProduct);
+                Glide.with(getApplicationContext()).load(product.getImageUrl()).into(imageViewProduct);
                 cardViewProduct1.setVisibility(View.VISIBLE);
                 cardViewProduct2.setVisibility(View.VISIBLE);
                 progressBarProductDetail.setVisibility(View.GONE);
