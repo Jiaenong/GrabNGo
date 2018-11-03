@@ -3,6 +3,10 @@ package com.example.user.grabngo.Admin;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -38,10 +42,32 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.itextpdf.text.BadElementException;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPHeaderCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Stack;
 
@@ -222,7 +248,7 @@ public class MakeOrderActivity extends AppCompatActivity {
                 String content = "";
 
                 if(validation()){
-
+                    createPDF();
                      Order order = new Order();
 
                     content = "Hi, we are from Econsave and would like to make an order with your company. \n\n Below are products we would like to order: \n\n";
@@ -259,14 +285,13 @@ public class MakeOrderActivity extends AppCompatActivity {
                     }
 
                     String email = supplierList.get(spinnerSupplier.getSelectedItemPosition()).getEmail();
-                    String fileName = "report.pdf";
-                    String completePath = Environment.getExternalStorageDirectory() + "/" + fileName;
+                    String completePath = Environment.getExternalStorageDirectory() + "/Order.pdf";
 
                     File file = new File(completePath);
 
                     Intent emailIntent = new Intent(Intent.ACTION_SEND);
                     emailIntent.setType("*/*");
-                    //emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                    emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
                     emailIntent.putExtra(Intent.EXTRA_EMAIL  , new String[]{email});
                     emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Econsave: Purchase Order");
                     emailIntent.putExtra(Intent.EXTRA_TEXT   , content);
@@ -281,6 +306,156 @@ public class MakeOrderActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public void createPDF(){
+        String saveLocation = Environment.getExternalStorageDirectory() + "/Order.pdf";
+
+        Document doc = new Document();
+        try {
+            PdfWriter.getInstance(doc, new FileOutputStream(saveLocation));
+            doc.setPageSize(PageSize.A4);
+            Drawable d = getResources ().getDrawable (R.drawable.econsavelogo);
+            Bitmap bitmap = ((BitmapDrawable)d).getBitmap();
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            Image img = null;
+            byte[] byteArray = stream.toByteArray();
+            img = Image.getInstance(byteArray);
+            img.scaleToFit(450, 80);
+            float x = (PageSize.A4.getWidth() - img.getScaledWidth()) / 2;
+            img.setAbsolutePosition(x, PageSize.A4.getHeight()-120);
+            doc.open();
+            doc.add(img);
+            Font f = new Font(Font.FontFamily.TIMES_ROMAN, 22.0f, Font.BOLD, BaseColor.BLACK);
+            Chunk c = new Chunk("\n\n\nPurchase Order\n", f);
+            Paragraph p1 = new Paragraph(c);
+            p1.setAlignment(Paragraph.ALIGN_CENTER);
+            doc.add(new Paragraph(p1));
+
+            PdfPTable table = new PdfPTable(2);
+            table.setTotalWidth(600f);
+            String s = "\nEconsave\nG01, 67,\nJalan Taman Ibu Kota,\nTaman Danau Kota,\n53300 Kuala Lumpur\n\nPhone number: (123)456-8172\nFax Number: (123)901-9281\n\n";
+            Date date = new Date();
+            SimpleDateFormat df = new SimpleDateFormat("MMM dd, yyyy");
+            String s2 = "\nIssued by: Lee Jia Jun\n\nDate issued: "+df.format(date);
+
+            Font tableFont = new Font(Font.FontFamily.TIMES_ROMAN, 16.0f, Font.NORMAL, BaseColor.BLACK);
+            //Cell One(Econsave info)
+            PdfPCell cell = new PdfPCell(new Phrase(s,tableFont));
+            cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+            cell.setBorder(Rectangle.NO_BORDER);
+
+            //Cell Two(Issue By)
+            PdfPCell cell2 = new PdfPCell(new Phrase(s2,tableFont));
+            cell2.setHorizontalAlignment(Element.ALIGN_LEFT);
+            cell2.setBorder(Rectangle.NO_BORDER);
+
+            //Add to PDF
+            table.addCell(cell);
+            table.addCell(cell2);
+            doc.add(table);
+
+            Font headerFont = new Font(Font.FontFamily.TIMES_ROMAN, 16.0f, Font.BOLD, BaseColor.BLACK);
+            //Order Detail
+
+            PdfPTable orderTable = new PdfPTable(new float[]{1f,5f,2f});
+            orderTable.setTotalWidth(600f);
+            PdfPCell headerCell = new PdfPCell(new Phrase(" "));
+            headerCell.setBackgroundColor(new BaseColor(220,220,220));
+
+            PdfPCell headerCell2 = new PdfPCell(new Phrase("Product Description",headerFont));
+            headerCell2.setBackgroundColor(new BaseColor(220,220,220));
+            headerCell2.setVerticalAlignment(Element.ALIGN_CENTER);
+            headerCell2.setPaddingBottom(5f);
+            headerCell2.setPaddingLeft(10f);
+
+            PdfPCell headerCell3 = new PdfPCell(new Phrase("Quantity",headerFont));
+            headerCell3.setBackgroundColor(new BaseColor(220,220,220));
+            headerCell3.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            headerCell3.setVerticalAlignment(Element.ALIGN_CENTER);
+            headerCell3.setPaddingBottom(5f);
+            headerCell3.setPaddingRight(10f);
+
+            orderTable.setHeaderRows(1);
+            orderTable.addCell(headerCell);
+            orderTable.addCell(headerCell2);
+            orderTable.addCell(headerCell3);
+
+            PdfPCell orderCell = new PdfPCell(new Phrase("1."));
+            orderCell.setPaddingLeft(10f);
+
+            PdfPCell orderCell2;
+            if(spinnerProduct.getSelectedItemPosition()==0){
+                orderCell2 = new PdfPCell(new Phrase(editTextProduct.getText().toString(),tableFont));
+                orderCell2.setVerticalAlignment(Element.ALIGN_CENTER);
+                orderCell2.setPaddingBottom(5f);
+                orderCell2.setPaddingLeft(10f);
+
+            }else {
+                orderCell2 = new PdfPCell(new Phrase(spinnerProduct.getSelectedItem().toString(),tableFont));
+                orderCell2.setVerticalAlignment(Element.ALIGN_CENTER);
+                orderCell2.setPaddingBottom(5f);
+                orderCell2.setPaddingLeft(10f);
+            }
+
+            PdfPCell orderCell3 = new PdfPCell(new Phrase(editTextQuantity.getText().toString(),tableFont));
+            orderCell3.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            orderCell3.setVerticalAlignment(Element.ALIGN_CENTER);
+            orderCell3.setPaddingBottom(5f);
+            orderCell3.setPaddingRight(10f);
+
+            orderTable.addCell(orderCell);
+            orderTable.addCell(orderCell2);
+            orderTable.addCell(orderCell3);
+
+            for(int i=0; i<orderList.size();i++){
+                View viewTemp = orderList.get(i);
+
+                Spinner spinnerProductTemp = (Spinner) viewTemp.findViewById(R.id.spinner_product);
+                EditText editTextQtyTemp = (EditText)viewTemp.findViewById(R.id.editTextQuantity);
+                EditText editTextProductTemp = (EditText)viewTemp.findViewById(R.id.editTextProduct);
+
+                int num = i+2;
+                PdfPCell orderCell4 = new PdfPCell(new Phrase(num+"."));
+                orderCell4.setPaddingLeft(10f);
+
+                PdfPCell orderCell5;
+                if(spinnerProductTemp.getSelectedItemPosition()==0){
+                    orderCell5 = new PdfPCell(new Phrase(editTextProductTemp.getText().toString(),tableFont));
+                    orderCell5.setVerticalAlignment(Element.ALIGN_CENTER);
+                    orderCell5.setPaddingBottom(5f);
+                    orderCell5.setPaddingLeft(10f);
+
+                }else {
+                    orderCell5 = new PdfPCell(new Phrase(spinnerProductTemp.getSelectedItem().toString(),tableFont));
+                    orderCell5.setVerticalAlignment(Element.ALIGN_CENTER);
+                    orderCell5.setPaddingBottom(5f);
+                    orderCell5.setPaddingLeft(10f);
+                }
+
+                PdfPCell orderCell6 = new PdfPCell(new Phrase(editTextQtyTemp.getText().toString(),tableFont));
+                orderCell6.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                orderCell6.setVerticalAlignment(Element.ALIGN_CENTER);
+                orderCell6.setPaddingBottom(5f);
+                orderCell6.setPaddingRight(10f);
+
+                orderTable.addCell(orderCell4);
+                orderTable.addCell(orderCell5);
+                orderTable.addCell(orderCell6);
+            }
+
+            doc.add(orderTable);
+            doc.close();
+
+        } catch (DocumentException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public Intent createEmailOnlyChooserIntent(Intent source,

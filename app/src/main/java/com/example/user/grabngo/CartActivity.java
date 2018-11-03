@@ -38,12 +38,14 @@ import com.example.user.grabngo.Class.Coupon;
 import com.example.user.grabngo.Class.Product;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.common.collect.Table;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.itextpdf.text.pdf.PdfPTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +61,7 @@ public class CartActivity extends AppCompatActivity {
     private CollectionReference mCollectionReference;
     private ProgressBar progressBarCart;
     private int promoPrice;
+    private String promoId;
     private double totalPrice;
 
     @Override
@@ -128,6 +131,9 @@ public class CartActivity extends AppCompatActivity {
                                     public void onClick(View view) {
 
                                         Intent intent = new Intent(CartActivity.this, PaymentActivity.class);
+                                        if(!textViewAppliedPromo.getText().toString().equals("")){
+                                            intent.putExtra("promoId",promoId);
+                                        }
                                         intent.putExtra("totalPrice",pricePayment.getText().toString());
                                         startActivity(intent);
                                     }
@@ -164,9 +170,11 @@ public class CartActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         boolean valid = false;
+                        List<String> promoIdList = new ArrayList<>();
                         for(QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots){
                             Coupon coupon = documentSnapshot.toObject(Coupon.class);
                             couponList.add(coupon);
+                            promoIdList.add(documentSnapshot.getId().toString());
                         }
 
                         //TODO: TEST NULL
@@ -174,26 +182,44 @@ public class CartActivity extends AppCompatActivity {
                             for (int i = 0; i < couponList.size(); i++) {
                                 if (couponList.get(i).getCode().equals(promoCode)) {
                                     valid = true;
+                                    final int j=i;
 
-                                    double totalPrice = Double.parseDouble(pricePayment.getText().toString().substring(2));
-                                    double rebatePrice = totalPrice - (double)couponList.get(i).getCashRebate();
+                                    String id = SaveSharedPreference.getID(CartActivity.this);
+                                    mFirebaseFirestore.collection("Promotion").document(promoIdList.get(i)).collection("Customer").whereEqualTo("id",id).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                            int count=0;
+                                            for(QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots){
+                                                count++;
+                                            }
 
-                                    if(rebatePrice<=0){
-                                        Toast.makeText(CartActivity.this, "Only applicable with a purchase of more than RM " + couponList.get(i).getCashRebate(), Toast.LENGTH_LONG).show();
-                                    }else{
+                                            if(count!=0){
+                                                Toast.makeText(CartActivity.this, "This promo code is only applicable once", Toast.LENGTH_SHORT).show();
+                                                return;
+                                            }else{
+                                                double totalPrice = Double.parseDouble(pricePayment.getText().toString().substring(2));
+                                                double rebatePrice = totalPrice - (double)couponList.get(j).getCashRebate();
 
-                                        btnApplyPromo.setVisibility(View.GONE);
-                                        editTextPromo.setVisibility(View.GONE);
-                                        btnChange.setVisibility(View.VISIBLE);
-                                        textViewAppliedPromo.setVisibility(View.VISIBLE);
-                                        promoPrice = couponList.get(i).getCashRebate();
-                                        textViewAppliedPromo.setText("Applied Promo Code : " + promoCode);
-                                        textViewPromo.setText("Promo Saved: RM " + String.format("%.2f",(double)couponList.get(i).getCashRebate()));
-                                        pricePayment.setText("RM " + String.format("%.2f", rebatePrice));
-                                        Toast.makeText(CartActivity.this, "Promo code successfully applied", Toast.LENGTH_SHORT).show();
-                                    }
+                                                if(rebatePrice<=0){
+                                                    Toast.makeText(CartActivity.this, "Only applicable with a purchase of more than RM " + couponList.get(j).getCashRebate(), Toast.LENGTH_LONG).show();
+                                                }else{
+                                                    promoId = promoIdList.get(j);
+                                                    btnApplyPromo.setVisibility(View.GONE);
+                                                    editTextPromo.setVisibility(View.GONE);
+                                                    btnChange.setVisibility(View.VISIBLE);
+                                                    textViewAppliedPromo.setVisibility(View.VISIBLE);
+                                                    promoPrice = couponList.get(j).getCashRebate();
+                                                    textViewAppliedPromo.setText("Applied Promo Code : " + promoCode);
+                                                    textViewPromo.setText("Promo Saved: RM " + String.format("%.2f",(double)couponList.get(j).getCashRebate()));
+                                                    pricePayment.setText("RM " + String.format("%.2f", rebatePrice));
+                                                    Toast.makeText(CartActivity.this, "Promo code successfully applied", Toast.LENGTH_SHORT).show();
+                                                }
 
+                                            }
+                                        }
+                                    });
                                     break;
+
                                 }
                             }
                         }
@@ -215,6 +241,7 @@ public class CartActivity extends AppCompatActivity {
                 btnApplyPromo.setVisibility(View.VISIBLE);
                 editTextPromo.setVisibility(View.VISIBLE);
                 btnChange.setVisibility(View.GONE);
+                textViewAppliedPromo.setText("");
                 textViewAppliedPromo.setVisibility(View.GONE);
                 editTextPromo.setText("");
                 textViewPromo.setText("Promo Saved: RM 0.00");
@@ -344,6 +371,7 @@ public class CartActivity extends AppCompatActivity {
             if(cartList.isEmpty()){
                 editTextPromo.setFocusable(false);
                 btnApplyPromo.setOnClickListener(null);
+                editTextPromo.setText("");
                 btnPayment.setBackgroundColor(getResources().getColor(R.color.foreground_light_color));
                 btnPayment.setOnClickListener(null); }
 

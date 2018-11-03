@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@color/colorPrimary"
+        android:background="#263238"
         android:gravity="center_vertical"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
@@ -47,8 +47,7 @@
             android:paddingTop="5dp"
             android:paddingLeft="20dp"
             android:textSize="14sp"
-            android:paddingBottom="5dp"
-            android:text="Applied Promo Code : ADKFOF"/>
+            android:paddingBottom="5dp" />
         <Button
             android:visibility="gone"
             android:id="@+id/btn_change"

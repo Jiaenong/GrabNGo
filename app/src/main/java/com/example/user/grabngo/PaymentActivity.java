@@ -48,7 +48,9 @@ import org.w3c.dom.Text;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.transform.Templates;
 
@@ -285,7 +287,7 @@ public class PaymentActivity extends AppCompatActivity {
 
                                     }
                                     deleteCollection();
-
+                                    updatePromotion();
                                 }
                             });
 
@@ -314,6 +316,16 @@ public class PaymentActivity extends AppCompatActivity {
         });
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void updatePromotion(){
+        String id = SaveSharedPreference.getID(PaymentActivity.this);
+        String promoId = getIntent().getStringExtra("promoId");
+        if(promoId!=null) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", id);
+            mFirebaseFirestore.collection("Promotion").document(promoId).collection("Customer").add(data);
+        }
     }
 
     private void deleteCollection() {

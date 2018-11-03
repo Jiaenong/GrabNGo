@@ -223,6 +223,7 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
         public void onBindViewHolder(final MyViewHolder holder, final int position) {
             mFirebaseFirestore = FirebaseFirestore.getInstance();
             final Post post = postList.get(position);
+            holder.imgView_postPic.setVisibility(View.GONE );
             if(!(post.getPostImage()==null))
             {
                 holder.imgView_postPic.setVisibility(View.VISIBLE);

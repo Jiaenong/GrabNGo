@@ -8,6 +8,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.MenuItem;
 import android.view.View;
@@ -113,7 +114,7 @@ public class DiscountDetailActivity extends AppCompatActivity {
 
                         if(type.equals("Product Discount")){
                             WriteBatch batch = mFirebaseFirestore.batch();
-
+                            Log.i("Check","disocunt");
                             for(int j=0; j<productsList.size(); j++) {
                                 DocumentReference documentRef = mFirebaseFirestore.collection("Product").document(productsList.get(j).getRef());
                                 batch.update(documentRef,"discount",0);
@@ -123,6 +124,17 @@ public class DiscountDetailActivity extends AppCompatActivity {
                             }
 
                             batch.commit();
+                        }else{
+                            Log.i("Check","coupon");
+                            mCollectionReference.document(promotionId).collection("Customer").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                @Override
+                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                    for(QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots){
+                                        documentSnapshot.getReference().delete();
+                                    }
+                                }
+                            });
+
                         }
 
                         mCollectionReference.document(promotionId).delete()
