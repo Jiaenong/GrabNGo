@@ -17,11 +17,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.example.user.grabngo.Class.Staff;
+import com.example.user.grabngo.CustomerForumFragment;
 import com.example.user.grabngo.HomeFragment;
 import com.example.user.grabngo.LoginActivity;
 import com.example.user.grabngo.R;
 import com.example.user.grabngo.SaveSharedPreference;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import org.w3c.dom.Text;
 
 public class StaffHomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -49,6 +59,20 @@ public class StaffHomeActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        View view = navigationView.getHeaderView(0);
+
+        String id = SaveSharedPreference.getID(StaffHomeActivity.this);
+        FirebaseFirestore.getInstance().collection("Staff").document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                Staff staff = documentSnapshot.toObject(Staff.class);
+                ImageView imageView = (ImageView)view.findViewById(R.id.imageView);
+                TextView textView = (TextView)view.findViewById(R.id.textViewName);
+                Glide.with(StaffHomeActivity.this).load(staff.getProfileUrl()).into(imageView);
+                textView.setText(staff.getName());
+            }
+        });
+
 
     }
 
@@ -91,7 +115,7 @@ public class StaffHomeActivity extends AppCompatActivity
             fm.beginTransaction().replace(R.id.fragment_container, fragment).commit();
 
         } else if (id == R.id.nav_forum) {
-            fragment = new ForumFragment();
+            fragment = new CustomerForumFragment();
             fm.beginTransaction().replace(R.id.fragment_container, fragment).commit();
 
         } else if (id == R.id.nav_account) {

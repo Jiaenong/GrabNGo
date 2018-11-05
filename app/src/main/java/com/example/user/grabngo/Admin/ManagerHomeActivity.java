@@ -17,13 +17,21 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.user.grabngo.Class.LowStockNotification;
+import com.example.user.grabngo.Class.Staff;
 import com.example.user.grabngo.LoginActivity;
 import com.example.user.grabngo.R;
 import com.example.user.grabngo.SaveSharedPreference;
 import com.example.user.grabngo.ViewDialog;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -67,6 +75,19 @@ public class ManagerHomeActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        View view = navigationView.getHeaderView(0);
+
+        String id = SaveSharedPreference.getID(ManagerHomeActivity.this);
+        FirebaseFirestore.getInstance().collection("Manager").document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                Staff staff = documentSnapshot.toObject(Staff.class);
+                ImageView imageView = (ImageView)view.findViewById(R.id.imageView);
+                TextView textView = (TextView)view.findViewById(R.id.textViewName);
+                Glide.with(ManagerHomeActivity.this).load(staff.getProfileUrl()).into(imageView);
+                textView.setText(staff.getName());
+            }
+        });
     }
 
     @Override

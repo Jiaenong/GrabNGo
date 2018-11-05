@@ -1,6 +1,8 @@
 package com.example.user.grabngo.Admin;
 
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.user.grabngo.Class.LowStockNotification;
 import com.example.user.grabngo.Class.Staff;
 import com.example.user.grabngo.LoginActivity;
 import com.example.user.grabngo.R;
@@ -110,7 +113,12 @@ public class StaffAcountFragment extends Fragment {
 
         String id = SaveSharedPreference.getID(getContext());
         mFirebaseFirestore = FirebaseFirestore.getInstance();
-        mDocumentReference = mFirebaseFirestore.document("Staff/"+id);
+        if(getContext() instanceof ManagerHomeActivity){
+            mDocumentReference = mFirebaseFirestore.document("Manager/"+id);
+        }else{
+            mDocumentReference = mFirebaseFirestore.document("Staff/"+id);
+        }
+
 
         mDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
@@ -155,6 +163,17 @@ public class StaffAcountFragment extends Fragment {
                 builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+
+                        if(getContext() instanceof ManagerHomeActivity){
+                            AlarmManager alarmMgr = (AlarmManager)getActivity().getSystemService(getActivity().ALARM_SERVICE);
+                            Intent notificationIntent = new Intent(getActivity(), LowStockNotification.class);
+                            PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 0, notificationIntent, 0);
+                            if(alarmMgr!=null){
+                                alarmMgr.cancel(pendingIntent);
+                                SaveSharedPreference.setCheckAlert(getActivity(),false);
+                            }
+                        }
+
                         SaveSharedPreference.clearUser(getContext());
                         Intent intent = new Intent(getActivity(),LoginActivity.class);
                         startActivity(intent);
