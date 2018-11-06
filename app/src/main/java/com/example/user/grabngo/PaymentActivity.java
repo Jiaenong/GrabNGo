@@ -319,7 +319,6 @@ public class PaymentActivity extends AppCompatActivity {
                             mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                                 @Override
                                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-
                                     for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                                         Cart cart = documentSnapshot.toObject(Cart.class);
                                         String key = cart.getProductRef();
@@ -341,7 +340,7 @@ public class PaymentActivity extends AppCompatActivity {
                                                 pCollectionReference.add(paymentDetail).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                                     @Override
                                                     public void onSuccess(DocumentReference documentReference) {
-                                                        sendMail();
+                                                        createPDF();
                                                         return;
                                                     }
                                                 });
@@ -361,6 +360,7 @@ public class PaymentActivity extends AppCompatActivity {
 
 
                                     }
+                                    sendMail();
                                     deleteCollection();
                                     updatePromotion();
                                 }
@@ -450,18 +450,15 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void sendMail()
     {
-        createPDF();
         String id = SaveSharedPreference.getID(PaymentActivity.this);
         pDocumentReference = mFirebaseFirestore.document("Customer/"+id);
         pDocumentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                //Log.i("Testing ", "hello");
                 Customer customer = documentSnapshot.toObject(Customer.class);
                 String email = customer.getEmail();
                 String subject = "Payment successfull ! This is your receipt";
                 String message = "This your receipt, thanks for using the service";
-                StringBuilder sb = new StringBuilder();
                 Log.i("Checksss",items.size()+"");
                 /*for(int i = 0; i<items.size(); i++)
                 {
