@@ -18,6 +18,11 @@ import android.support.design.widget.BottomNavigationView;
 import android.widget.Toast;
 
 import com.example.user.grabngo.Admin.ForumFragment;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.lang.reflect.Field;
 
@@ -63,6 +68,9 @@ public class HomeActivity extends AppCompatActivity {
                 return false;
             }
         };
+        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        BottomNavigationViewHelper.removeShiftMode(navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         Fragment fragment = fm.findFragmentById(R.id.fragment_container);
         if(tag != null)
@@ -78,13 +86,5 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
-        BottomNavigationViewHelper.removeShiftMode(navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-
-
     }
-
-
-
 }

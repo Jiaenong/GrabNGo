@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -125,7 +126,6 @@ public class ProductDetailActivity extends AppCompatActivity {
         });
 
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

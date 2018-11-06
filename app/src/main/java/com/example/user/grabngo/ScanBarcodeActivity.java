@@ -150,10 +150,28 @@ public class ScanBarcodeActivity extends AppCompatActivity implements ZXingScann
                         String barcode = product.getBarcode();
                         if (barcode.equals(scanResult)) {
                             check++;
-                            Intent intent = new Intent(ScanBarcodeActivity.this, AddToCartActivity.class);
-                            intent.putExtra("barcode", scanResult);
-                            startActivity(intent);
-                            finish();
+                            if(product.getStockAmount() == 0)
+                            {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(ScanBarcodeActivity.this, R.style.AlertDialogCustom));
+                                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                                        scannerView.resumeCameraPreview(ScanBarcodeActivity.this);
+                                        dialogInterface.cancel();
+                                    }
+                                });
+                                builder.setCancelable(false);
+                                builder.setTitle("Error");
+                                builder.setMessage("Out of Stock !");
+                                AlertDialog alert = builder.create();
+                                alert.show();
+                            }else {
+                                Intent intent = new Intent(ScanBarcodeActivity.this, AddToCartActivity.class);
+                                intent.putExtra("barcode", scanResult);
+                                startActivity(intent);
+                                finish();
+                            }
                         }
                     }
                     if(check == 0) {

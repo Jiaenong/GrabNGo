@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -91,6 +92,7 @@ public class PaymentActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     private ProgressBar progressBar;
     private ScrollView scrollViewPayment;
+    private Spinner spinnerCardType;
 
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference, nCollectionReference, pCollectionReference;
@@ -117,6 +119,11 @@ public class PaymentActivity extends AppCompatActivity {
         switchSave = (Switch)findViewById(R.id.switchSave);
         progressBar = (ProgressBar)findViewById(R.id.progressBarPayment);
         scrollViewPayment = (ScrollView)findViewById(R.id.scrollViewPayment);
+        spinnerCardType = (Spinner)findViewById(R.id.spinnerCardType);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(PaymentActivity.this ,R.array.cardss, R.layout.support_simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item);
+        spinnerCardType.setAdapter(adapter);
 
         progressBar.setVisibility(View.VISIBLE);
         scrollViewPayment.setVisibility(View.GONE);
@@ -162,6 +169,7 @@ public class PaymentActivity extends AppCompatActivity {
         itemsprice = new ArrayList<>();
         amounts = new ArrayList<>();
 
+
         if(SaveSharedPreference.getCheckSave(PaymentActivity.this))
         {
             String number = SaveSharedPreference.getCardNumber(PaymentActivity.this);
@@ -169,6 +177,7 @@ public class PaymentActivity extends AppCompatActivity {
             editTextCardName.setText(SaveSharedPreference.getCardName(PaymentActivity.this));
             editTextExpDate.setText(SaveSharedPreference.getExpDate(PaymentActivity.this));
             expDates = SaveSharedPreference.getSaveDate(PaymentActivity.this);
+            spinnerCardType.setSelection(SaveSharedPreference.getCardType(PaymentActivity.this));
             switchSave.setChecked(true);
         }
 
@@ -226,6 +235,7 @@ public class PaymentActivity extends AppCompatActivity {
                 String cardName = editTextCardName.getText().toString();
                 String expDate = editTextExpDate.getText().toString();
                 String cvv = editTextCVV.getText().toString();
+                int cardType = spinnerCardType.getSelectedItemPosition();
 
                 if(cardName.equals("")||cardNumber.equals("")||expDate.equals("")||cvv.equals(""))
                 {
@@ -287,7 +297,7 @@ public class PaymentActivity extends AppCompatActivity {
                         SaveSharedPreference.setCardName(PaymentActivity.this, cardName);
                         SaveSharedPreference.setExpDate(PaymentActivity.this, expDate);
                         SaveSharedPreference.setCheckSave(PaymentActivity.this, save);
-                        SaveSharedPreference.setCheckSave(PaymentActivity.this, save);
+                        SaveSharedPreference.setCardType(PaymentActivity.this,cardType);
                     } else {
                         SaveSharedPreference.clearData(PaymentActivity.this);
                     }
@@ -463,6 +473,8 @@ public class PaymentActivity extends AppCompatActivity {
                 sm.execute();*/
                 try {
                     SendeMail sm = new SendeMail(PaymentActivity.this, email, subject, message);
+                    String file = Environment.getExternalStorageDirectory().getPath() + "/Payment.pdf";
+                    Log.i("File ",file);
                     sm.addAttachment(Environment.getExternalStorageDirectory().getPath() + "/Payment.pdf");
                     sm.execute();
                 } catch (Exception e) {
@@ -476,7 +488,7 @@ public class PaymentActivity extends AppCompatActivity {
     public void createPDF(){
         Log.i("Check",items.size()+"");
         String saveLocation = Environment.getExternalStorageDirectory() + "/Payment.pdf";
-
+        Log.i("File Location ", saveLocation);
         Document doc = new Document();
         try {
             PdfWriter.getInstance(doc, new FileOutputStream(saveLocation));

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -11,7 +12,8 @@
         android:id="@+id/imageViewProductImage"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:src="@drawable/grocery_oatkrunch" />
+        android:src="@drawable/initial"
+        app:srcCompat="@drawable/initial" />
 
     <TextView
         android:id="@+id/textViewProductName"
