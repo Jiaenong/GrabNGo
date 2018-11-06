@@ -16,6 +16,12 @@
     <string name="hello_scan_fragment">Hello scan fragment</string>
     <string name="hello_account_fragment">Hello account fragment</string>
 
+    <string-array name="cardss">
+        <item>Visa</item>
+        <item>Master</item>
+        <item>American Express</item>
+    </string-array>
+
     <string-array name="category">
         <item>All</item>
         <item>Personal Care</item>
@@ -114,4 +120,5 @@
     <string name="delete">Delete</string>
     <string name="edit_comment">Edit Comment</string>
     <string name="comment">Comment</string>
+    <string name="cardType">Card Type</string>
 </resources>

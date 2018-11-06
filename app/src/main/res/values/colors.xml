@@ -11,6 +11,7 @@
     <color name="cancel_color">#C21807</color>
     <color name="comfirm_color">#3ebf20</color>
     <color name="disable_button">#E0E0E0</color>
+    <color name="grey_color">#666660</color>
     
     <color name="graph_red">#FF0033</color>
     <color name="graph_orange">#FF7700</color>

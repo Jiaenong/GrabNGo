@@ -2,6 +2,7 @@ package com.example.user.grabngo;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -276,7 +277,7 @@ public class CartActivity extends AppCompatActivity {
 
         private List<CartItem> cart;
         private FirebaseFirestore mFirebaseFirestore;
-        private CollectionReference mCollectionReference;
+        private CollectionReference mCollectionReference, qCollectionReference;
         private DocumentReference mDocumentReference;
         private double totalPay = 0;
 
@@ -351,24 +352,51 @@ public class CartActivity extends AppCompatActivity {
             holder.button_add.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    qCollectionReference = mFirebaseFirestore.collection("Product");
                     int quantity = Integer.parseInt(holder.edit_text_cartQuantity.getText().toString());
                     quantity++;
-                    totalPay = cartItem.getPrice()*quantity;
-                    holder.edit_text_cartQuantity.setText(quantity+"");
-                    pricePayment.setText("RM " + String.format("%.2f",(totalPrice-(cartItem.getPrice()*cartItem.getQuantity()))+totalPay));
-                    String id = SaveSharedPreference.getID(CartActivity.this);
-                    mCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
-                    int finalQuantity = quantity;
-                    mCollectionReference.whereEqualTo("productName",cartItem.getProductname()).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    int finalQuantity1 = quantity;
+                    qCollectionReference.whereEqualTo("productName",cartItem.getProductname()).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                         @Override
                         public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                            String key = "";
                             for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                             {
-                                key = documentSnapshot.getId();
+                                Product product = documentSnapshot.toObject(Product.class);
+                                if(finalQuantity1 > product.getStockAmount())
+                                {
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(CartActivity.this);
+                                    builder.setTitle("Error");
+                                    builder.setCancelable(false);
+                                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            return;
+                                        }
+                                    });
+                                    builder.setMessage("Quantity cannot more than the stock amount !");
+                                    AlertDialog alert = builder.create();
+                                    alert.show();
+                                }else{
+                                    totalPay = cartItem.getPrice()*finalQuantity1;
+                                    holder.edit_text_cartQuantity.setText(finalQuantity1+"");
+                                    pricePayment.setText("RM " + String.format("%.2f",(totalPrice-(cartItem.getPrice()*cartItem.getQuantity()))+totalPay));
+                                    String id = SaveSharedPreference.getID(CartActivity.this);
+                                    mCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
+                                    int finalQuantity = finalQuantity1;
+                                    mCollectionReference.whereEqualTo("productName",cartItem.getProductname()).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                            String key = "";
+                                            for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                                            {
+                                                key = documentSnapshot.getId();
+                                            }
+                                            mDocumentReference = mFirebaseFirestore.document("Customer/"+id+"/Cart/"+key);
+                                            mDocumentReference.update("quantity", finalQuantity);
+                                        }
+                                    });
+                                }
                             }
-                            mDocumentReference = mFirebaseFirestore.document("Customer/"+id+"/Cart/"+key);
-                            mDocumentReference.update("quantity", finalQuantity);
                         }
                     });
                 }

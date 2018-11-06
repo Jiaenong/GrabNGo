@@ -1,10 +1,16 @@
 package com.example.user.grabngo;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -147,17 +153,35 @@ public class AddToCartActivity extends AppCompatActivity {
                 mCollectionReference.whereEqualTo("barcode",barcode).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        int qty = Integer.parseInt(quantity.getText().toString());
                         for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                         {
                             Product product = documentSnapshot.toObject(Product.class);
+
                             String name = product.getProductName();
                             String key = documentSnapshot.getId();
-                            AddCart(name, key);
+                            if(qty > product.getStockAmount())
+                            {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(AddToCartActivity.this);
+                                builder.setTitle("Error");
+                                builder.setCancelable(false);
+                                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        return;
+                                    }
+                                });
+                                builder.setMessage("Quantity cannot more than the stock amount !");
+                                AlertDialog alert = builder.create();
+                                alert.show();
+                            }else {
+                                AddCart(name, key);
+                                Toast.makeText(AddToCartActivity.this, "Item successfully added to cart",Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
                         }
                     }
                 });
-                finish();
-                Toast.makeText(AddToCartActivity.this, "Item successfully added to cart",Toast.LENGTH_SHORT).show();
             }
         });
 

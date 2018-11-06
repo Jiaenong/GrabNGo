@@ -2,10 +2,12 @@ package com.example.user.grabngo;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -74,7 +76,7 @@ class SendeMail extends AsyncTask<Void,Void,Void> {
 
         messageBodyPart.setDataHandler(new DataHandler(source));
 
-        messageBodyPart.setFileName("Payment receipt");
+        messageBodyPart.setFileName(filename);
 
         _multipart.addBodyPart(messageBodyPart);
 
@@ -104,17 +106,24 @@ class SendeMail extends AsyncTask<Void,Void,Void> {
             //Creating MimeMessage object
             MimeMessage mm = new MimeMessage(session);
 
+            DataHandler handler = new DataHandler(new ByteArrayDataSource(
+
+                    message.getBytes(), "text/plain"));
+
             //Setting sender address
             mm.setFrom(new InternetAddress(Config.EMAIL));
             //Adding receiver
             mm.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
             //Adding subject
             mm.setSubject(subject);
+
+            mm.setDataHandler(handler);
+
             //Adding message
             mm.setText(message);
 
             BodyPart messageBodyPart = new MimeBodyPart();
-            ((MimeBodyPart) messageBodyPart).setText(message);
+            messageBodyPart.setText(message);
             _multipart.addBodyPart(messageBodyPart);
             mm.setContent(_multipart);
 

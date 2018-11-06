@@ -14,6 +14,7 @@ public class SaveSharedPreference {
     static final String PREF_CHECK_SAVE = "saved";
     static final String USER_TYPE = "user";
     static final String LOW_STOCK_ALERT = "false";
+    static final String PREF_CARD_TYPE = "card";
 
     static SharedPreferences getSharedPreference(Context context)
     {
@@ -46,6 +47,18 @@ public class SaveSharedPreference {
     public static String getCardNumber(Context context)
     {
         return getSharedPreference(context).getString(PREF_CARD_NUMBER,"");
+    }
+
+    public static void setCardType(Context context, int cardType)
+    {
+        SharedPreferences.Editor editor = getSharedPreference(context).edit();
+        editor.putInt(PREF_CARD_TYPE, cardType);
+        editor.commit();
+    }
+
+    public static int getCardType(Context context)
+    {
+        return getSharedPreference(context).getInt(PREF_CARD_TYPE,0);
     }
 
     public static void setCardName(Context context, String cardName)
@@ -126,6 +139,7 @@ public class SaveSharedPreference {
         editor.remove(PREF_EXP_DATE);
         editor.remove(PREF_CHECK_SAVE);
         editor.remove(PREF_SAVE_DATE);
+        editor.remove(PREF_CARD_TYPE);
         editor.commit();
     }
 
