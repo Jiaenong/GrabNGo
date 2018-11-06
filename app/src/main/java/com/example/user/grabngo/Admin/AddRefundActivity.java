@@ -236,7 +236,9 @@ public class AddRefundActivity extends AppCompatActivity {
 
     private void uploadImage() {
 
-        validation();
+        if(!validation()){
+            return;
+        }
 
         InputMethodManager inputManager = (InputMethodManager)
                 getSystemService(INPUT_METHOD_SERVICE);
@@ -332,37 +334,18 @@ public class AddRefundActivity extends AppCompatActivity {
         }
     }
 
-    public void validation(){
+    public boolean validation(){
+        boolean valid = false;
+
         if(editTextProduct.getText().toString().equals("") || editTextCustomer.getText().toString().equals("") || editTextReason.getText().toString().equals("")){
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(AddRefundActivity.this, R.style.AlertDialogCustom));
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    return;
-                }
-            });
-            builder.setTitle("Field cannot be empty");
-            builder.setMessage("Please fill in all the textbox provided to proceed");
-            AlertDialog alert = builder.create();
-            alert.show();
-            return;
-
+            Toast.makeText(AddRefundActivity.this,"All field cannot be empty",Toast.LENGTH_SHORT).show();
         }else if(filePath==null){
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(AddRefundActivity.this, R.style.AlertDialogCustom));
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    return;
-                }
-            });
-            builder.setTitle("Image cannot be empty");
-            builder.setMessage("Please submit a photo of the refund product");
-            AlertDialog alert = builder.create();
-            alert.show();
-            return;
+            Toast.makeText(AddRefundActivity.this,"Please insert an image",Toast.LENGTH_SHORT).show();
+        }else {
+            valid=true;
         }
+
+        return valid;
     }
 
 

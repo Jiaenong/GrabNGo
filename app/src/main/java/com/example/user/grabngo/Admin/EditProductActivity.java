@@ -56,8 +56,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -76,7 +79,7 @@ public class EditProductActivity extends AppCompatActivity {
     private ImageView imageViewProduct;
     private Button btnSubmit, btnCamera, btnGallery;
     private Uri filePath;
-    private String pictureFilePath, oldImgUrl, selectedProduct;
+    private String pictureFilePath, oldImgUrl, selectedProduct,productName;
     private EditText editTextName, editTextPrice, editTextExpiredDate, editTextAmount, editTextLocation, editTextBarcode;
     private Spinner spinnerCategory, spinnerProducer;
     private ProgressBar progressBar;
@@ -185,6 +188,7 @@ public class EditProductActivity extends AppCompatActivity {
                         linearLayout.setVisibility(View.VISIBLE);
                         Product product = documentSnapshot.toObject(Product.class);
 
+                        productName = product.getProductName();
                         oldImgUrl = product.getImageUrl();
                         editTextBarcode.setText(product.getBarcode());
                         editTextName.setText(product.getProductName());
@@ -316,60 +320,119 @@ public class EditProductActivity extends AppCompatActivity {
 
     private void uploadImage() {
 
-        pDialog = new ProgressDialog(EditProductActivity.this);
-        pDialog.setMessage("Saving...");
-        pDialog.setCancelable(false);
-        pDialog.show();
-
-        if (filePath != null) {
-            final StorageReference ref = mStorageReference.child("product_photo/" + UUID.randomUUID().toString());
-
-            Bitmap bmp = null;
-            try {
-                bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
-            byte[] data = baos.toByteArray();
-
-            //uploading the image
-            UploadTask uploadTask2 = ref.putBytes(data);
-            uploadTask2.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(EditProductActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            Task<Uri> urlTask = uploadTask2.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                @Override
-                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                    if (!task.isSuccessful()) {
-                        throw task.getException();
-                    }
-
-                    // Continue with the task to get the download URL
-                    return ref.getDownloadUrl();
-
-                }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    if (task.isSuccessful()) {
-                        Uri downloadUri = task.getResult();
-                        saveChanges(downloadUri.toString());
-                    } else {
-                        // Handle failures
-                        Toast.makeText(EditProductActivity.this, "GetDownloadURL fail", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-
-        }else{
-            saveChanges(oldImgUrl);
+        if(!validation()){
+            return;
         }
+
+        mCollectionReference.whereEqualTo("productName",editTextName.getText().toString()).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                Product product = queryDocumentSnapshots.getDocuments().get(0).toObject(Product.class);
+
+                if(!queryDocumentSnapshots.isEmpty() && !productName.equals(product.getProductName())){
+                    Toast.makeText(EditProductActivity.this,"Product name cannot be the same",Toast.LENGTH_SHORT).show();
+                }else{
+                    pDialog = new ProgressDialog(EditProductActivity.this);
+                    pDialog.setMessage("Saving...");
+                    pDialog.setCancelable(false);
+                    pDialog.show();
+
+                    if (filePath != null) {
+                        final StorageReference ref = mStorageReference.child("product_photo/" + UUID.randomUUID().toString());
+
+                        Bitmap bmp = null;
+                        try {
+                            bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+                        byte[] data = baos.toByteArray();
+
+                        //uploading the image
+                        UploadTask uploadTask2 = ref.putBytes(data);
+                        uploadTask2.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(EditProductActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                        Task<Uri> urlTask = uploadTask2.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                            @Override
+                            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                                if (!task.isSuccessful()) {
+                                    throw task.getException();
+                                }
+
+                                // Continue with the task to get the download URL
+                                return ref.getDownloadUrl();
+
+                            }
+                        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                if (task.isSuccessful()) {
+                                    Uri downloadUri = task.getResult();
+                                    saveChanges(downloadUri.toString());
+                                } else {
+                                    // Handle failures
+                                    Toast.makeText(EditProductActivity.this, "GetDownloadURL fail", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+
+                    }else{
+                        saveChanges(oldImgUrl);
+                    }
+                }
+            }
+        });
+
+    }
+
+    public boolean validation(){
+
+        boolean valid = false;
+
+        String barcode = editTextBarcode.getText().toString();
+        String productName = editTextName.getText().toString();
+        String price = editTextPrice.getText().toString();
+        String amount = editTextAmount.getText().toString();
+        String location = editTextLocation.getText().toString();
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+        Calendar now = Calendar.getInstance();
+        now.set(Calendar.HOUR,0);
+        now.set(Calendar.MINUTE,0);
+        now.set(Calendar.SECOND,0);
+
+        Calendar expiredDate = Calendar.getInstance();
+        try {
+            expiredDate.setTime(dateFormat.parse(editTextExpiredDate.getText().toString()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        if(barcode.equals("") || productName.equals("") || price.equals("") || amount.equals("") || location.equals("")){
+            Toast.makeText(EditProductActivity.this,"All field cannot be empty",Toast.LENGTH_SHORT).show();
+        }else{
+            InputMethodManager inputManager = (InputMethodManager)
+                    getSystemService(INPUT_METHOD_SERVICE);
+
+            inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS);
+
+            if(expiredDate.getTime().equals(now.getTime()) || expiredDate.getTime().before(now.getTime())){
+                Toast.makeText(EditProductActivity.this,"Expired date is invalid",Toast.LENGTH_SHORT).show();
+            }else {
+                valid=true;
+            }
+
+        }
+
+        return valid;
     }
 
     public void saveChanges(String picURL){

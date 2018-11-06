@@ -54,6 +54,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AddSupplierActivity extends AppCompatActivity {
 
@@ -72,6 +74,7 @@ public class AddSupplierActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private ProgressDialog pDialog;
     private LinearLayout linearLayout;
+    private Supplier supplierTemp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,13 +106,13 @@ public class AddSupplierActivity extends AppCompatActivity {
             mCollectionReference.document(selectedSupplier).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    Supplier supplier = documentSnapshot.toObject(Supplier.class);
-                    oldImageUrl = supplier.getPicUrl();
-                    editTextName.setText(supplier.getName());
-                    editTextEmail.setText(supplier.getEmail());
-                    editTextPhone.setText(supplier.getPhone());
-                    editTextLocation.setText(supplier.getLocation());
-                    Glide.with(AddSupplierActivity.this).load(supplier.getPicUrl()).into(imageViewSupplier);
+                    supplierTemp = documentSnapshot.toObject(Supplier.class);
+                    oldImageUrl = supplierTemp.getPicUrl();
+                    editTextName.setText(supplierTemp.getName());
+                    editTextEmail.setText(supplierTemp.getEmail());
+                    editTextPhone.setText(supplierTemp.getPhone());
+                    editTextLocation.setText(supplierTemp.getLocation());
+                    Glide.with(AddSupplierActivity.this).load(supplierTemp.getPicUrl()).into(imageViewSupplier);
                     linearLayout.setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.GONE);
                 }
@@ -151,7 +154,63 @@ public class AddSupplierActivity extends AppCompatActivity {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                uploadImage();
+                if(!validation()){
+                    return;
+                }
+
+                if(selectedSupplier==null) {
+                    mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            boolean check = true;
+                            for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                                Supplier supplier = documentSnapshot.toObject(Supplier.class);
+                                if (editTextName.getText().toString().equals(supplier.getName())) {
+                                    Toast.makeText(AddSupplierActivity.this, "Supplier name already existed", Toast.LENGTH_SHORT).show();
+                                    check = false;
+                                    break;
+                                } else if (editTextEmail.getText().toString().equals(supplier.getEmail())) {
+                                    Toast.makeText(AddSupplierActivity.this, "Email address already existed", Toast.LENGTH_SHORT).show();
+                                    check = false;
+                                    break;
+                                } else if (editTextPhone.getText().toString().equals(supplier.getPhone())) {
+                                    Toast.makeText(AddSupplierActivity.this, "Phone number already existed", Toast.LENGTH_SHORT).show();
+                                    check = false;
+                                    break;
+                                }
+                            }
+                            if(check){
+                                uploadImage();
+                            }
+                        }
+                    });
+                }else{
+                    mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            boolean check = true;
+                            for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                                Supplier supplier = documentSnapshot.toObject(Supplier.class);
+                                if (editTextName.getText().toString().equals(supplier.getName())&&!editTextName.getText().toString().equals(supplierTemp.getName())) {
+                                    Toast.makeText(AddSupplierActivity.this, "Supplier name already existed", Toast.LENGTH_SHORT).show();
+                                    check = false;
+                                    break;
+                                } else if (editTextEmail.getText().toString().equals(supplier.getEmail())&&!editTextEmail.getText().toString().equals(supplierTemp.getEmail())) {
+                                    Toast.makeText(AddSupplierActivity.this, "Email address already existed", Toast.LENGTH_SHORT).show();
+                                    check = false;
+                                    break;
+                                } else if (editTextPhone.getText().toString().equals(supplier.getPhone())&&!editTextPhone.getText().toString().equals(supplierTemp.getPhone())) {
+                                    Toast.makeText(AddSupplierActivity.this, "Phone number already existed", Toast.LENGTH_SHORT).show();
+                                    check = false;
+                                    break;
+                                }
+                            }
+                            if(check){
+                                uploadImage();
+                            }
+                        }
+                    });
+                }
             }
         });
     }
@@ -197,123 +256,94 @@ public class AddSupplierActivity extends AppCompatActivity {
 
     private void uploadImage() {
 
-        if(editTextName.getText().toString().equals("") || editTextEmail.getText().toString().equals("") || editTextPhone.getText().toString().equals("") || editTextLocation.getText().toString().equals("")){
+            pDialog = new ProgressDialog(AddSupplierActivity.this);
+            pDialog.setMessage("Saving...");
+            pDialog.setCancelable(false);
+            pDialog.show();
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(AddSupplierActivity.this, R.style.AlertDialogCustom));
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    return;
+            if (filePath != null) {
+                final StorageReference ref = mStorageReference.child("supplier_photo/" + UUID.randomUUID().toString());
+
+                Bitmap bmp = null;
+                try {
+                    bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            });
-            builder.setTitle("Field cannot be empty");
-            builder.setMessage("Please fill in all the textbox provided to proceed");
-            AlertDialog alert = builder.create();
-            alert.show();
-            return;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
+                byte[] data = baos.toByteArray();
 
-        }else if(filePath==null && oldImageUrl==null){
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(AddSupplierActivity.this, R.style.AlertDialogCustom));
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    return;
-                }
-            });
-            builder.setTitle("Image cannot be empty");
-            builder.setMessage("Please submit a photo of the supplier logo");
-            AlertDialog alert = builder.create();
-            alert.show();
-            return;
-        }
-
-        pDialog = new ProgressDialog(AddSupplierActivity.this);
-        pDialog.setMessage("Saving...");
-        pDialog.setCancelable(false);
-        pDialog.show();
-
-        if(filePath != null)
-        {
-            final StorageReference ref = mStorageReference.child("supplier_photo/"+ UUID.randomUUID().toString());
-
-            Bitmap bmp = null;
-            try {
-                bmp = MediaStore.Images.Media.getBitmap(getContentResolver(), filePath);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 25, baos);
-            byte[] data = baos.toByteArray();
-
-            //uploading the image
-            UploadTask uploadTask2 = ref.putBytes(data);
-            uploadTask2.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(AddSupplierActivity.this, "Failed "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            Task<Uri> urlTask = uploadTask2.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                @Override
-                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                    if (!task.isSuccessful()) {
-                        throw task.getException();
+                //uploading the image
+                UploadTask uploadTask2 = ref.putBytes(data);
+                uploadTask2.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(AddSupplierActivity.this, "Failed " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
+                });
 
-                    // Continue with the task to get the download URL
-                    return ref.getDownloadUrl();
-
-                }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    if (task.isSuccessful()) {
-                        Uri downloadUri = task.getResult();
-                        if(selectedSupplier!=null){
-                            mStorageReference = mFirebaseStorage.getReferenceFromUrl(oldImageUrl);
-                            mStorageReference.delete();
+                Task<Uri> urlTask = uploadTask2.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                    @Override
+                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            throw task.getException();
                         }
-                        saveChanges(downloadUri.toString());
 
-                    } else {
-                        // Handle failures
-                        Toast.makeText(AddSupplierActivity.this, "GetDownloadURL fail", Toast.LENGTH_SHORT).show();
+                        // Continue with the task to get the download URL
+                        return ref.getDownloadUrl();
+
                     }
-                }
-            });
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()) {
+                            Uri downloadUri = task.getResult();
+                            if (selectedSupplier != null) {
+                                mStorageReference = mFirebaseStorage.getReferenceFromUrl(oldImageUrl);
+                                mStorageReference.delete();
+                            }
+                            saveChanges(downloadUri.toString());
 
-        }else{
-            saveChanges(oldImageUrl);
-        }
+                        } else {
+                            // Handle failures
+                            Toast.makeText(AddSupplierActivity.this, "GetDownloadURL fail", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+            } else {
+                saveChanges(oldImageUrl);
+            }
+
     }
 
     public void saveChanges(String picUrl){
 
         if(selectedSupplier == null){
+                        Supplier supplier = new Supplier(editTextName.getText().toString(),
+                                editTextEmail.getText().toString(),
+                                editTextPhone.getText().toString(),
+                                editTextLocation.getText().toString(),
+                                picUrl,
+                                "");
 
-            Supplier supplier = new Supplier(editTextName.getText().toString(),
-                    editTextEmail.getText().toString(),
-                    editTextPhone.getText().toString(),
-                    editTextLocation.getText().toString(),
-                    picUrl,
-                    "");
+                        mCollectionReference.add(supplier).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Toast.makeText(AddSupplierActivity.this, "Supplier successfully added", Toast.LENGTH_SHORT).show();
 
-            mCollectionReference.add(supplier).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                @Override
-                public void onSuccess(DocumentReference documentReference) {
-                    Toast.makeText(AddSupplierActivity.this, "Supplier successfully added", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(AddSupplierActivity.this, "Unable to upload to firestore", Toast.LENGTH_SHORT).show();
+                                    }
+                        });
 
-                }
-            })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(AddSupplierActivity.this, "Unable to upload to firestore", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+
+
 
         }else{
 
@@ -354,6 +384,34 @@ public class AddSupplierActivity extends AppCompatActivity {
 
     }
 
+
+    public boolean validation(){
+        boolean valid = false;
+
+        String name = editTextName.getText().toString();
+        String email = editTextEmail.getText().toString();
+        String phone = editTextPhone.getText().toString();
+        String location = editTextLocation.getText().toString();
+
+        if(name.equals("") || email.equals("") || phone.equals("") || location.equals("")){
+            Toast.makeText(AddSupplierActivity.this,"All field cannot be empty",Toast.LENGTH_SHORT).show();
+        }else if(filePath==null && oldImageUrl==null){
+            Toast.makeText(AddSupplierActivity.this,"Please insert supplier logo image",Toast.LENGTH_SHORT).show();
+        }else if(!isEmailValid(email)){
+            Toast.makeText(AddSupplierActivity.this,"Please input valid email",Toast.LENGTH_SHORT).show();
+        }else{
+            valid=true;
+        }
+
+        return valid;
+    }
+
+    public static boolean isEmailValid(String email) {
+        String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
+        Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

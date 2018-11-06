@@ -39,6 +39,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -60,6 +61,7 @@ public class EditPromotionActivity extends AppCompatActivity {
     private List<DiscountProducts> productsList;
     private FirebaseFirestore mFirebaseFirestore;
     private Discount discount;
+    private Coupon coupon;
     private ProgressBar progressBar;
 
     @Override
@@ -112,7 +114,7 @@ public class EditPromotionActivity extends AppCompatActivity {
             mFirebaseFirestore.collection("Promotion").document(promotionId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    Coupon coupon = documentSnapshot.toObject(Coupon.class);
+                    coupon = documentSnapshot.toObject(Coupon.class);
 
                     editTextTitle.setText(coupon.getTitle());
                     editTextDescription.setText(coupon.getDescription());
@@ -212,38 +214,67 @@ public class EditPromotionActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-                Date startDate=null, endDate=null;
-                try {
-                    startDate = df.parse(editTextStartDate.getText().toString());
-                    endDate = df.parse(editTextEndDate.getText().toString());
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
-                pDialog = new ProgressDialog(EditPromotionActivity.this);
-                pDialog.setMessage("Saving...");
-                pDialog.setCancelable(false);
-                pDialog.show();
-
                 if(type.equals("Coupon")){
 
-                    mFirebaseFirestore.collection("Promotion").document(promotionId).update("title",editTextTitle.getText().toString(),
-                            "description",editTextDescription.getText().toString(),
-                            "startDate",startDate,
-                            "endDate", endDate,
-                            "code", editTextCouponCode.getText().toString(),
-                            "cashRebate",Integer.parseInt(editTextCashRebate.getText().toString()))
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    if(!validateCoupon()){
+                        return;
+                    }
+
+                    mFirebaseFirestore.collection("Promotion").whereEqualTo("type","Coupon").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                         @Override
-                        public void onSuccess(Void aVoid) {
-                            Toast.makeText(EditPromotionActivity.this, "Changes has been saved", Toast.LENGTH_SHORT).show();
-                            pDialog.dismiss();
-                            finish();
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            boolean check = true;
+                            for(QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots){
+                                Coupon couponTemp = documentSnapshot.toObject(Coupon.class);
+                                if(!coupon.getCode().equals(editTextCouponCode.getText().toString()) && couponTemp.getCode().equals(editTextCouponCode.getText().toString())){
+                                    Toast.makeText(EditPromotionActivity.this, "Coupon code is already existed", Toast.LENGTH_SHORT).show();
+                                    check = false;
+                                    break;
+                                }
+                            }
+                            if(check){
+                                pDialog = new ProgressDialog(EditPromotionActivity.this);
+                                pDialog.setMessage("Saving...");
+                                pDialog.setCancelable(false);
+                                pDialog.show();
+
+                                DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+                                Date startDate=null, endDate=null;
+                                try {
+                                    startDate = df.parse(editTextStartDate.getText().toString());
+                                    endDate = df.parse(editTextEndDate.getText().toString());
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+
+                                mFirebaseFirestore.collection("Promotion").document(promotionId).update("title",editTextTitle.getText().toString(),
+                                        "description",editTextDescription.getText().toString(),
+                                        "startDate",startDate,
+                                        "endDate", endDate,
+                                        "code", editTextCouponCode.getText().toString(),
+                                        "cashRebate",Integer.parseInt(editTextCashRebate.getText().toString()))
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Toast.makeText(EditPromotionActivity.this, "Changes has been saved", Toast.LENGTH_SHORT).show();
+                                                pDialog.dismiss();
+                                                finish();
+                                            }
+                                        });
+                            }
                         }
                     });
 
                 }else{
+
+                    if(!validateDiscount()){
+                        return;
+                    }
+
+                    pDialog = new ProgressDialog(EditPromotionActivity.this);
+                    pDialog.setMessage("Saving...");
+                    pDialog.setCancelable(false);
+                    pDialog.show();
 
                     if(promoList.size()!=0){
 
@@ -293,6 +324,15 @@ public class EditPromotionActivity extends AppCompatActivity {
                         batch.commit();
                     }
 
+                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+                    Date startDate=null, endDate=null;
+                    try {
+                        startDate = df.parse(editTextStartDate.getText().toString());
+                        endDate = df.parse(editTextEndDate.getText().toString());
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
                     mFirebaseFirestore.collection("Promotion").document(promotionId).update("title",editTextTitle.getText().toString(),
                             "description",editTextDescription.getText().toString(),
                             "startDate",startDate,
@@ -311,6 +351,73 @@ public class EditPromotionActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public boolean validateCoupon(){
+        boolean valid = false;
+
+        String title = editTextTitle.getText().toString();
+        String description = editTextDescription.getText().toString();
+        String startingDate = editTextStartDate.getText().toString();
+        String endingDate = editTextEndDate.getText().toString();
+        String code = editTextCouponCode.getText().toString();
+        String cashRebate = editTextCashRebate.getText().toString();
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Date startDate = null, endDate = null;
+
+        try {
+            startDate = dateFormat.parse(startingDate);
+            endDate = dateFormat.parse(endingDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        if(title.equals("")||description.equals("")||startingDate.equals("")||endingDate.equals("")||code.equals("")||cashRebate.equals("")){
+            Toast.makeText(EditPromotionActivity.this, "All field cannot be empty", Toast.LENGTH_SHORT).show();
+        }else if(startDate.after(endDate) || startDate.equals(endDate)){
+            Toast.makeText(EditPromotionActivity.this, "Ending date must be bigger than starting date", Toast.LENGTH_SHORT).show();
+        }else{
+            valid=true;
+        }
+
+        return valid;
+    }
+
+    public boolean validateDiscount(){
+        boolean valid = false;
+
+        String title = editTextTitle.getText().toString();
+        String description = editTextDescription.getText().toString();
+        String startingDate = editTextStartDate.getText().toString();
+        String endingDate = editTextEndDate.getText().toString();
+        String discount = editTextCouponCode.getText().toString();
+        int discountPercent=0;
+        if(!discount.equals("")){
+            discountPercent = Integer.parseInt(discount);
+        }
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Date startDate = null, endDate = null;
+
+        try {
+            startDate = dateFormat.parse(startingDate);
+            endDate = dateFormat.parse(endingDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        if(title.equals("")||description.equals("")||startingDate.equals("")||endingDate.equals("")||discount.equals("")){
+            Toast.makeText(EditPromotionActivity.this, "All field cannot be empty", Toast.LENGTH_SHORT).show();
+        }else if(textViewProduct.getText().toString().equals("")){
+            Toast.makeText(EditPromotionActivity.this, "Please select the discount product", Toast.LENGTH_SHORT).show();
+        }else if(discountPercent<=0 || discountPercent>=100){
+            Toast.makeText(EditPromotionActivity.this, "Discount percent can only be in between 0 to 100(%)", Toast.LENGTH_SHORT).show();
+        }else if(startDate.after(endDate) || startDate.equals(endDate)){
+            Toast.makeText(EditPromotionActivity.this, "Ending date must be bigger than starting date", Toast.LENGTH_SHORT).show();
+        }else{
+            valid=true;
+        }
+
+        return valid;
     }
 
     @Override

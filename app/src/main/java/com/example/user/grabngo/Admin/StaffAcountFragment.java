@@ -18,6 +18,7 @@ import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -50,6 +51,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static android.app.Activity.RESULT_OK;
+import static android.content.Context.INPUT_METHOD_SERVICE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -224,14 +226,25 @@ public class StaffAcountFragment extends Fragment {
         btnEditSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                final String name = editTextName.getText().toString();
+                final String phone = editTextPhone.getText().toString();
+                final String address = editTextAddress.getText().toString();
+
+                if(name.equals("")||phone.equals("")||address.equals("")) {
+                    Toast.makeText(getActivity(),"Please fill in all the field to proceed",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                InputMethodManager inputManager = (InputMethodManager)
+                        getActivity().getSystemService(INPUT_METHOD_SERVICE);
+
+                inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
+
                 pDialog = new ProgressDialog(getActivity());
                 pDialog.setMessage("Saving...");
                 pDialog.setCancelable(false);
                 pDialog.show();
-
-                final String name = editTextName.getText().toString();
-                final String phone = editTextPhone.getText().toString();
-                final String address = editTextAddress.getText().toString();
 
                 mDocumentReference.update("name",name,
                         "phone", phone,
@@ -272,6 +285,12 @@ public class StaffAcountFragment extends Fragment {
                     Toast.makeText(getActivity(),"Confirm New Password does not match",Toast.LENGTH_SHORT).show();
                     return;
                 }else{
+                    InputMethodManager inputManager = (InputMethodManager)
+                            getActivity().getSystemService(INPUT_METHOD_SERVICE);
+
+                    inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
+
                     pDialog = new ProgressDialog(getActivity());
                     pDialog.setMessage("Saving...");
                     pDialog.setCancelable(false);

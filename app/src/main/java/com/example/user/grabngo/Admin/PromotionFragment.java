@@ -202,7 +202,7 @@ public class PromotionFragment extends Fragment {
         promotionAdapter.notifyDataSetChanged();
         show();
     }
-
+/*
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -218,6 +218,6 @@ public class PromotionFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.promotion_history,menu);
         return;
-    }
+    }*/
 
 }

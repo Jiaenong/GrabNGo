@@ -5,15 +5,26 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Properties;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 class SendeMail extends AsyncTask<Void,Void,Void> {
 
@@ -28,6 +39,7 @@ class SendeMail extends AsyncTask<Void,Void,Void> {
 
     //Progressdialog to show while sending email
     private ProgressDialog progressDialog;
+    private Multipart _multipart = new MimeMultipart();
 
     //Class Constructor
     public SendeMail(Context context, String email, String subject, String message){
@@ -52,6 +64,20 @@ class SendeMail extends AsyncTask<Void,Void,Void> {
         //progressDialog.dismiss();
         //Showing a success message
         return;
+    }
+
+    public void addAttachment(String filename) throws Exception {
+
+        BodyPart messageBodyPart = new MimeBodyPart();
+
+        DataSource source = new FileDataSource(filename);
+
+        messageBodyPart.setDataHandler(new DataHandler(source));
+
+        messageBodyPart.setFileName("Payment receipt");
+
+        _multipart.addBodyPart(messageBodyPart);
+
     }
 
     @Override
@@ -87,6 +113,11 @@ class SendeMail extends AsyncTask<Void,Void,Void> {
             //Adding message
             mm.setText(message);
 
+            BodyPart messageBodyPart = new MimeBodyPart();
+            ((MimeBodyPart) messageBodyPart).setText(message);
+            _multipart.addBodyPart(messageBodyPart);
+            mm.setContent(_multipart);
+
             //Sending email
             Transport.send(mm);
 
@@ -96,5 +127,67 @@ class SendeMail extends AsyncTask<Void,Void,Void> {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public class ByteArrayDataSource implements DataSource {
+
+        private byte[] data;
+
+        private String type;
+
+        public ByteArrayDataSource(byte[] data, String type) {
+
+            super();
+
+            this.data = data;
+
+            this.type = type;
+
+        }
+
+        public ByteArrayDataSource(byte[] data) {
+
+            super();
+
+            this.data = data;
+
+        }
+
+        public void setType(String type) {
+
+            this.type = type;
+
+        }
+
+        public String getContentType() {
+
+            if (type == null)
+
+                return "application/octet-stream";
+
+            else
+
+                return type;
+
+        }
+
+        public InputStream getInputStream() throws IOException {
+
+            return new ByteArrayInputStream(data);
+
+        }
+
+        public String getName() {
+
+            return "ByteArrayDataSource";
+
+        }
+
+        public OutputStream getOutputStream() throws IOException {
+
+            throw new IOException("Not Supported");
+
+        }
+
     }
 }
