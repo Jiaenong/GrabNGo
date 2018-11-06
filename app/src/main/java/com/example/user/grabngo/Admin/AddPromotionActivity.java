@@ -186,7 +186,7 @@ public class AddPromotionActivity extends AppCompatActivity {
                                 coupon.setDescription(editTextDescription.getText().toString());
                                 coupon.setCode(editTextCouponCode.getText().toString());
                                 coupon.setCashRebate(Integer.parseInt(editTextCashRebate.getText().toString()));
-                                coupon.setStatus("ongoing");
+                                coupon.setStatus("Ongoing");
                                 coupon.setStartDate(startDate);
                                 coupon.setEndDate(endDate);
 
@@ -229,7 +229,7 @@ public class AddPromotionActivity extends AppCompatActivity {
                     discount.setTitle(editTextTitle.getText().toString());
                     discount.setDescription(editTextDescription.getText().toString());
                     discount.setDiscount(Integer.parseInt(editTextCouponCode.getText().toString()));
-                    discount.setStatus("ongoing");
+                    discount.setStatus("Ongoing");
                     discount.setStartDate(startDate);
                     discount.setEndDate(endDate);
                     FirebaseFirestore.getInstance().collection("Promotion").add(discount).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {

@@ -167,7 +167,7 @@ public class CartActivity extends AppCompatActivity {
 
                 List<Coupon> couponList = new ArrayList<>();
                 String promoCode = editTextPromo.getText().toString();
-                mFirebaseFirestore.collection("Promotion").whereEqualTo("type","Coupon").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                mFirebaseFirestore.collection("Promotion").whereEqualTo("type","Coupon").whereEqualTo("status","Ongoing").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         boolean valid = false;

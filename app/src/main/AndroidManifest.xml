@@ -102,7 +102,9 @@
             android:label="Search"
             android:parentActivityName=".HomeActivity" />
         <activity android:name=".ForgetPasswordActivity" />
-        <activity android:name=".RecommendActivity"></activity>
+        <activity android:name=".RecommendActivity" />
+        <activity android:name=".Admin.ExpiredPromotion" />
+        <activity android:name=".Admin.ExpiredPromotionDetail"></activity>
     </application>
 
 </manifest>
