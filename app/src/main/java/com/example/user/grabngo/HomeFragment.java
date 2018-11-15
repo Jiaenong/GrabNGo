@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -24,7 +25,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.example.user.grabngo.Class.Payment;
 import com.example.user.grabngo.Class.PaymentDetail;
 import com.example.user.grabngo.Class.PaymentList;
 import com.example.user.grabngo.Class.Product;
@@ -35,11 +35,11 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import org.w3c.dom.Text;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.support.v4.app.ActivityCompat.invalidateOptionsMenu;
 
 
 /**
@@ -352,6 +352,32 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    public static void setBadgeCount(Context context, LayerDrawable icon, String count) {
+        BadgeDrawable badge;
+        // Reuse drawable if possible
+        Drawable reuse = icon.findDrawableByLayerId(R.id.ic_badge);
+        if (reuse != null && reuse instanceof BadgeDrawable) {
+            badge = (BadgeDrawable) reuse;
+        } else {
+            badge = new BadgeDrawable(context);
+        }
+
+        badge.setCount(count);
+        icon.mutate();
+        icon.setDrawableByLayerId(R.id.ic_badge, badge);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        if(Build.VERSION.SDK_INT > 11) {
+            getActivity().invalidateOptionsMenu();
+            MenuItem itemCart = menu.findItem(R.id.cart);
+            LayerDrawable icon = (LayerDrawable)itemCart.getIcon();
+            setBadgeCount(getActivity(),icon, GlobalVars.cartCount+"");
+        }
+        return;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -368,6 +394,7 @@ public class HomeFragment extends Fragment {
 
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.cart,menu);
+
         return;
     }
 

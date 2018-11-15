@@ -456,8 +456,10 @@ public class CartActivity extends AppCompatActivity {
             cart.remove(position);
             notifyItemRemoved(position);
             notifyItemRangeChanged(position,cart.size());
+            GlobalVars.cartCount = cart.size();
 
             if(cartList.isEmpty()){
+                GlobalVars.cartCount = 0;
                 editTextPromo.setFocusable(false);
                 btnApplyPromo.setOnClickListener(null);
                 editTextPromo.setText("");

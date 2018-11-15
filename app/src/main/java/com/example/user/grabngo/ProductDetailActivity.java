@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -44,7 +45,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     private ImageView imageViewProduct;
 
     private FirebaseFirestore mFirebaseFirestore;
-    private CollectionReference mCollectionReference;
+    private CollectionReference mCollectionReference, nCollectionReference;
     private DocumentReference mDocumentReference;
     private ProgressBar progressBarProductDetail;
     private CardView cardViewProduct1, cardViewProduct2;
@@ -127,6 +128,21 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     }
 
+    public static void setBadgeCount(Context context, LayerDrawable icon, String count) {
+        BadgeDrawable badge;
+        // Reuse drawable if possible
+        Drawable reuse = icon.findDrawableByLayerId(R.id.ic_badge);
+        if (reuse != null && reuse instanceof BadgeDrawable) {
+            badge = (BadgeDrawable) reuse;
+        } else {
+            badge = new BadgeDrawable(context);
+        }
+
+        badge.setCount(count);
+        icon.mutate();
+        icon.setDrawableByLayerId(R.id.ic_badge, badge);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -150,5 +166,35 @@ public class ProductDetailActivity extends AppCompatActivity {
             item.setVisible(false);
         }
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if(Build.VERSION.SDK_INT > 11) {
+            invalidateOptionsMenu();
+            MenuItem itemCart = menu.findItem(R.id.cart);
+            LayerDrawable icon = (LayerDrawable)itemCart.getIcon();
+            setBadgeCount(ProductDetailActivity.this,icon, GlobalVars.cartCount+"");
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        invalidateOptionsMenu();
+        String id = SaveSharedPreference.getID(ProductDetailActivity.this);
+        nCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
+        nCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                int num = 0;
+                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                    num++;
+                }
+                Log.i("Testing ","here");
+                GlobalVars.cartCount = num;
+            }
+        });
     }
 }

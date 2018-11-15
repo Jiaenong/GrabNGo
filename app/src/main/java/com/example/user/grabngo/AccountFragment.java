@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -42,6 +43,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
@@ -132,29 +135,28 @@ public class AccountFragment extends Fragment {
         String id = SaveSharedPreference.getID(getContext());
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mFirebaseStorage = FirebaseStorage.getInstance();
-        mDocumentReference = mFirebaseFirestore.document("Customer/"+id);
+        mDocumentReference = mFirebaseFirestore.document("Customer/" + id);
         mStorageReference = mFirebaseStorage.getReference().child("profile_photo");
 
-        textViewName = (TextView)v.findViewById(R.id.textViewName);
-        textViewGender = (TextView)v.findViewById(R.id.textViewGender);
-        textViewEmail = (TextView)v.findViewById(R.id.textViewEmail);
-        textViewAddress = (TextView)v.findViewById(R.id.textViewAddress);
-        textViewUploadPic = (TextView)v.findViewById(R.id.textViewUploadPic);
-        imageViewProfilePic = (ImageView)v.findViewById(R.id.imageViewProfilePic);
-        btnPurchaseHistory = (ImageButton)v.findViewById(R.id.btn_purchase_history);
-        btnEditProfile = (ImageButton)v.findViewById(R.id.btn_edit_profile);
-        btnForgetPassword = (ImageButton)v.findViewById(R.id.btn_forget_password);
-        btnLogout = (ImageButton)v.findViewById(R.id.btn_logout);
-        progressBarAccount = (ProgressBar)v.findViewById(R.id.progressBarAccount);
-        linearLayoutAccount = (LinearLayout)v.findViewById(R.id.linearLayoutAccount);
+        textViewName = (TextView) v.findViewById(R.id.textViewName);
+        textViewGender = (TextView) v.findViewById(R.id.textViewGender);
+        textViewEmail = (TextView) v.findViewById(R.id.textViewEmail);
+        textViewAddress = (TextView) v.findViewById(R.id.textViewAddress);
+        textViewUploadPic = (TextView) v.findViewById(R.id.textViewUploadPic);
+        imageViewProfilePic = (ImageView) v.findViewById(R.id.imageViewProfilePic);
+        btnPurchaseHistory = (ImageButton) v.findViewById(R.id.btn_purchase_history);
+        btnEditProfile = (ImageButton) v.findViewById(R.id.btn_edit_profile);
+        btnForgetPassword = (ImageButton) v.findViewById(R.id.btn_forget_password);
+        btnLogout = (ImageButton) v.findViewById(R.id.btn_logout);
+        progressBarAccount = (ProgressBar) v.findViewById(R.id.progressBarAccount);
+        linearLayoutAccount = (LinearLayout) v.findViewById(R.id.linearLayoutAccount);
 
         final FragmentManager fm = getFragmentManager();
-        homeActivity = (HomeActivity)getActivity();
-        if(homeActivity.tag != null)
-        {
+        homeActivity = (HomeActivity) getActivity();
+        if (homeActivity.tag != null) {
             Fragment forgetPasswordFragment = new ForgetPasswordFragment();
-            fm.beginTransaction().replace(R.id.fragment_container,forgetPasswordFragment).commit();
-        }else {
+            fm.beginTransaction().replace(R.id.fragment_container, forgetPasswordFragment).commit();
+        } else {
             progressBarAccount.setVisibility(View.VISIBLE);
             linearLayoutAccount.setVisibility(View.GONE);
 
@@ -184,14 +186,14 @@ public class AccountFragment extends Fragment {
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("image/jpeg");
                 intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-                startActivityForResult(Intent.createChooser(intent,"Complete the action using"), RC_PHOTO_PICKER);
+                startActivityForResult(Intent.createChooser(intent, "Complete the action using"), RC_PHOTO_PICKER);
             }
         });
 
         btnPurchaseHistory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getActivity(),PurchaseHistoryActivity.class);
+                Intent intent = new Intent(getActivity(), PurchaseHistoryActivity.class);
                 startActivity(intent);
             }
         });
@@ -200,7 +202,7 @@ public class AccountFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Fragment editProfileFragment = new EditProfileFragment();
-                fm.beginTransaction().replace(R.id.fragment_container,editProfileFragment).commit();
+                fm.beginTransaction().replace(R.id.fragment_container, editProfileFragment).commit();
             }
         });
 
@@ -208,7 +210,7 @@ public class AccountFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Fragment forgetPasswordFragment = new ForgetPasswordFragment();
-                fm.beginTransaction().replace(R.id.fragment_container,forgetPasswordFragment).commit();
+                fm.beginTransaction().replace(R.id.fragment_container, forgetPasswordFragment).commit();
             }
         });
 
@@ -221,7 +223,7 @@ public class AccountFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         SaveSharedPreference.clearUser(getContext());
-                        Intent intent = new Intent(getActivity(),LoginActivity.class);
+                        Intent intent = new Intent(getActivity(), LoginActivity.class);
                         startActivity(intent);
                         getActivity().finish();
 
@@ -242,6 +244,32 @@ public class AccountFragment extends Fragment {
         return v;
     }
 
+    public static void setBadgeCount(Context context, LayerDrawable icon, String count) {
+        BadgeDrawable badge;
+        // Reuse drawable if possible
+        Drawable reuse = icon.findDrawableByLayerId(R.id.ic_badge);
+        if (reuse != null && reuse instanceof BadgeDrawable) {
+            badge = (BadgeDrawable) reuse;
+        } else {
+            badge = new BadgeDrawable(context);
+        }
+
+        badge.setCount(count);
+        icon.mutate();
+        icon.setDrawableByLayerId(R.id.ic_badge, badge);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        if(Build.VERSION.SDK_INT > 11) {
+            getActivity().invalidateOptionsMenu();
+            MenuItem itemCart = menu.findItem(R.id.cart);
+            LayerDrawable icon = (LayerDrawable)itemCart.getIcon();
+            setBadgeCount(getActivity(),icon, GlobalVars.cartCount+"");
+        }
+        return;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -258,6 +286,7 @@ public class AccountFragment extends Fragment {
         inflater.inflate(R.menu.cart,menu);
         MenuItem item = menu.findItem(R.id.action_search);
         item.setVisible(false);
+
         return;
     }
 

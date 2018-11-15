@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -57,7 +58,7 @@ public class AddToCartActivity extends AppCompatActivity {
 
     private FirebaseFirestore mFirebaseFirestore;
     private DocumentReference mDocumentReference;
-    private CollectionReference mCollectionReference;
+    private CollectionReference mCollectionReference , nCollectionReference;
 
     private int check = 0;
 
@@ -177,7 +178,6 @@ public class AddToCartActivity extends AppCompatActivity {
                             }else {
                                 AddCart(name, key);
                                 Toast.makeText(AddToCartActivity.this, "Item successfully added to cart",Toast.LENGTH_SHORT).show();
-                                finish();
                             }
                         }
                     }
@@ -206,14 +206,32 @@ public class AddToCartActivity extends AppCompatActivity {
                     {
                         mDocumentReference = mFirebaseFirestore.document("Customer/"+id+"/Cart/"+key);
                         mDocumentReference.update("quantity",num+qty);
+                        finish();
                     }
                 }
                 if(check == 0) {
+                    GlobalVars.cartCount++;
                     Cart cart = new Cart(name, productRef, qty);
                     mCollectionReference.add(cart);
+                    finish();
                 }
             }
         });
+    }
+
+    public static void setBadgeCount(Context context, LayerDrawable icon, String count) {
+        BadgeDrawable badge;
+        // Reuse drawable if possible
+        Drawable reuse = icon.findDrawableByLayerId(R.id.ic_badge);
+        if (reuse != null && reuse instanceof BadgeDrawable) {
+            badge = (BadgeDrawable) reuse;
+        } else {
+            badge = new BadgeDrawable(context);
+        }
+
+        badge.setCount(count);
+        icon.mutate();
+        icon.setDrawableByLayerId(R.id.ic_badge, badge);
     }
 
     @Override
@@ -236,5 +254,35 @@ public class AddToCartActivity extends AppCompatActivity {
         MenuItem item = menu.findItem(R.id.action_search);
         item.setVisible(false);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if(Build.VERSION.SDK_INT > 11) {
+            invalidateOptionsMenu();
+            MenuItem itemCart = menu.findItem(R.id.cart);
+            LayerDrawable icon = (LayerDrawable)itemCart.getIcon();
+            setBadgeCount(AddToCartActivity.this,icon, GlobalVars.cartCount+"");
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        invalidateOptionsMenu();
+        String id = SaveSharedPreference.getID(AddToCartActivity.this);
+        nCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
+        nCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                int num = 0;
+                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                    num++;
+                }
+                Log.i("Testing ","here");
+                GlobalVars.cartCount = num;
+            }
+        });
     }
 }

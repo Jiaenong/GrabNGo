@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -148,6 +149,32 @@ public class CustomerForumFragment extends Fragment implements SwipeRefreshLayou
             }
         });
         return view;
+    }
+
+    public static void setBadgeCount(Context context, LayerDrawable icon, String count) {
+        BadgeDrawable badge;
+        // Reuse drawable if possible
+        Drawable reuse = icon.findDrawableByLayerId(R.id.ic_badge);
+        if (reuse != null && reuse instanceof BadgeDrawable) {
+            badge = (BadgeDrawable) reuse;
+        } else {
+            badge = new BadgeDrawable(context);
+        }
+
+        badge.setCount(count);
+        icon.mutate();
+        icon.setDrawableByLayerId(R.id.ic_badge, badge);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        if(Build.VERSION.SDK_INT > 11) {
+            getActivity().invalidateOptionsMenu();
+            MenuItem itemCart = menu.findItem(R.id.cart);
+            LayerDrawable icon = (LayerDrawable)itemCart.getIcon();
+            setBadgeCount(getActivity(),icon, GlobalVars.cartCount+"");
+        }
+        return;
     }
 
     @Override

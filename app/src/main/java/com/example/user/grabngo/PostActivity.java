@@ -54,9 +54,9 @@ public class PostActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        progressBarPost.setVisibility(View.VISIBLE);
         if(requestCode == RC_PHOTO_PICKER && resultCode == RESULT_OK)
         {
+            progressBarPost.setVisibility(View.VISIBLE);
             Uri selectedImageUri = data.getData();
             final StorageReference photoref = mStorageReference.child(selectedImageUri.getLastPathSegment());
             Toast.makeText(PostActivity.this,"Uploading", Toast.LENGTH_LONG).show();
@@ -76,9 +76,9 @@ public class PostActivity extends AppCompatActivity {
                     {
                         Uri downloadUri = task.getResult();
                         image = downloadUri.toString();
+                        Glide.with(PostActivity.this).load(image).into(imageViewPostPic);
                         progressBarPost.setVisibility(View.GONE);
                         imageViewPostPic.setVisibility(View.VISIBLE);
-                        Glide.with(PostActivity.this).load(image).into(imageViewPostPic);
                     }else{
                         Toast.makeText(PostActivity.this,"Upload Failed: "+task.getException().getMessage(),Toast.LENGTH_LONG).show();
                     }
