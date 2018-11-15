@@ -27,6 +27,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.lang.reflect.Field;
 
@@ -44,6 +45,7 @@ public class HomeActivity extends AppCompatActivity {
         String id = SaveSharedPreference.getID(HomeActivity.this);
 
         final android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        FirebaseMessaging.getInstance().subscribeToTopic("pushNotification");
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
