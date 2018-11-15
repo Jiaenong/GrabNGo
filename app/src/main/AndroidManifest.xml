@@ -105,6 +105,12 @@
         <activity android:name=".RecommendActivity" />
         <activity android:name=".Admin.ExpiredPromotion" />
         <activity android:name=".Admin.ExpiredPromotionDetail"></activity>
+        <service android:name=".Class.MyFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"
+                        android:stopWithTask="false"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
