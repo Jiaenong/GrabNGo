@@ -32,9 +32,9 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import java.lang.reflect.Field;
 
 public class HomeActivity extends AppCompatActivity {
+    public String tag;
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
-    public String tag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,39 +42,11 @@ public class HomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home);
         Intent intent2 = getIntent();
         tag = intent2.getStringExtra("tag");
-        String id = SaveSharedPreference.getID(HomeActivity.this);
 
         final android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
         FirebaseMessaging.getInstance().subscribeToTopic("pushNotification");
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
-        mCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
-        mCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                int num = 0;
-                for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
-                {
-                    num++;
-                }
-                GlobalVars.cartCount = num;
-
-                Fragment fragment = fm.findFragmentById(R.id.fragment_container);
-                if(tag != null)
-                {
-                    if(fragment==null){
-                        fragment = new AccountFragment();
-                        fm.beginTransaction().add(R.id.fragment_container, fragment).commit();
-                    }
-                }else {
-                    if (fragment == null) {
-                        fragment = new HomeFragment();
-                        fm.beginTransaction().add(R.id.fragment_container, fragment).commit();
-                    }
-                }
-            }
-        });
-
 
         BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
                 = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -110,6 +82,20 @@ public class HomeActivity extends AppCompatActivity {
         BottomNavigationViewHelper.removeShiftMode(navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
+        Fragment fragment = fm.findFragmentById(R.id.fragment_container);
+        if(tag != null)
+        {
+            if(fragment==null){
+                fragment = new AccountFragment();
+                fm.beginTransaction().add(R.id.fragment_container, fragment).commit();
+            }
+        }else {
+            if (fragment == null) {
+                fragment = new HomeFragment();
+                fm.beginTransaction().add(R.id.fragment_container, fragment).commit();
+            }
+        }
+
 
     }
 
@@ -127,7 +113,7 @@ public class HomeActivity extends AppCompatActivity {
                     num++;
                 }
                 Log.i("Testing ","here");
-                GlobalVars.cartCount = num;
+                SaveSharedPreference.setCartNumber(HomeActivity.this,num);
             }
         });
     }

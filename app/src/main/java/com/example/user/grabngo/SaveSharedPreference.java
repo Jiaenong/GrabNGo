@@ -15,6 +15,7 @@ public class SaveSharedPreference {
     static final String USER_TYPE = "user";
     static final String LOW_STOCK_ALERT = "false";
     static final String PREF_CARD_TYPE = "card";
+    static final String PREF_SAVE_CART = "cart";
 
     static SharedPreferences getSharedPreference(Context context)
     {
@@ -44,6 +45,19 @@ public class SaveSharedPreference {
         editor.putString(PREF_CARD_NUMBER, cardNumber);
         editor.commit();
     }
+
+    public static int getCartNumber(Context context)
+    {
+        return getSharedPreference(context).getInt(PREF_SAVE_CART,0);
+    }
+
+    public static void setCartNumber(Context context, int cartNumber)
+    {
+        SharedPreferences.Editor editor = getSharedPreference(context).edit();
+        editor.putInt(PREF_SAVE_CART,cartNumber);
+        editor.apply();
+    }
+
     public static String getCardNumber(Context context)
     {
         return getSharedPreference(context).getString(PREF_CARD_NUMBER,"");
@@ -148,6 +162,13 @@ public class SaveSharedPreference {
         SharedPreferences.Editor editor = getSharedPreference(context).edit();
         editor.clear();
         editor.commit();
+    }
+
+    public static void clearCart(Context context)
+    {
+        SharedPreferences.Editor editor = getSharedPreference(context).edit();
+        editor.remove(PREF_SAVE_CART);
+        editor.apply();
     }
 }
 

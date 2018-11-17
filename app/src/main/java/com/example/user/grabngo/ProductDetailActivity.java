@@ -174,7 +174,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             invalidateOptionsMenu();
             MenuItem itemCart = menu.findItem(R.id.cart);
             LayerDrawable icon = (LayerDrawable)itemCart.getIcon();
-            setBadgeCount(ProductDetailActivity.this,icon, GlobalVars.cartCount+"");
+            setBadgeCount(ProductDetailActivity.this,icon, SaveSharedPreference.getCartNumber(ProductDetailActivity.this)+"");
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -193,7 +193,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                     num++;
                 }
                 Log.i("Testing ","here");
-                GlobalVars.cartCount = num;
+                SaveSharedPreference.setCartNumber(ProductDetailActivity.this,num);
             }
         });
     }

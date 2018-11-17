@@ -19,14 +19,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".LoginActivity"
-            android:theme="@style/AppThemeOne">
+        <activity android:name=".SplashActivity" android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".LoginActivity"
+            android:theme="@style/AppThemeOne">
         </activity>
         <activity
             android:name=".SignUpActivity"
@@ -104,11 +106,13 @@
         <activity android:name=".ForgetPasswordActivity" />
         <activity android:name=".RecommendActivity" />
         <activity android:name=".Admin.ExpiredPromotion" />
-        <activity android:name=".Admin.ExpiredPromotionDetail"></activity>
+        <activity android:name=".Admin.ExpiredPromotionDetail" />
+
         <service android:name=".Class.MyFirebaseMessagingService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"
-                        android:stopWithTask="false"/>
+                <action
+                    android:name="com.google.firebase.MESSAGING_EVENT"
+                    android:stopWithTask="false" />
             </intent-filter>
         </service>
     </application>

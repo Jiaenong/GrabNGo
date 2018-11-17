@@ -196,6 +196,7 @@ public class AddToCartActivity extends AppCompatActivity {
         mCollectionReference.whereEqualTo("productName",name).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                int cartNum = SaveSharedPreference.getCartNumber(AddToCartActivity.this);
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                 {
                     check++;
@@ -210,7 +211,8 @@ public class AddToCartActivity extends AppCompatActivity {
                     }
                 }
                 if(check == 0) {
-                    GlobalVars.cartCount++;
+                    cartNum++;
+                    SaveSharedPreference.setCartNumber(AddToCartActivity.this,cartNum);
                     Cart cart = new Cart(name, productRef, qty);
                     mCollectionReference.add(cart);
                     finish();
@@ -262,7 +264,7 @@ public class AddToCartActivity extends AppCompatActivity {
             invalidateOptionsMenu();
             MenuItem itemCart = menu.findItem(R.id.cart);
             LayerDrawable icon = (LayerDrawable)itemCart.getIcon();
-            setBadgeCount(AddToCartActivity.this,icon, GlobalVars.cartCount+"");
+            setBadgeCount(AddToCartActivity.this,icon, SaveSharedPreference.getCartNumber(AddToCartActivity.this)+"");
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -281,7 +283,7 @@ public class AddToCartActivity extends AppCompatActivity {
                     num++;
                 }
                 Log.i("Testing ","here");
-                GlobalVars.cartCount = num;
+                SaveSharedPreference.setCartNumber(AddToCartActivity.this,num);
             }
         });
     }

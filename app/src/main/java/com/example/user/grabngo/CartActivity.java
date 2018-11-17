@@ -103,8 +103,8 @@ public class CartActivity extends AppCompatActivity {
                             Product product = documentSnapshot1.toObject(Product.class);
 
                             double price = Double.parseDouble(product.getPrice());
-                            if(product.getDiscount()!=0){
-                                double discountPercent = (100 - product.getDiscount())*0.01;
+                            if (product.getDiscount() != 0) {
+                                double discountPercent = (100 - product.getDiscount()) * 0.01;
                                 price = price * discountPercent;
                             }
 
@@ -115,15 +115,15 @@ public class CartActivity extends AppCompatActivity {
                                     cart.getCartRef());
 
                             cartList.add(cartItem);
-                            totalPrice += price*cart.getQuantity();
+                            totalPrice += price * cart.getQuantity();
                             mAdapter = new CartAdapter(cartList);
                             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
                             mRecyclerView.setLayoutManager(mLayoutManager);
                             mRecyclerView.setItemAnimator(new DefaultItemAnimator());
                             mRecyclerView.setAdapter(mAdapter);
-                            pricePayment.setText("RM " + String.format("%.2f",totalPrice));
+                            pricePayment.setText("RM " + String.format("%.2f", totalPrice));
 
-                            if(!cartList.isEmpty()){
+                            if (!cartList.isEmpty()) {
                                 editTextPromo.setFocusableInTouchMode(true);
                                 editTextPromo.setFocusable(true);
                                 btnPayment.setBackgroundColor(getResources().getColor(R.color.price_color));
@@ -132,10 +132,10 @@ public class CartActivity extends AppCompatActivity {
                                     public void onClick(View view) {
 
                                         Intent intent = new Intent(CartActivity.this, PaymentActivity.class);
-                                        if(!textViewAppliedPromo.getText().toString().equals("")){
-                                            intent.putExtra("promoId",promoId);
+                                        if (!textViewAppliedPromo.getText().toString().equals("")) {
+                                            intent.putExtra("promoId", promoId);
                                         }
-                                        intent.putExtra("totalPrice",pricePayment.getText().toString());
+                                        intent.putExtra("totalPrice", pricePayment.getText().toString());
                                         startActivity(intent);
                                     }
                                 });
@@ -145,8 +145,6 @@ public class CartActivity extends AppCompatActivity {
 
                     });
                 }
-
-
                 progressBarCart.setVisibility(View.GONE);
                 mRecyclerView.setVisibility(View.VISIBLE);
             }
@@ -456,10 +454,10 @@ public class CartActivity extends AppCompatActivity {
             cart.remove(position);
             notifyItemRemoved(position);
             notifyItemRangeChanged(position,cart.size());
-            GlobalVars.cartCount = cart.size();
+            SaveSharedPreference.setCartNumber(CartActivity.this,cart.size());;
 
             if(cartList.isEmpty()){
-                GlobalVars.cartCount = 0;
+                SaveSharedPreference.clearCart(CartActivity.this);
                 editTextPromo.setFocusable(false);
                 btnApplyPromo.setOnClickListener(null);
                 editTextPromo.setText("");

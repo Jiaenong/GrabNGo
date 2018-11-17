@@ -373,7 +373,7 @@ public class HomeFragment extends Fragment {
             getActivity().invalidateOptionsMenu();
             MenuItem itemCart = menu.findItem(R.id.cart);
             LayerDrawable icon = (LayerDrawable)itemCart.getIcon();
-            setBadgeCount(getActivity(),icon, GlobalVars.cartCount+"");
+            setBadgeCount(getActivity(),icon, SaveSharedPreference.getCartNumber(getActivity())+"");
         }
         return;
     }

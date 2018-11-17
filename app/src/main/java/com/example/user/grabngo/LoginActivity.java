@@ -40,7 +40,7 @@ public class LoginActivity extends AppCompatActivity {
     private String tag;
 
     private FirebaseFirestore mFirebaseFirestore;
-    private CollectionReference mCollectionReference;
+    private CollectionReference mCollectionReference, nCollectionReference;
     private CollectionReference mStaffCollectionReference;
     private CollectionReference mManagerCollectionReference;
 
@@ -62,21 +62,6 @@ public class LoginActivity extends AppCompatActivity {
         textViewForgetPassword = (TextView)findViewById(R.id.forgetPassword);
         view1 = (View)findViewById(R.id.view1);
         view2 = (View)findViewById(R.id.view2);
-
-        if(SaveSharedPreference.getCheckLogin(LoginActivity.this))
-        {
-            if(SaveSharedPreference.getUserType(LoginActivity.this).equals("customer")) {
-                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                startActivity(intent);
-            }else if(SaveSharedPreference.getUserType(LoginActivity.this).equals("staff")){
-                Intent intent = new Intent(LoginActivity.this, StaffHomeActivity.class);
-                startActivity(intent);
-            }else if(SaveSharedPreference.getUserType(LoginActivity.this).equals("manager")){
-                Intent intent = new Intent(LoginActivity.this, ManagerHomeActivity.class);
-                startActivity(intent);
-            }
-            finish();
-        }
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Customer");
@@ -166,10 +151,22 @@ public class LoginActivity extends AppCompatActivity {
                                     String id = documentSnapshot.getId();
                                     SaveSharedPreference.setID(LoginActivity.this, id, "customer");
                                     SaveSharedPreference.setCheckLogin(LoginActivity.this, true);
-                                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                                    intent.putExtra("tag",tag);
-                                    startActivity(intent);
-                                    finish();
+                                    nCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
+                                    nCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                            int num = 0;
+                                            for(QueryDocumentSnapshot documentSnapshot1 : queryDocumentSnapshots)
+                                            {
+                                                num++;
+                                            }
+                                            SaveSharedPreference.setCartNumber(LoginActivity.this,num);
+                                            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                            intent.putExtra("tag",tag);
+                                            startActivity(intent);
+                                            finish();
+                                        }
+                                    });
                                     break;
                                 }
                             }
