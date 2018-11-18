@@ -220,6 +220,11 @@ public class EditPromotionActivity extends AppCompatActivity {
                         return;
                     }
 
+                    pDialog = new ProgressDialog(EditPromotionActivity.this);
+                    pDialog.setMessage("Saving...");
+                    pDialog.setCancelable(false);
+                    pDialog.show();
+
                     mFirebaseFirestore.collection("Promotion").whereEqualTo("type","Coupon").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                         @Override
                         public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -227,16 +232,13 @@ public class EditPromotionActivity extends AppCompatActivity {
                             for(QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots){
                                 Coupon couponTemp = documentSnapshot.toObject(Coupon.class);
                                 if(!coupon.getCode().equals(editTextCouponCode.getText().toString()) && couponTemp.getCode().equals(editTextCouponCode.getText().toString())){
+                                    pDialog.dismiss();
                                     Toast.makeText(EditPromotionActivity.this, "Coupon code is already existed", Toast.LENGTH_SHORT).show();
                                     check = false;
                                     break;
                                 }
                             }
                             if(check){
-                                pDialog = new ProgressDialog(EditPromotionActivity.this);
-                                pDialog.setMessage("Saving...");
-                                pDialog.setCancelable(false);
-                                pDialog.show();
 
                                 DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
                                 Date startDate=null, endDate=null;
@@ -247,10 +249,18 @@ public class EditPromotionActivity extends AppCompatActivity {
                                     e.printStackTrace();
                                 }
 
+                                String status;
+                                if(startDate.after(new Date())){
+                                    status = "Pending";
+                                }else{
+                                    status = "Ongoing";
+                                }
+
                                 mFirebaseFirestore.collection("Promotion").document(promotionId).update("title",editTextTitle.getText().toString(),
                                         "description",editTextDescription.getText().toString(),
                                         "startDate",startDate,
                                         "endDate", endDate,
+                                        "status", status,
                                         "code", editTextCouponCode.getText().toString(),
                                         "cashRebate",Integer.parseInt(editTextCashRebate.getText().toString()))
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -276,6 +286,22 @@ public class EditPromotionActivity extends AppCompatActivity {
                     pDialog.setCancelable(false);
                     pDialog.show();
 
+                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+                    Date startDate=null, endDate=null;
+                    try {
+                        startDate = df.parse(editTextStartDate.getText().toString());
+                        endDate = df.parse(editTextEndDate.getText().toString());
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
+                    String status;
+                    if(startDate.after(new Date())){
+                        status = "Pending";
+                    }else{
+                        status = "Ongoing";
+                    }
+
                     if(promoList.size()!=0){
 
                         WriteBatch batch = mFirebaseFirestore.batch();
@@ -289,9 +315,11 @@ public class EditPromotionActivity extends AppCompatActivity {
                             batch.update(documentRef,"discount",0);
                         }
 
-                        for(int i=0; i<promoList.size(); i++) {
-                            DocumentReference documentRef = mFirebaseFirestore.collection("Product").document(promoList.get(i).getDocumentId());
-                            batch.update(documentRef,"discount",Integer.parseInt(editTextCouponCode.getText().toString()));
+                        if(status.equals("Ongoing")) {
+                            for (int i = 0; i < promoList.size(); i++) {
+                                DocumentReference documentRef = mFirebaseFirestore.collection("Product").document(promoList.get(i).getDocumentId());
+                                batch.update(documentRef, "discount", Integer.parseInt(editTextCouponCode.getText().toString()));
+                            }
                         }
 
                         batch.commit().addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -317,26 +345,27 @@ public class EditPromotionActivity extends AppCompatActivity {
 
                     }else {
                         WriteBatch batch = mFirebaseFirestore.batch();
-                        for(int i=0; i<productsList.size(); i++) {
-                            DocumentReference documentRef = mFirebaseFirestore.collection("Product").document(productsList.get(i).getRef());
-                            batch.update(documentRef,"discount",Integer.parseInt(editTextCouponCode.getText().toString()));
+                        if(status.equals("Ongoing")) {
+                            for (int i = 0; i < productsList.size(); i++) {
+                                DocumentReference documentRef = mFirebaseFirestore.collection("Product").document(productsList.get(i).getRef());
+                                batch.update(documentRef, "discount", Integer.parseInt(editTextCouponCode.getText().toString()));
+                            }
+                        }else{
+                            for(int i=0; i<productsList.size(); i++) {
+                                DocumentReference documentRef = mFirebaseFirestore.collection("Product").document(productsList.get(i).getRef());
+                                batch.update(documentRef,"discount",0);
+                            }
                         }
                         batch.commit();
                     }
 
-                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-                    Date startDate=null, endDate=null;
-                    try {
-                        startDate = df.parse(editTextStartDate.getText().toString());
-                        endDate = df.parse(editTextEndDate.getText().toString());
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
+
 
                     mFirebaseFirestore.collection("Promotion").document(promotionId).update("title",editTextTitle.getText().toString(),
                             "description",editTextDescription.getText().toString(),
                             "startDate",startDate,
                             "endDate", endDate,
+                            "status", status,
                             "discount",Integer.parseInt(editTextCouponCode.getText().toString()))
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override

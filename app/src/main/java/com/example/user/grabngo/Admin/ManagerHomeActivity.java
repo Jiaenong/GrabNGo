@@ -1,13 +1,16 @@
 package com.example.user.grabngo.Admin;
 
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -33,11 +36,14 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
 public class ManagerHomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private final int MY_PERMISSIONS_REQUEST = 9;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +51,22 @@ public class ManagerHomeActivity extends AppCompatActivity
         setContentView(R.layout.activity_manager_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        ArrayList<String> arrPerm = new ArrayList<>();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            arrPerm.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            arrPerm.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            arrPerm.add(Manifest.permission.CAMERA);
+        }
+        if(!arrPerm.isEmpty()) {
+            String[] permissions = new String[arrPerm.size()];
+            permissions = arrPerm.toArray(permissions);
+            ActivityCompat.requestPermissions(this, permissions, MY_PERMISSIONS_REQUEST);
+        }
 
         if(SaveSharedPreference.getCheckAlert(ManagerHomeActivity.this)==false){
             SaveSharedPreference.setCheckAlert(ManagerHomeActivity.this,true);
@@ -214,6 +236,45 @@ public class ManagerHomeActivity extends AppCompatActivity
         builder.setContentText(content);
         builder.setSmallIcon(R.drawable.ic_info_outline_black_24dp);
         return builder.build();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0) {
+                    for(int i = 0; i < grantResults.length; i++) {
+                        String permission = permissions[i];
+                        if(Manifest.permission.READ_EXTERNAL_STORAGE.equals(permission)) {
+                            if(grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                                // you now have permission
+                            }
+                        }
+                        if(Manifest.permission.WRITE_EXTERNAL_STORAGE.equals(permission)) {
+                            if(grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                                // you now have permission
+                            }
+                        }
+
+                        if(Manifest.permission.CAMERA   .equals(permission)) {
+                            if(grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                                // you now have permission
+                            }
+                        }
+                    }
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                break;
+            }
+        }
+
+        // other 'case' lines to check for other
+        // permissions this app might request
     }
 
 }

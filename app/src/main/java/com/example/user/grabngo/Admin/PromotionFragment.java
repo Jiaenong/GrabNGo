@@ -182,13 +182,26 @@ public class PromotionFragment extends Fragment {
                     promotionList.add(promotion);
                 }
 
-                promotionAdapter = new PromotionAdapter(getActivity(),promotionList);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
-                recyclerView.setLayoutManager(mLayoutManager);
-                recyclerView.setItemAnimator(new DefaultItemAnimator());
-                recyclerView.setAdapter(promotionAdapter);
-                progressBar.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.VISIBLE);
+                mCollectionReference.whereEqualTo("status","Pending").orderBy("startDate", Query.Direction.ASCENDING).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
+                        {
+                            Promotion promotion = documentSnapshot.toObject(Promotion.class);
+                            promotion.setDocumentId(documentSnapshot.getId());
+                            promotionList.add(promotion);
+                        }
+
+                        promotionAdapter = new PromotionAdapter(getActivity(),promotionList);
+                        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
+                        recyclerView.setLayoutManager(mLayoutManager);
+                        recyclerView.setItemAnimator(new DefaultItemAnimator());
+                        recyclerView.setAdapter(promotionAdapter);
+                        progressBar.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                    }
+                });
+
             }
         });
     }

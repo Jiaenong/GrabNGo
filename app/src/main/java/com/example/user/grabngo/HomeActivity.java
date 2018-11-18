@@ -1,14 +1,17 @@
 package com.example.user.grabngo;
 
+import android.Manifest;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -30,11 +33,13 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 public class HomeActivity extends AppCompatActivity {
     public String tag;
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
+    private final int MY_PERMISSIONS_REQUEST = 9;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +52,22 @@ public class HomeActivity extends AppCompatActivity {
         FirebaseMessaging.getInstance().subscribeToTopic("pushNotification");
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
+
+        ArrayList<String> arrPerm = new ArrayList<>();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            arrPerm.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            arrPerm.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if(ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            arrPerm.add(Manifest.permission.CAMERA);
+        }
+        if(!arrPerm.isEmpty()) {
+            String[] permissions = new String[arrPerm.size()];
+            permissions = arrPerm.toArray(permissions);
+            ActivityCompat.requestPermissions(this, permissions, MY_PERMISSIONS_REQUEST);
+        }
 
         BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
                 = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -116,5 +137,44 @@ public class HomeActivity extends AppCompatActivity {
                 SaveSharedPreference.setCartNumber(HomeActivity.this,num);
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0) {
+                    for(int i = 0; i < grantResults.length; i++) {
+                        String permission = permissions[i];
+                        if(Manifest.permission.READ_EXTERNAL_STORAGE.equals(permission)) {
+                            if(grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                                // you now have permission
+                            }
+                        }
+                        if(Manifest.permission.WRITE_EXTERNAL_STORAGE.equals(permission)) {
+                            if(grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                                // you now have permission
+                            }
+                        }
+
+                        if(Manifest.permission.CAMERA   .equals(permission)) {
+                            if(grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                                // you now have permission
+                            }
+                        }
+                    }
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                break;
+            }
+        }
+
+        // other 'case' lines to check for other
+        // permissions this app might request
     }
 }

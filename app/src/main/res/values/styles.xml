@@ -17,6 +17,14 @@
         <item name="android:colorForeground">@color/foreground_material_light</item>
     </style>
 
+    <style name="AppThemeTwo" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent2</item>
+        <item name="android:colorForeground">@color/foreground_material_light</item>
+    </style>
+
     <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@drawable/background</item>
     </style>

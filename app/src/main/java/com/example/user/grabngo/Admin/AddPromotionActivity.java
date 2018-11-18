@@ -152,6 +152,11 @@ public class AddPromotionActivity extends AppCompatActivity {
                         return;
                     }
 
+                    pDialog = new ProgressDialog(AddPromotionActivity.this);
+                    pDialog.setMessage("Saving...");
+                    pDialog.setCancelable(false);
+                    pDialog.show();
+
                     mFirebaseFirestore.collection("Promotion").whereEqualTo("type","Coupon").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                         @Override
                         public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -160,6 +165,7 @@ public class AddPromotionActivity extends AppCompatActivity {
                                 Coupon couponTemp = documentSnapshot.toObject(Coupon.class);
 
                                 if(editTextCouponCode.getText().toString().equals(couponTemp.getCode())){
+                                    pDialog.dismiss();
                                     Toast.makeText(AddPromotionActivity.this, "Coupon code is already existed", Toast.LENGTH_SHORT).show();
                                     check = false;
                                     break;
@@ -167,10 +173,6 @@ public class AddPromotionActivity extends AppCompatActivity {
                             }
 
                             if(check){
-                                pDialog = new ProgressDialog(AddPromotionActivity.this);
-                                pDialog.setMessage("Saving...");
-                                pDialog.setCancelable(false);
-                                pDialog.show();
 
                                 DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
                                 Date startDate=null, endDate=null;
@@ -181,12 +183,19 @@ public class AddPromotionActivity extends AppCompatActivity {
                                     e.printStackTrace();
                                 }
 
+                                String status;
+                                if(startDate.after(new Date())){
+                                    status = "Pending";
+                                }else{
+                                    status = "Ongoing";
+                                }
+
                                 coupon.setType(type);
                                 coupon.setTitle(editTextTitle.getText().toString());
                                 coupon.setDescription(editTextDescription.getText().toString());
                                 coupon.setCode(editTextCouponCode.getText().toString());
                                 coupon.setCashRebate(Integer.parseInt(editTextCashRebate.getText().toString()));
-                                coupon.setStatus("Ongoing");
+                                coupon.setStatus(status);
                                 coupon.setStartDate(startDate);
                                 coupon.setEndDate(endDate);
 
@@ -225,11 +234,18 @@ public class AddPromotionActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
+                    String status;
+                    if(startDate.after(new Date())){
+                        status = "Pending";
+                    }else{
+                        status = "Ongoing";
+                    }
+
                     discount.setType(type);
                     discount.setTitle(editTextTitle.getText().toString());
                     discount.setDescription(editTextDescription.getText().toString());
                     discount.setDiscount(Integer.parseInt(editTextCouponCode.getText().toString()));
-                    discount.setStatus("Ongoing");
+                    discount.setStatus(status);
                     discount.setStartDate(startDate);
                     discount.setEndDate(endDate);
                     FirebaseFirestore.getInstance().collection("Promotion").add(discount).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -247,21 +263,28 @@ public class AddPromotionActivity extends AppCompatActivity {
                         }
                     });
 
-                    WriteBatch batch = mFirebaseFirestore.batch();
-                    for(int i=0; i<promoList.size(); i++) {
-                        DocumentReference documentRef = mFirebaseFirestore.collection("Product").document(promoList.get(i).getDocumentId());
-                        batch.update(documentRef,"discount",Integer.parseInt(editTextCouponCode.getText().toString()));
+                    if(status.equals("Ongoing")) {
 
-                    }
+                        WriteBatch batch = mFirebaseFirestore.batch();
+                        for (int i = 0; i < promoList.size(); i++) {
+                            DocumentReference documentRef = mFirebaseFirestore.collection("Product").document(promoList.get(i).getDocumentId());
+                            batch.update(documentRef, "discount", Integer.parseInt(editTextCouponCode.getText().toString()));
 
-                    batch.commit().addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Toast.makeText(AddPromotionActivity.this, "Promotion successfully added",Toast.LENGTH_SHORT).show();
-                            pDialog.dismiss();
-                            finish();
                         }
-                    });
+
+                        batch.commit().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(AddPromotionActivity.this, "Promotion successfully added", Toast.LENGTH_SHORT).show();
+                                pDialog.dismiss();
+                                finish();
+                            }
+                        });
+                    }else{
+                        Toast.makeText(AddPromotionActivity.this, "Promotion successfully added", Toast.LENGTH_SHORT).show();
+                        pDialog.dismiss();
+                        finish();
+                    }
                 }
 
 
