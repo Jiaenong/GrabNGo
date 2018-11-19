@@ -97,7 +97,8 @@ public class EditProfileFragment extends Fragment {
                 String address = editTextAddress.getText().toString();
                 if (name.equals("") || email.equals("") || address.equals("")) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setTitle("All field must fill in");
+                    builder.setTitle("Update Error");
+                    builder.setMessage("All field must fill in");
                     builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
