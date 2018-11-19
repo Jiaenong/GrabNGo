@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.example.user.grabngo.Class.Customer;
@@ -32,6 +33,7 @@ public class EditProfileFragment extends Fragment {
     private ImageButton btnPurchaseHistory, btnEditProfile, btnForgetPassword, btnLogout;
     private EditText editTextName, editTextEmail, editTextAddress;
     private RadioButton radioButtonMale, radioButtonFemale;
+    private RadioGroup radioGroupSex;
 
     private FirebaseFirestore mFirebaseFirestore;
     private DocumentReference mDocumentReference;
@@ -59,6 +61,7 @@ public class EditProfileFragment extends Fragment {
         editTextAddress = (EditText)v.findViewById(R.id.editTextAddress);
         radioButtonMale = (RadioButton)v.findViewById(R.id.radioButtonMale);
         radioButtonFemale = (RadioButton)v.findViewById(R.id.radioButtonFemale);
+        radioGroupSex = (RadioGroup)v.findViewById(R.id.radioSex);
 
 
         btnSave = (Button)v.findViewById(R.id.btn_save);
@@ -68,11 +71,21 @@ public class EditProfileFragment extends Fragment {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 Customer customer = documentSnapshot.toObject(Customer.class);
+                String male = radioButtonMale.getText().toString();
+                String female = radioButtonFemale.getText().toString();
+                String gender = customer.getGender();
                 editTextName.setText(customer.getName());
                 editTextEmail.setText(customer.getEmail());
                 editTextAddress.setText(customer.getAddress());
+                if(gender.equals(male))
+                {
+                    radioButtonMale.setChecked(true);
+                }else{
+                    radioButtonFemale.setChecked(true);
+                }
             }
         });
+
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,19 +95,31 @@ public class EditProfileFragment extends Fragment {
                 String name = editTextName.getText().toString();
                 String email = editTextEmail.getText().toString();
                 String address = editTextAddress.getText().toString();
-                mDocumentReference.update("name",name);
-                mDocumentReference.update("email",email);
-                mDocumentReference.update("address",address);
-                if(radioButtonMale.isChecked())
-                {
-                    mDocumentReference.update("gender",male);
-                }else{
-                    mDocumentReference.update("gender",female);
+                if (name.equals("") || email.equals("") || address.equals("")) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setTitle("All field must fill in");
+                    builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            return;
+                        }
+                    });
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                } else {
+                    mDocumentReference.update("name", name);
+                    mDocumentReference.update("email", email);
+                    mDocumentReference.update("address", address);
+                    if (radioButtonMale.isChecked()) {
+                        mDocumentReference.update("gender", male);
+                    } else {
+                        mDocumentReference.update("gender", female);
+                    }
+                    Toast.makeText(getActivity(), "Profile details saved successfully", Toast.LENGTH_SHORT).show();
+                    FragmentManager fm = getFragmentManager();
+                    Fragment accountFragment = new AccountFragment();
+                    fm.beginTransaction().replace(R.id.fragment_container, accountFragment).commit();
                 }
-                Toast.makeText(getActivity(), "Profile details saved successfully", Toast.LENGTH_SHORT).show();
-                FragmentManager fm = getFragmentManager();
-                Fragment accountFragment = new AccountFragment();
-                fm.beginTransaction().replace(R.id.fragment_container,accountFragment).commit();
             }
         });
 

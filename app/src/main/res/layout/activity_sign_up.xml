@@ -135,6 +135,11 @@
                     android:paddingLeft="8dp"
                     android:paddingTop="4dp"/>
 
+                <RadioGroup
+                    android:id="@+id/radioGender"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
                 <RadioButton
                     android:id="@+id/radioButtonFemale"
                     android:layout_width="wrap_content"
@@ -154,6 +159,7 @@
                     android:textColor="#fff"
                     android:textSize="18sp"
                     android:buttonTint="#fff"/>
+                </RadioGroup>
 
             </LinearLayout>
 

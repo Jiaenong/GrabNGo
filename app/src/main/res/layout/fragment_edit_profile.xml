@@ -164,12 +164,16 @@
                             android:textColor="@color/foreground_dark_color"
                             android:text="Gender: "/>
 
+                        <RadioGroup
+                            android:id="@+id/radioSex"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
                         <RadioButton
                             android:id="@+id/radioButtonMale"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="10dp"
-                            android:checked="true"
                             android:text="Male"
                             android:textSize="14sp" />
 
@@ -180,6 +184,7 @@
                             android:layout_marginLeft="20dp"
                             android:text="Female"
                             android:textSize="14sp" />
+                        </RadioGroup>
                     </LinearLayout>
 
                     <android.support.design.widget.TextInputLayout

@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.example.user.grabngo.Class.Customer;
@@ -42,6 +43,7 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText editTextEmailAddress, editTextPassword, editTextRetypePassword, editTextCustomerName, editTextAddress;
     private RadioButton radioButtonMale, radioButtonFemale;
     private FirebaseFirestore mFirebaseFirestore;
+    private RadioGroup radioGender;
     private DocumentReference mDocumentReference;
     private CollectionReference mCollectionReference;
 
@@ -59,6 +61,7 @@ public class SignUpActivity extends AppCompatActivity {
         editTextAddress = (EditText)findViewById(R.id.editTextAddress);
         radioButtonMale = (RadioButton)findViewById(R.id.radioButtonMale);
         radioButtonFemale = (RadioButton)findViewById(R.id.radioButtonFemale);
+        radioGender = (RadioGroup)findViewById(R.id.radioGender);
 
         mFirebaseFirestore = FirebaseFirestore.getInstance();
         mCollectionReference = mFirebaseFirestore.collection("Customer");
