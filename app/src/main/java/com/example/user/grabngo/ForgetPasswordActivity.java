@@ -1,8 +1,11 @@
 package com.example.user.grabngo;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +24,7 @@ import java.util.Random;
 public class ForgetPasswordActivity extends AppCompatActivity {
     private EditText editTextRecoverEmail;
     private Button btnRecoverOkay;
+    private int check = 0;
 
     private FirebaseFirestore mFirebaseFirestore;
     private CollectionReference mCollectionReference;
@@ -63,17 +67,35 @@ public class ForgetPasswordActivity extends AppCompatActivity {
                 String id = "";
                 for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                 {
+                    check++;
                     id = documentSnapshot.getId();
                 }
-                mDocumentReference = mFirebaseFirestore.document("Customer/"+id);
-                mDocumentReference.update("password",randomNum);
+
+                if(check == 0)
+                {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(ForgetPasswordActivity.this, R.style.AlertDialogCustom));
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            return;
+                        }
+                    });
+                    builder.setTitle("Error");
+                    builder.setMessage("Email address does not exist from database!");
+                    AlertDialog alert = builder.create();
+                    alert.show();
+                }else{
+                    mDocumentReference = mFirebaseFirestore.document("Customer/"+id);
+                    mDocumentReference.update("password",randomNum);
+                    SendeMail sm = new SendeMail(ForgetPasswordActivity.this, email, subject, message);
+                    sm.execute();
+                    Intent intent = new Intent(ForgetPasswordActivity.this,LoginActivity.class);
+                    intent.putExtra("tag","TAG");
+                    startActivity(intent);
+                }
             }
         });
-        SendeMail sm = new SendeMail(ForgetPasswordActivity.this, email, subject, message);
-        sm.execute();
-        Intent intent = new Intent(ForgetPasswordActivity.this,LoginActivity.class);
-        intent.putExtra("tag","TAG");
-        startActivity(intent);
+
         return;
     }
 
