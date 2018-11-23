@@ -140,6 +140,7 @@ public class PostActivity extends AppCompatActivity {
                         {
                             String content = post.getContent();
                             String picture = post.getPostImage();
+                            image = picture;
                             id = documentSnapshot.getId();
                             editTextContent.setText(content);
                             Glide.with(PostActivity.this).load(picture).into(imageViewPostPic);
