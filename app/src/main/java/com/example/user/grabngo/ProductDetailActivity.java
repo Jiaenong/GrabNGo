@@ -117,7 +117,14 @@ public class ProductDetailActivity extends AppCompatActivity {
                 textViewProducer.setText("Producer               : " + product.getProducer());
                 textViewCategory.setText("Category               : " + product.getCategory());
                 textViewExpired.setText("Expired Date        : " + product.getExpired());
-                textViewStock.setText("Stock Amount     : " + product.getStockAmount());
+
+                if(product.getStockAmount() == 0)
+                {
+                    textViewStock.setText("Stock Amount     : " + "Out of stock");
+                    textViewStock.setTextColor(getResources().getColor(R.color.price_color));
+                }else{
+                    textViewStock.setText("Stock Amount     : " + product.getStockAmount());
+                }
                 textViewLocation.setText("Shelf location      : " + product.getShelfLocation());
                 Glide.with(getApplicationContext()).load(product.getImageUrl()).into(imageViewProduct);
                 cardViewProduct1.setVisibility(View.VISIBLE);

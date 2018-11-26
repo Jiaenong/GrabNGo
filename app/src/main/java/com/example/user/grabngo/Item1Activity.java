@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.example.user.grabngo.Class.Payment;
 import com.example.user.grabngo.Class.PaymentDetail;
+import com.example.user.grabngo.Class.Product;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -69,6 +70,21 @@ public class Item1Activity extends AppCompatActivity {
         layout1.setVisibility(View.GONE);
         layout2.setVisibility(View.GONE);
         layout3.setVisibility(View.GONE);
+
+        recyclerViewPaymentDetail.addOnItemTouchListener(new RecyclerTouchListener(Item1Activity.this, recyclerViewPaymentDetail, new RecyclerTouchListener.ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                PaymentDetail paymentDetail = pdList.get(position);
+                Intent intent = new Intent(Item1Activity.this, ProductDetailActivity.class);
+                intent.putExtra("productName",paymentDetail.getProductName());
+                startActivity(intent);
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        }));
 
         Log.i("Testing ",date);
         mFirebaseFirestore = FirebaseFirestore.getInstance();

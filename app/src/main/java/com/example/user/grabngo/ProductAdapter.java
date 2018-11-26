@@ -30,6 +30,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
         Product product = productList.get(position);
         holder.name.setText(product.getProductName());
         holder.originalPrice.setVisibility(View.GONE);
+        holder.outOfStock.setVisibility(View.GONE);
+        if(product.getStockAmount() == 0){
+            holder.outOfStock.setVisibility(View.VISIBLE);
+            holder.price.setVisibility(View.GONE);
+            holder.originalPrice.setVisibility(View.GONE);
+        }
         if(product.getDiscount()!=0){
             holder.originalPrice.setVisibility(View.VISIBLE);
             holder.originalPrice.setText("RM " + product.getPrice());
@@ -51,7 +57,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
-        public TextView name, price, originalPrice;
+        public TextView name, price, originalPrice, outOfStock;
         public ImageView  imageViewProduct;
 
         public MyViewHolder(View view)
@@ -59,6 +65,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.MyViewHo
             super(view);
             name = (TextView)view.findViewById(R.id.textViewProductName);
             originalPrice = (TextView)view.findViewById(R.id.textViewProductOriPrice);
+            outOfStock = (TextView)view.findViewById(R.id.textViewOutOfStock);
             price = (TextView)view.findViewById(R.id.textViewProductPrice);
             imageViewProduct = (ImageView)view.findViewById(R.id.imageViewProductImage);
         }

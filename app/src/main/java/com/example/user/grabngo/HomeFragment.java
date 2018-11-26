@@ -35,6 +35,8 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import org.w3c.dom.Text;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -411,6 +413,13 @@ public class HomeFragment extends Fragment {
         public void onBindViewHolder(MyViewHolder holder, int position) {
             Product product = listProduct.get(position);
             holder.textViewProductName.setText(product.getProductName());
+            holder.txtViewOutOfStock.setVisibility(View.GONE);
+            if(product.getStockAmount() == 0)
+            {
+                holder.txtViewOutOfStock.setVisibility(View.VISIBLE);
+                holder.textViewOriPrice.setVisibility(View.GONE);
+                holder.textViewProductPrice.setVisibility(View.GONE);
+            }
             if(product.getDiscount()!=0){
                 holder.textViewOriPrice.setVisibility(View.VISIBLE);
                 holder.textViewOriPrice.setText("RM " + product.getPrice());
@@ -431,7 +440,7 @@ public class HomeFragment extends Fragment {
         }
 
         public class MyViewHolder extends RecyclerView.ViewHolder{
-            public TextView textViewProductName, textViewProductPrice, textViewOriPrice;
+            public TextView textViewProductName, textViewProductPrice, textViewOriPrice, txtViewOutOfStock;
             public ImageView imageViewProductImage;
 
             public MyViewHolder(View view)
@@ -441,6 +450,7 @@ public class HomeFragment extends Fragment {
                 textViewProductPrice = (TextView)view.findViewById(R.id.textViewProductPrice);
                 imageViewProductImage = (ImageView)view.findViewById(R.id.imageViewProductImage);
                 textViewOriPrice = (TextView)view.findViewById(R.id.textViewProductOriPrice);
+                txtViewOutOfStock = (TextView)view.findViewById(R.id.txtViewOutOfStock);
             }
         }
 
