@@ -426,6 +426,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void deleteCollection() {
         String id = SaveSharedPreference.getID(PaymentActivity.this);
+        SaveSharedPreference.setCartNumber(PaymentActivity.this, 0);
         nCollectionReference = mFirebaseFirestore.collection("Customer").document(id).collection("Cart");
         nCollectionReference.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
