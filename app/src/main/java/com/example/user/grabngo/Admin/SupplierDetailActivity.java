@@ -150,7 +150,7 @@ public class SupplierDetailActivity extends AppCompatActivity {
 
                     }
                 });
-                builder.setTitle("Delete the product?");
+                builder.setTitle("Delete the supplier?");
                 AlertDialog alert = builder.create();
                 alert.show();
             }

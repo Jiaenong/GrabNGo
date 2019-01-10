@@ -195,6 +195,12 @@ public class ReportFragment extends Fragment {
                     spinnerFilter.setVisibility(View.GONE);
                     linearLayout3.setVisibility(View.VISIBLE);
                     linearLayout4.setVisibility(View.VISIBLE);
+                }else if(i==3){
+
+                    textViewMonth.setVisibility(View.GONE);
+                    spinnerFilter.setVisibility(View.GONE);
+                    linearLayout3.setVisibility(View.VISIBLE);
+                    linearLayout4.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -230,6 +236,12 @@ public class ReportFragment extends Fragment {
                     salesReport();
 
                 }else if(i==2){
+                    barChartProduct.clear();
+                    textViewReportTitle.setText(spinnerReportType.getSelectedItem().toString() + " of " + spinnerMonth.getSelectedItem().toString() + " " + spinnerYear.getSelectedItem().toString());
+                    moveToOuterCollection();
+
+                }else if(i==3){
+                    barChartProduct.clear();
                     textViewReportTitle.setText(spinnerReportType.getSelectedItem().toString() + " of " + spinnerMonth.getSelectedItem().toString() + " " + spinnerYear.getSelectedItem().toString());
                     moveToOuterCollection();
 
@@ -341,7 +353,12 @@ public class ReportFragment extends Fragment {
                                                 batch1.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
-                                                        bestSellingProduct();
+                                                        if(spinnerReportType.getSelectedItemPosition()==2){
+                                                            bestSellingProduct();
+                                                        }else{
+                                                            leastPopularProduct();
+                                                        }
+
                                                         return;
                                                     }
                                                 });
@@ -435,13 +452,111 @@ public class ReportFragment extends Fragment {
                 Legend legend = barChartProduct.getLegend();
                 legend.setFormSize(5f);
                 legend.setWordWrapEnabled(true);
-                legend.setCustom(new LegendEntry[]{l1,l2,l3,l4,l5,l6,l7,l8});
+                legend.setCustom(new LegendEntry[]{l8,l7,l6,l5,l4,l3,l2,l1});
 
                 BarData data = new BarData(set);
                 data.setValueTextSize(9f);
                 data.setBarWidth(0.9f);
                 YAxis rightYAxis = barChartProduct.getAxisRight();
                 rightYAxis.setDrawLabels(false);
+                barChartProduct.getXAxis().setDrawLabels(false);
+                barChartProduct.setScaleEnabled(false);
+                barChartProduct.setData(data);
+                barChartProduct.setDrawGridBackground(true);
+                barChartProduct.getDescription().setText("Quantity");
+                barChartProduct.getDescription().setPosition(1f,1f);
+                barChartProduct.getDescription().setTextSize(6f);
+                barChartProduct.setGridBackgroundColor(Color.WHITE);
+                barChartProduct.setPinchZoom(true);
+                barChartProduct.setFitBars(true); // make the x-axis fit exactly all bars
+                barChartProduct.invalidate();
+                barChartProduct.setVisibility(View.VISIBLE);
+
+                barChartProduct.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+                barChartProduct.saveToGallery("barchart",85);
+            }
+        });
+    }
+
+    public void leastPopularProduct(){
+
+        mFirebaseFirestore.collection("ReportProduct").orderBy("productName").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                paymentDetails = new ArrayList<>();
+                List<PaymentDetail> top8Best = new ArrayList<>();
+                int i=0;
+
+                for(QueryDocumentSnapshot documentSnapshot:queryDocumentSnapshots){
+                    PaymentDetail paymentDetail = documentSnapshot.toObject(PaymentDetail.class);
+
+                    if(paymentDetails.isEmpty()){
+                        paymentDetails.add(paymentDetail);
+                    }else {
+                        if(paymentDetails.get(i).getProductName().equals(paymentDetail.getProductName())){
+                            int quantity = paymentDetails.get(i).getQuantity() + paymentDetail.getQuantity();
+                            paymentDetails.get(i).setQuantity(quantity);
+                        }else{
+                            paymentDetails.add(paymentDetail);
+                            i++;
+                        }
+                    }
+                }
+
+
+
+                for(int k=0; k<8; k++){
+                    PaymentDetail paymentTemp = paymentDetails.get(0);
+                    for(int j=1; j<paymentDetails.size(); j++){
+                        if(paymentDetails.get(j).getQuantity()<paymentTemp.getQuantity()){
+                            paymentTemp = paymentDetails.get(j);
+                        }
+                    }
+
+                    top8Best.add(paymentTemp);
+                    paymentDetails.remove(paymentTemp);
+                }
+
+                String[] productName = new String[8];
+                List<BarEntry> entries = new ArrayList<>();
+                for(int m=7; m>=0; m--){
+                    entries.add(new BarEntry(m, top8Best.get(m).getQuantity()));
+                    productName[m] = top8Best.get(m).getProductName();
+                }
+
+                BarDataSet set = new BarDataSet(entries, "Product Sales");
+                int[] color = new int[]{getResources().getColor(R.color.graph_red),
+                        getResources().getColor(R.color.graph_orange),
+                        getResources().getColor(R.color.graph_yellow),
+                        getResources().getColor(R.color.graph_green),
+                        getResources().getColor(R.color.graph_blue),
+                        getResources().getColor(R.color.graph_purple),
+                        getResources().getColor(R.color.graph_indigo),
+                        getResources().getColor(R.color.graph_pink)};
+                set.setColors(color);
+
+                LegendEntry l1 = new LegendEntry(productName[7],Legend.LegendForm.CIRCLE,10f,2f,null,getResources().getColor(R.color.graph_red));
+                LegendEntry l2 = new LegendEntry(productName[6],Legend.LegendForm.CIRCLE,10f,2f,null,getResources().getColor(R.color.graph_orange));
+                LegendEntry l3 = new LegendEntry(productName[5],Legend.LegendForm.CIRCLE,10f,2f,null,getResources().getColor(R.color.graph_yellow));
+                LegendEntry l4 = new LegendEntry(productName[4],Legend.LegendForm.CIRCLE,10f,2f,null,getResources().getColor(R.color.graph_green));
+                LegendEntry l5 = new LegendEntry(productName[3],Legend.LegendForm.CIRCLE,10f,2f,null,getResources().getColor(R.color.graph_blue));
+                LegendEntry l6 = new LegendEntry(productName[2],Legend.LegendForm.CIRCLE,10f,2f,null,getResources().getColor(R.color.graph_purple));
+                LegendEntry l7 = new LegendEntry(productName[1],Legend.LegendForm.CIRCLE,10f,2f,null,getResources().getColor(R.color.graph_indigo));
+                LegendEntry l8 = new LegendEntry(productName[0],Legend.LegendForm.CIRCLE,10f,2f,null,getResources().getColor(R.color.graph_pink));
+
+                Legend legend = barChartProduct.getLegend();
+                legend.setFormSize(5f);
+                legend.setWordWrapEnabled(true);
+                legend.setCustom(new LegendEntry[]{l8,l7,l6,l5,l4,l3,l2,l1});
+
+                BarData data = new BarData(set);
+                data.setValueTextSize(9f);
+                data.setBarWidth(0.9f);
+                YAxis rightYAxis = barChartProduct.getAxisRight();
+                rightYAxis.setDrawLabels(false);
+                YAxis leftYAxis = barChartProduct.getAxisLeft();
+                leftYAxis.setGranularity(1.0f);
                 barChartProduct.getXAxis().setDrawLabels(false);
                 barChartProduct.setScaleEnabled(false);
                 barChartProduct.setData(data);
@@ -629,6 +744,9 @@ public class ReportFragment extends Fragment {
                     bitmap = barChart.getChartBitmap();
                     title = spinnerReportType.getSelectedItem().toString() + " of " + spinnerFilter.getSelectedItem().toString();
                 }else if(selectedReport==2 && !barChartProduct.isEmpty()){
+                    bitmap = barChartProduct.getChartBitmap();
+                    title = spinnerReportType.getSelectedItem().toString() + " of " + spinnerMonth.getSelectedItem().toString() + " " + spinnerYear.getSelectedItem().toString();
+                }else if(selectedReport==3 && !barChartProduct.isEmpty()){
                     bitmap = barChartProduct.getChartBitmap();
                     title = spinnerReportType.getSelectedItem().toString() + " of " + spinnerMonth.getSelectedItem().toString() + " " + spinnerYear.getSelectedItem().toString();
                 }else {
